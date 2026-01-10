@@ -1,0 +1,43 @@
+{
+  "name": "abstrauth",
+  "version": "0.0.0",
+  "engines": {
+    "node": ">=20.19.0 || >=22.12.0",
+    "npm": ">=10.0.0"
+  },
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve --proxy-config proxy.conf.json",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test",
+    "test:coverage": "ng test --code-coverage --watch=false"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/animations": "^21.0.8",
+    "@angular/common": "^21.0.8",
+    "@angular/compiler": "^21.0.8",
+    "@angular/core": "^21.0.8",
+    "@angular/forms": "^21.0.8",
+    "@angular/platform-browser": "^21.0.8",
+    "@angular/platform-browser-dynamic": "^21.0.8",
+    "@angular/router": "^21.0.8",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0",
+    "zone.js": "~0.15.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^21.0.5",
+    "@angular/cli": "^21.0.5",
+    "@angular/compiler-cli": "^21.0.8",
+    "@types/jasmine": "~5.1.0",
+    "jasmine-core": "~5.6.0",
+    "karma": "~6.4.0",
+    "karma-chrome-launcher": "~3.2.0",
+    "karma-coverage": "~2.2.0",
+    "karma-jasmine": "~5.1.0",
+    "karma-jasmine-html-reporter": "~2.1.0",
+    "typescript": "~5.9.3"
+  }
+}
