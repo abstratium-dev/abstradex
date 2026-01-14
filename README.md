@@ -8,7 +8,7 @@ Runtime: Quarkus (Java)
 
 Frontend UI: Angular (via Quinoa)
 
-API Layer: REST / GraphQL
+API Layer: REST
 
 Auth: Integrated with Abstrauth
 
@@ -28,7 +28,7 @@ Clone Abstracore and point it to your new origin:
 git clone https://github.com/your-org/abstracore.git your-new-project
 cd your-new-project
 git remote rename origin upstream
-git remote add origin https://github.com/your-org/your-new-project.git
+git remote add origin git@github.com:your-org/your-new-project.git
 git push -u origin main
 ```
 
@@ -56,7 +56,7 @@ If you prefer to sync manually:
 git checkout main
 
 # Add upstream remote (only needed once)
-git remote add upstream https://github.com/abstratium-dev/abstracore.git
+git remote add upstream git@github.com:abstratium-dev/abstracore.git
 
 # Fetch the latest baseline code
 git fetch upstream
@@ -153,6 +153,7 @@ Background Color: #5c6bc0
 
 # Things to do when creating a new project
 
+- [ ] - Use the prompt below, to get an LLM to do this
 - [ ] - Search for TODO and fix
 - [ ] - Search for core and fix, e.g. in `pom.xml`
 - [ ] - Update README.md with project-specific information
@@ -166,13 +167,46 @@ Background Color: #5c6bc0
 - [ ] - Create favicon, store it in root as zip and put it in `src/main/webui/public`
 - [ ] - Update `.windsurf` configuration
 - [ ] - Replace `src/main/webui/src/app/demo` with project-specific components
-- [ ] - 
-- [ ] - 
-- [ ] - 
-- [ ] - 
-- [ ] - 
-- [ ] - 
-- [X] - 
-- [x] - 
-- [ ] - 
-- [ ] - 
+- [ ] - Update application.properties with abstradex-specific values
+- [ ] - Update Angular configuration files (angular.json, package.json, index.html)
+- [ ] - Update Java source files (Roles.java, ConfigInfoContributor.java)
+- [ ] - Update database migration files
+- [ ] - Update script files (build-docker-image.sh, push-docker-image.sh, clear-test-db.sh)
+- [ ] - Update e2e-tests configuration
+- [ ] - Update documentation files (QUARKUS.md, DEVELOPMENT_AND_TESTING.md, AUTHENTICATION_FLOW.md)
+
+# First Prompt for LLM 
+
+```
+I have copied a "baseline project" that I use to create an initial version of all the microservices in my company. it is full of "TODO" and "todo" markers which show places in the code that need updating.
+
+This project is called "abstradex" and is A "rolodex" for your SME's partners (customers, suppliers, etc.) . Search for all places that contain the text "todo" and make the appropriate changes. 
+
+Also use @README.md#L154-169  as a checklist and as you fix those things, add an X between the square brackets. if anything is missing off of that list, please append it to the list. keep going until you cannot find any more TODOs to fix. 
+
+If there is anything you are unsure of, add that to a new chapter named "FIXME" below the todo list in @README.md .  
+
+Please do not change the functionality of the application yet. Keep things like the @Demo.java entity, @DemoService.java , @DemoResource.java  and all the related stuff in the @src/main/webui  folder like @demo.component.ts , etc.  We will change the functionality later!
+```
+
+# Second Prompt for LLM
+
+Remember to replace XXXXXX with the name of the entity that you want to replace. Like "partner".
+
+```
+Using the description at the top of the @README.md file, replace the @Demo.java entity, @DemoService.java , @DemoResource.java  and all the related stuff in the @src/main/webui  folder like @demo.component.ts , etc.  with a new CRUD service for the XXXXXX entity.
+
+That Entity should have the following properties:
+
+- name
+- description
+- website
+- phone
+- email
+- address
+- city
+- state
+- zip
+- country
+```
+
