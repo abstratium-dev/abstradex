@@ -1,5 +1,11 @@
 # abstracore
 
+----
+FIRST: check that the file `.git/hooks/pre-commit` exists and is executable. If not, move the script `copy_to_.git_hooks_pre-commit` to there.
+
+THEN: read more below.
+----
+
 **abstracore** is the master blueprint for abstratium applications. Built on the Quarkus subatomic Java stack, Quinoa for seamless integration, and Angular for the frontend, it serves as the upstream source for all specific project forks.
 
 ## 📦 Tech Stack
@@ -174,6 +180,9 @@ Background Color: #5c6bc0
 - [ ] - Update script files (build-docker-image.sh, push-docker-image.sh, clear-test-db.sh)
 - [ ] - Update e2e-tests configuration
 - [ ] - Update documentation files (QUARKUS.md, DEVELOPMENT_AND_TESTING.md, AUTHENTICATION_FLOW.md)
+- [ ] - delete the top of this file that talks about the git hook
+- [ ] - delete the file name `copy_to_.git_hooks_pre-commit` as it is only required in the baseline project, and keeping that hook in your new project would break the mechanism!!!
+- [ ] - delete this TODO list
 
 # First Prompt for LLM 
 
