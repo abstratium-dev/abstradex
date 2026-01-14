@@ -1,6 +1,6 @@
-# abstracore
+# abstradex
 
-**abstracore** is the master blueprint for abstratium applications. Built on the Quarkus subatomic Java stack, Quinoa for seamless integration, and Angular for the frontend, it serves as the upstream source for all specific project forks.
+**abstradex** is a "rolodex" for your SME's partners (customers, suppliers, etc.). Built on the Quarkus subatomic Java stack, Quinoa for seamless integration, and Angular for the frontend, it provides a modern contact management system for small and medium enterprises.
 
 ## 📦 Tech Stack
 
@@ -8,7 +8,7 @@ Runtime: Quarkus (Java)
 
 Frontend UI: Angular (via Quinoa)
 
-API Layer: REST / GraphQL
+API Layer: REST
 
 Auth: Integrated with Abstrauth
 
@@ -16,59 +16,14 @@ Data: Designed for MySql compatibility
 
 ## 🛠️ Getting Started
 
-1. Creating a New Project from Abstracore
-
-To start a new project (e.g., abstradex) using this core:
-
-Create a new empty repository on your Git server.
-
-Clone Abstracore and point it to your new origin:
-
-```bash
-git clone https://github.com/your-org/abstracore.git your-new-project
-cd your-new-project
-git remote rename origin upstream
-git remote add origin https://github.com/your-org/your-new-project.git
-git push -u origin main
-```
-
-2. Pulling Baseline Updates
-
-When Abstracore is updated with new features or security patches, pull those changes into your project fork using the provided sync script:
+This project is based on the Abstracore template. To sync with baseline updates from Abstracore:
 
 ```bash
 # From the project root, run the sync script
 bash scripts/sync-base.sh
 ```
 
-The script will:
-- Add the `upstream` remote if it doesn't exist (pointing to Abstracore)
-- Fetch the latest changes from Abstracore
-- Merge the baseline changes into your project
-- Pause before committing so you can review the changes
-
-**Manual Alternative:**
-
-If you prefer to sync manually:
-
-```bash
-# Ensure you are on your main branch
-git checkout main
-
-# Add upstream remote (only needed once)
-git remote add upstream https://github.com/abstratium-dev/abstracore.git
-
-# Fetch the latest baseline code
-git fetch upstream
-
-# Merge baseline changes into your project
-git merge upstream/main --no-commit --no-ff
-
-# Review changes, then commit
-git commit -m "Merge baseline updates from Abstracore"
-```
-
-⚠️ **IMPORTANT**: Avoid modifying the `/core` directory in your project forks. Keep your custom logic in `/app` or specific feature packages to minimize merge conflicts during updates.
+⚠️ **IMPORTANT**: Avoid modifying the `/core` directory to minimize merge conflicts during updates. Keep custom logic in `/demo` or other feature packages.
 
 ## 🏗️ Project Structure
 
@@ -96,7 +51,7 @@ Dev UI: http://localhost:8080/q/dev
 
 ## 📝 Governance
 
-This is a Living Blueprint. If you develop a feature in a specific project (like a new logging service or UI utility) that would benefit all Abstratium apps, please back-port it to Abstracore via a Pull Request.
+This project is based on Abstracore. If you develop a feature here (like a new logging service or UI utility) that would benefit all Abstratium apps, please consider back-porting it to Abstracore via a Pull Request.
 
 
 ------------------------
@@ -148,31 +103,3 @@ Font Variant: Regular 400 Normal
 Font Size: 110
 Font Color: #FFFFFF
 Background Color: #5c6bc0
-
-----
-
-# Things to do when creating a new project
-
-- [ ] - Search for TODO and fix
-- [ ] - Search for core and fix, e.g. in `pom.xml`
-- [ ] - Update README.md with project-specific information
-- [ ] - Update USER_GUIDE.md with project-specific information
-- [ ] - Update DATABASE.md with project-specific information
-- [ ] - Update NATIVE_IMAGE_BUILD.md with project-specific information
-- [ ] - Update SECURITY_DESIGN.md with project-specific information
-- [ ] - Update TODO.md with project-specific information
-- [ ] - Update SECURITY.md with project-specific information
-- [ ] - Update CONTRIBUTING.md with project-specific information
-- [ ] - Create favicon, store it in root as zip and put it in `src/main/webui/public`
-- [ ] - Update `.windsurf` configuration
-- [ ] - Replace `src/main/webui/src/app/demo` with project-specific components
-- [ ] - 
-- [ ] - 
-- [ ] - 
-- [ ] - 
-- [ ] - 
-- [ ] - 
-- [X] - 
-- [x] - 
-- [ ] - 
-- [ ] - 

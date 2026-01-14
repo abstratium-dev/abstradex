@@ -9,7 +9,7 @@
 
 First add env vars:
 
-    source /w/abstratium-TODO.env
+    source /w/abstratium-abstradex.env
 
 That file should contain:
 
@@ -51,16 +51,14 @@ docker run -d \
 # create the database and user
 docker run -it --rm --network abstratium mysql mysql -h abstratium-mysql --port 3306 -u root -psecret
 
-TODO change `abstracore` to the actual database name, in all of the statements below
+DROP USER IF EXISTS 'abstradex'@'%';
 
-DROP USER IF EXISTS 'abstracore'@'%';
+CREATE USER 'abstradex'@'%' IDENTIFIED BY 'secret';
 
-CREATE USER 'abstracore'@'%' IDENTIFIED BY 'secret';
+DROP DATABASE IF EXISTS abstradex;
 
-DROP DATABASE IF EXISTS abstracore;
-
-CREATE DATABASE abstracore CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-GRANT ALL PRIVILEGES ON abstracore.* TO abstracore@'%'; -- on own database
+CREATE DATABASE abstradex CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+GRANT ALL PRIVILEGES ON abstradex.* TO abstradex@'%'; -- on own database
 
 FLUSH PRIVILEGES;
 ```
@@ -68,7 +66,7 @@ FLUSH PRIVILEGES;
 exit, then reconnect using the new user:
 
 ```bash
-docker run -it --network abstratium --rm mysql mysql -h abstratium-mysql --port 3306 -u TODO -psecret TODO
+docker run -it --network abstratium --rm mysql mysql -h abstratium-mysql --port 3306 -u abstradex -psecret abstradex
 ```
 
 # Testing
@@ -93,7 +91,7 @@ It might be easier to test these manually during testing.
 
 Start the component:
 ```bash
-source /w/abstratium-TODO.env
+source /w/abstratium-abstradex.env
 quarkus dev
 ```
 
@@ -145,7 +143,7 @@ ng update
 ng update @angular/cli @angular/core
 ```
 
-4. Check Github for security problems by signing in and viewing the problems here: https://github.com/abstratium-dev/TODO/security/dependabot and https://github.com/abstratium-dev/TODO/security/code-scanning
+4. Check Github for security problems by signing in and viewing the problems here: https://github.com/abstratium-dev/abstradex/security/dependabot and https://github.com/abstratium-dev/abstradex/security/code-scanning
 
 # Issues with Webkit
 

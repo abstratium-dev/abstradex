@@ -4,7 +4,7 @@ import { Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { WINDOW } from './window.token';
 
-export const CLIENT_ID = 'abstratium-abstracore'; // TODO set the client id properly
+export const CLIENT_ID = 'abstratium-abstradex';
 export const ISSUER = 'https://abstrauth.abstratium.dev';
 export const ROLE_USER = CLIENT_ID + '_user';
 

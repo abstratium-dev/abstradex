@@ -2,7 +2,7 @@
 trigger: always_on
 ---
 
-The aim of the project is to implement a demo of a functional component which includes the backend and frontend.
+The aim of the project is to implement a partner (customer and supplier) management system which includes the backend and frontend.
 
 The project uses the quarkus framework with Java 21. The extensions in use are:
 

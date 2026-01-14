@@ -16,19 +16,18 @@ This component requires a MySQL database. Create a database and user with the fo
 1. **Connect to MySQL** as root or admin user:
 
 (change `<password>` to your password)
-(change `<TODO>` to the project name)
 
 ```bash
 docker run -it --rm --network abstratium mysql mysql -h abstratium-mysql --port 3306 -u root -p<password>
 
-DROP USER IF EXISTS 'TODO'@'%';
+DROP USER IF EXISTS 'abstradex'@'%';
 
-CREATE USER 'TODO'@'%' IDENTIFIED BY '<password>';
+CREATE USER 'abstradex'@'%' IDENTIFIED BY '<password>';
 
-DROP DATABASE IF EXISTS TODO;
+DROP DATABASE IF EXISTS abstradex;
 
-CREATE DATABASE TODO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-GRANT ALL PRIVILEGES ON TODO.* TO TODO@'%'; -- on own database
+CREATE DATABASE abstradex CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+GRANT ALL PRIVILEGES ON abstradex.* TO abstradex@'%'; -- on own database
 
 FLUSH PRIVILEGES;
 
@@ -39,38 +38,43 @@ This project will automatically create all necessary tables and any initial data
 
 New versions will update the database as needed.
 
-### Generate TODO
+### Generate Secrets
 
-TODO any env vars that need generating are to be described here.
+Generate the required secrets for the application.
 
-1. **Generate TODO** (32+ characters recommended):
+1. **Generate Cookie Encryption Secret** (32+ characters recommended):
    ```bash
    openssl rand -base64 32
    ```
-   Use this output for `TODO_ENV_VAR_NAME`.
+   Use this output for `COOKIE_ENCRYPTION_SECRET`.
+
+2. **Generate CSRF Token Signature Key** (64+ characters recommended):
+   ```bash
+   openssl rand -base64 64
+   ```
+   Use this output for `CSRF_TOKEN_SIGNATURE_KEY`.
 
 ### Pull and Run the Docker Container
 
 1. **Pull the latest image** from GitHub Container Registry:
    ```bash
-   docker pull ghcr.io/abstratium-dev/TODO:latest
+   docker pull ghcr.io/abstratium-dev/abstradex:latest
    ```
 
 2. **Run the container**:
 
-_Replace all `TODO_...` values with the values generated above.
-
    ```bash
    docker run -d \
-     --name TODO \
-     --network your-network \
+     --name abstradex \
+     --network abstratium \
      -p 127.0.0.1:41080:8080 \
      -p 127.0.0.1:9002:9002 \
-     -e QUARKUS_DATASOURCE_JDBC_URL="jdbc:mysql://your-mysql-host:3306/TODO" \
-     -e QUARKUS_DATASOURCE_USERNAME="TODO_YOUR_USERNAME" \
-     -e QUARKUS_DATASOURCE_PASSWORD="TODO_YOUR_SECURE_PASSWORD" \
-     -e COOKIE_ENCRYPTION_SECRET="TODO_YOUR_COOKIE_ENCRYPTION_SECRET" \
-     ghcr.io/abstratium-dev/TODO:latest
+     -e QUARKUS_DATASOURCE_JDBC_URL="jdbc:mysql://abstratium-mysql:3306/abstradex" \
+     -e QUARKUS_DATASOURCE_USERNAME="abstradex" \
+     -e QUARKUS_DATASOURCE_PASSWORD="YOUR_SECURE_PASSWORD" \
+     -e COOKIE_ENCRYPTION_SECRET="YOUR_COOKIE_ENCRYPTION_SECRET" \
+     -e CSRF_TOKEN_SIGNATURE_KEY="YOUR_CSRF_TOKEN_SIGNATURE_KEY" \
+     ghcr.io/abstratium-dev/abstratium-abstradex:latest
    ```
 
    **Required Environment Variables:**
@@ -81,12 +85,14 @@ _Replace all `TODO_...` values with the values generated above.
    - `CSRF_TOKEN_SIGNATURE_KEY`: CSRF token signature key (min 32 chars, generate with `openssl rand -base64 64`)
    
    **Optional Environment Variables:**
-   - `TODO_ENV_VAR_NAME`: TODO
+   - `QUARKUS_OIDC_AUTH_SERVER_URL`: OIDC server URL (default: http://abstratium-abstrauth:8080/realms/abstratium)
+   - `QUARKUS_OIDC_CLIENT_ID`: OAuth2 client ID (default: abstradex)
+   - `QUARKUS_OIDC_CREDENTIALS_SECRET`: OAuth2 client secret
 
 3. **Verify the container is running**:
    ```bash
    docker ps
-   docker logs TODO
+   docker logs abstradex
    curl http://localhost:41080/m/health
    curl http://localhost:41080/m/info
    ```
@@ -108,15 +114,20 @@ Before installation, ensure you have:
 
 ## Initial Onboarding
 
-TODO
+None
 
 ## Account and Role Management
 
 This component requires that users can authenticate using `abstratium-abstrauth`. That requires that an administrator signs into `abstratium-abstrauth` first to create the oauth2 client. Use the `client_id` and `client_secret` to set the values of the environment variables above, so that users can sign in.
 
-## TODO
+## Partner Management
 
-TODO describe other functionality here.
+Abstradex provides a centralized system for managing your business partners:
+
+- **Contact Directory**: Store and organize customer and supplier information
+- **Search and Filter**: Quickly find partners by name, type, or other criteria
+- **Secure Access**: Role-based access control ensures data privacy
+- **Integration Ready**: REST API for integration with other systems
 
 ## Monitoring and Health Checks
 
@@ -134,14 +145,14 @@ This project provides several endpoints for monitoring:
 
 ### Container won't start
 
-1. Check Docker logs: `docker logs TODO`
+1. Check Docker logs: `docker logs abstratium-abstradex`
 2. Verify environment variables are set correctly
 3. Ensure database is accessible from container
-4. Check network connectivity: `docker network inspect your-network`
+4. Check network connectivity: `docker network inspect abstratium`
 
 ### Database connection errors
 
-1. Verify MySQL is running: `mysql -u TODO -p -h your-mysql-host`
+1. Verify MySQL is running: `mysql -u abstradex -p -h abstratium-mysql`
 2. Check firewall rules allow connection on port 3306
 3. Verify database user has correct permissions
 4. Check JDBC URL format is correct
@@ -168,5 +179,7 @@ This project provides several endpoints for monitoring:
 
 ### Additional Resources
 
-- TODO e.g. [RFC 7636 - PKCE](https://datatracker.ietf.org/doc/html/rfc7636)
+- [Quarkus Documentation](https://quarkus.io/guides/)
+- [Angular Documentation](https://angular.io/docs)
+- [Abstracore Repository](https://github.com/abstratium-dev/abstracore)
 

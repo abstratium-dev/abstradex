@@ -2,9 +2,7 @@
 
 ## Overview
 
-TODO: _get the LLM to generate this_
-
-TODO describe the data model.
+The Abstradex database stores partner information for SMEs, including customers, suppliers, and other business contacts. The data model is designed to be simple yet extensible, supporting basic contact management with room for future enhancements.
 
 The schema is compatible with both MySQL and H2 databases and follows a naming convention where all tables are prefixed with `T_`, foreign keys with `FK_`, and indices with `I_`.
 
@@ -12,39 +10,60 @@ The schema is compatible with both MySQL and H2 databases and follows a naming c
 
 ```mermaid
 erDiagram
-    T_... ||--o{ T_credentials : "has"
+    T_account ||--o{ T_demo : "creates"
 ```
 
 ## Table Descriptions
 
-### TODO one of these paragraphs per table
+### T_account
 
-The `T_TODO` table stores ...
-
-**Important:** TODO if there is anything important, add it here...
+The `T_account` table stores user account information for authentication and authorization.
 
 **Key Features:**
-- TODO
+- Stores user identity and authentication details
+- Links to OIDC authentication provider
+- Tracks account creation and modification
 
 **Constraints:**
-- `I_TODO`: Unique constraint on TODO field
-
-**Status Values:**
-- `TODO`: a line per status, if the field contains status
+- Primary key: `id` (VARCHAR(36) UUID)
+- Unique constraint on username/email
 
 **Indices:**
-- `I_TODO`: describe indices here
+- Primary key index on `id`
+- Unique index on username/email fields
 
 **Relationships:**
-- TODO Links to client via `client_id` (not enforced FK for flexibility)
-- TODO Links to account via `account_id` after user authentication
-- TODO ---
+- One account can create many demo records
 
 **Security Features:**
-- TODO if there are any...
+- Integrates with OIDC authentication
+- No passwords stored locally (delegated to abstrauth)
+
+### T_demo
+
+The `T_demo` table stores partner/contact information (customers, suppliers, etc.).
+
+**Important:** This is the main business entity table for the application. Currently named "demo" as a placeholder - will be renamed to "partner" or similar in future iterations.
+
+**Key Features:**
+- Stores partner contact details
+- Tracks creation and modification metadata
+- Supports full CRUD operations
+
+**Constraints:**
+- Primary key: `id` (auto-increment or UUID)
+- Foreign key to `T_account` for creator tracking
+
+**Indices:**
+- Primary key index
+- Index on account_id for efficient filtering
+- Index on name for search operations
+
+**Relationships:**
+- Links to account via `account_id` (creator/owner)
 
 **Default Data:**
-- TODO if there is any
+- Sample demo records created via migration scripts for testing
 
 ## Naming Conventions
 
@@ -58,7 +77,9 @@ The database follows strict naming conventions for consistency and clarity:
 
 ## Data Flow
 
-TODO describe it here.
+1. **User Authentication**: Users authenticate via OIDC (abstrauth), creating/updating records in `T_account`
+2. **Partner Management**: Authenticated users create, read, update, and delete partner records in `T_demo`
+3. **Audit Trail**: All records track creator and timestamps for audit purposes
 
 ## Database Compatibility
 
@@ -93,20 +114,28 @@ Strategic indexes are placed for common query patterns:
 
 Expired records should be periodically cleaned:
 
-TODO describe the queries here. e.g.:
+Currently, the demo table does not have expiration-based records. Future enhancements may include:
+
 ```sql
--- Clean expired authorization requests
-DELETE FROM T_authorization_requests 
-WHERE expires_at < CURRENT_TIMESTAMP;
+-- Example: Clean soft-deleted records older than 90 days
+-- DELETE FROM T_demo 
+-- WHERE deleted_at < DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 90 DAY);
 
 ### Monitoring Queries
 
-TODO describe them here, e.g.:
+Useful monitoring queries:
+
 ```sql
--- Check for locked accounts
-SELECT a.email, c.locked_until, c.failed_login_attempts
-FROM T_accounts a
-JOIN T_credentials c ON a.id = c.account_id
-WHERE c.locked_until > CURRENT_TIMESTAMP;
+-- Count partners by account
+SELECT account_id, COUNT(*) as partner_count
+FROM T_demo
+GROUP BY account_id
+ORDER BY partner_count DESC;
+
+-- Recent activity
+SELECT *
+FROM T_demo
+WHERE created_at > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 7 DAY)
+ORDER BY created_at DESC;
 ```
 
