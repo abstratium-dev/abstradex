@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration
-UPSTREAM_URL="https://github.com/abstratium-dev/abstracore.git"
+UPSTREAM_URL="git@github.com:abstratium-dev/abstracore.git"
 MAIN_BRANCH="main"
 
 # Check if upstream remote exists, if not, add it
