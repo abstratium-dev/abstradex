@@ -69,6 +69,10 @@ exit, then reconnect using the new user:
 docker run -it --network abstratium --rm mysql mysql -h abstratium-mysql --port 3306 -u abstradex -psecret abstradex
 ```
 
+# Authorization
+
+See the [USER_GUIDE.md](../USER_GUIDE.md) file and its section called `Account and Role Management` for details on how to set up authorization.
+
 # Testing
 
 ## Unit and Integration Tests

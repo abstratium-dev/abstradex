@@ -118,7 +118,7 @@ None
 
 ## Account and Role Management
 
-This component requires that users can authenticate using `abstratium-abstrauth`. That requires that an administrator signs into `abstratium-abstrauth` first to create the oauth2 client. Use the `client_id` and `client_secret` to set the values of the environment variables above, so that users can sign in.
+This component requires that users can authenticate using an oauth authorization server. That requires that an administrator signs into something like `abstratium-abstrauth` first, to create the oauth2 client. The callback url should be `http://localhost:8080/oauth/callback` and one for the production environment, also ending in `/oauth/callback`. Use the `client_id` and `client_secret` that it provides, to set the values of the environment variables above, so that users can sign in.
 
 ## Partner Management
 
