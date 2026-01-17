@@ -1,0 +1,128 @@
+
+erDiagram
+    Partner ||--|| PartnerType : "has type"
+    Partner ||--o{ AddressDetail : "has"
+    Partner ||--o{ ContactDetail : "has"
+    Partner ||--o{ PartnerTag : "tagged with"
+    Partner ||--o{ PartnerRelationship : "relates from"
+    Partner ||--o{ PartnerRelationship : "relates to"
+    Partner ||--o{ SMERelationship : "has relationship with SME"
+
+    AddressDetail ||--|| Address : "is"
+    
+    NaturalPerson ||--|| Partner : extends
+    LegalEntity ||--|| Partner : extends
+    
+    LegalEntity ||--o{ NaturalPerson : "employs/represents"
+    
+    Tag ||--o{ PartnerTag : "applied to"
+
+    Partner {
+        UUID id PK
+        String partner_number UK "Unique business identifier"
+        UUID partner_type_id FK
+        LocalDateTime created_at
+        LocalDateTime updated_at
+        boolean is_active
+        String notes
+    }
+    
+    PartnerType {
+        UUID id PK
+        String type_code UK "NATURAL_PERSON or LEGAL_ENTITY"
+        String description
+    }
+    
+    NaturalPerson {
+        UUID partner_id PK,FK
+        String first_name
+        String last_name
+        String middle_name
+        String title "Mr, Ms, Dr, etc"
+        date date_of_birth
+        String tax_id "Personal tax identifier"
+        String preferred_language
+    }
+    
+    LegalEntity {
+        UUID partner_id PK,FK
+        String legal_name
+        String trading_name "DBA name"
+        String registration_number
+        String tax_id "VAT/EIN/Company tax ID"
+        String legal_form "LLC, Corp, GmbH, etc"
+        date incorporation_date
+        String jurisdiction "Registration country/state"
+    }
+    
+    Address {
+        UUID id PK
+        String street_line1
+        String street_line2
+        String city
+        String state_province
+        String postal_code
+        String country_code "ISO 3166-1 alpha-2 code"
+        LocalDateTime valid_from "date that address is captured"
+        LocalDateTime valid_to "date that address is no longer valid since e.g. the street was renamed or built over"
+        boolean is_verified
+    }
+    
+    ContactDetail {
+        UUID id PK
+        UUID partner_id FK
+        String contact_type "EMAIL, PHONE, MOBILE, FAX, WEBSITE"
+        String contact_value
+        String label "Work, Personal, Emergency, etc"
+        boolean is_primary
+        boolean is_verified
+    }
+    
+    AddressDetail {
+        UUID id PK
+        UUID partner_id FK
+        UUID address_id FK
+        boolean is_primary
+        String address_type "BILLING, SHIPPING, REGISTERED, etc"
+        LocalDateTime valid_from "Effective date from point of view of partner"
+        LocalDateTime valid_to "Expiry date from point of view of partner"
+    }
+    
+    SMERelationship {
+        UUID id PK
+        UUID partner_id FK
+        String relationship_type "CUSTOMER, SUPPLIER, BOTH"
+        String status "ACTIVE, INACTIVE, PROSPECT, FORMER"
+        date relationship_start
+        date relationship_end
+        String payment_terms
+        String credit_limit
+        integer priority_level
+        String account_manager
+    }
+    
+    PartnerRelationship {
+        UUID id PK
+        UUID from_partner_id FK
+        UUID to_partner_id FK
+        String relationship_type "PARENT_COMPANY, SUBSIDIARY, EMPLOYEE, AUTHORIZED_REP, BUSINESS_PARTNER, REFERRAL"
+        date effective_from
+        date effective_to
+        String notes
+    }
+    
+    Tag {
+        UUID id PK
+        String tag_name UK
+        String color_hex
+        String description
+    }
+    
+    PartnerTag {
+        UUID id PK
+        UUID partner_id FK
+        UUID tag_id FK
+        LocalDateTime tagged_at
+        String tagged_by "User who applied tag"
+    }
+

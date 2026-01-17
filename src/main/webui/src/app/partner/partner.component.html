@@ -1,0 +1,131 @@
+<div class="container">
+  <div class="page-header">
+    <h1>Partners</h1>
+    <div class="header-actions">
+      <button class="btn-add" (click)="toggleAddForm()" [disabled]="formSubmitting">
+        {{ showAddForm ? 'Cancel' : '+ Add Partner' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Search Section -->
+  <div class="filter-section">
+    <div class="filter-input-wrapper">
+      <input 
+        type="text" 
+        class="filter-input"
+        [(ngModel)]="searchTerm"
+        (input)="onSearch()"
+        placeholder="Search partners by number, name, email, or notes..."
+        [disabled]="loading()">
+      <button 
+        *ngIf="searchTerm" 
+        class="filter-clear-button"
+        (click)="clearSearch()"
+        title="Clear search">
+        ✕
+      </button>
+    </div>
+    <div class="filter-info" *ngIf="searchTerm">
+      Showing {{ partners().length }} result(s) for "{{ searchTerm }}"
+    </div>
+  </div>
+  
+  <div *ngIf="loading()" class="loading">
+    <p>Loading partners...</p>
+  </div>
+
+  <div *ngIf="error()" class="error-box">
+    <p>{{ error() }}</p>
+    <button (click)="onRetry()">Retry</button>
+  </div>
+
+  <!-- Add Partner Form -->
+  <div *ngIf="showAddForm" class="form-container">
+    <h2>Create New Partner</h2>
+
+    <form (ngSubmit)="onSubmitAdd()">
+      <div *ngIf="formError" class="error-box">
+        {{ formError }}
+      </div>
+
+      <div class="form-group">
+        <label for="partnerNumber">Partner Number *</label>
+        <input 
+          type="text" 
+          id="partnerNumber" 
+          [(ngModel)]="newPartner.partnerNumber" 
+          name="partnerNumber"
+          placeholder="e.g., P-001"
+          required
+          [disabled]="formSubmitting">
+      </div>
+
+      <div class="form-group">
+        <label for="notes">Notes</label>
+        <textarea 
+          id="notes" 
+          [(ngModel)]="newPartner.notes" 
+          name="notes"
+          rows="3"
+          placeholder="Optional notes about this partner"
+          [disabled]="formSubmitting"></textarea>
+      </div>
+
+      <div class="form-group checkbox-group">
+        <label>
+          <input 
+            type="checkbox" 
+            [(ngModel)]="newPartner.active" 
+            name="active"
+            [disabled]="formSubmitting">
+          Active
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-primary" [disabled]="formSubmitting">
+          {{ formSubmitting ? 'Creating...' : 'Create Partner' }}
+        </button>
+        <button type="button" class="btn-secondary" (click)="toggleAddForm()" [disabled]="formSubmitting">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div *ngIf="!loading() && !error() && partners().length === 0" class="info-message">
+    <p>No partners found. Click "Add Partner" to create your first partner.</p>
+  </div>
+
+  <div *ngIf="!loading() && !error() && partners().length > 0">
+    <div class="partner-list">
+      <div class="tile" *ngFor="let partner of partners()">
+        <div class="tile-header">
+          <div class="tile-info">
+            <h3 class="tile-title">{{ partner.partnerNumber }}</h3>
+            <p class="tile-subtitle" *ngIf="partner.partnerType">
+              Type: {{ partner.partnerType.typeCode }}
+            </p>
+          </div>
+          <div class="tile-actions">
+            <span class="status-badge" [class.active]="partner.active" [class.inactive]="!partner.active">
+              {{ partner.active ? 'Active' : 'Inactive' }}
+            </span>
+            <button class="btn-icon btn-icon-danger" 
+                    (click)="deletePartner(partner)" 
+                    title="Delete partner">
+              🗑️
+            </button>
+          </div>
+        </div>
+        <div class="tile-body" *ngIf="partner.notes || partner.createdAt">
+          <p *ngIf="partner.notes" class="notes">{{ partner.notes }}</p>
+          <p *ngIf="partner.createdAt" class="metadata">
+            Created: {{ formatDate(partner.createdAt) }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

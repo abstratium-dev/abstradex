@@ -1,12 +1,10 @@
 import { Injectable, signal, Signal } from '@angular/core';
+import { Demo } from './models/demo.model';
+import { Config } from './models/config.model';
+import { Partner } from './models/partner.model';
 
-export interface Demo {
-  id: string;
-}
-
-export interface Config {
-  logLevel: string;
-}
+// Re-export models for backward compatibility
+export type { Demo, Config, Partner };
 
 @Injectable({
   providedIn: 'root',
@@ -18,10 +16,18 @@ export class ModelService {
   private demosError = signal<string | null>(null);
   private config = signal<Config | null>(null);
 
+  private partners = signal<Partner[]>([]);
+  private partnersLoading = signal<boolean>(false);
+  private partnersError = signal<string | null>(null);
+
   demos$: Signal<Demo[]> = this.demos.asReadonly();
   demosLoading$: Signal<boolean> = this.demosLoading.asReadonly();
   demosError$: Signal<string | null> = this.demosError.asReadonly();
   config$: Signal<Config | null> = this.config.asReadonly();
+
+  partners$: Signal<Partner[]> = this.partners.asReadonly();
+  partnersLoading$: Signal<boolean> = this.partnersLoading.asReadonly();
+  partnersError$: Signal<string | null> = this.partnersError.asReadonly();
 
   setDemos(demos: Demo[]) {
     this.demos.set(demos);
@@ -37,5 +43,17 @@ export class ModelService {
 
   setConfig(config: Config) {
     this.config.set(config);
+  }
+
+  setPartners(partners: Partner[]) {
+    this.partners.set(partners);
+  }
+
+  setPartnersLoading(loading: boolean) {
+    this.partnersLoading.set(loading);
+  }
+
+  setPartnersError(error: string | null) {
+    this.partnersError.set(error);
   }
 }

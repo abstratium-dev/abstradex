@@ -1,0 +1,66 @@
+// Partner-specific styles (global styles are in src/styles.scss)
+
+.partner-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.tile-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+
+  &.active {
+    background-color: var(--color-success-bg);
+    color: var(--color-success-text);
+  }
+
+  &.inactive {
+    background-color: var(--color-error-bg);
+    color: var(--color-error-text);
+  }
+}
+
+.tile-body {
+  border-top: 1px solid var(--color-border-primary);
+  padding-top: 1rem;
+  margin-top: 1rem;
+
+  .notes {
+    margin: 0 0 0.5rem 0;
+    color: var(--color-text-primary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .metadata {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--color-text-tertiary);
+  }
+}
+
+.checkbox-group {
+  label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+
+    input[type="checkbox"] {
+      margin-right: 0.5rem;
+      width: 1.25rem;
+      height: 1.25rem;
+      cursor: pointer;
+    }
+  }
+}
