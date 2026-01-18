@@ -1,0 +1,99 @@
+<div class="partner-address-container">
+  <div class="header">
+    <button class="back-button" (click)="goBack()">← Back</button>
+    <h2>Manage Addresses for Partner {{ partnerNumber }}</h2>
+  </div>
+
+  <div class="actions">
+    <button class="btn-primary" (click)="toggleAddForm()">
+      {{ showAddForm ? 'Cancel' : '+ Add Address' }}
+    </button>
+    <button class="btn-secondary" (click)="goToAddressManagement()">
+      Create New Address
+    </button>
+  </div>
+
+  <!-- Add Address Form -->
+  <div class="add-form" *ngIf="showAddForm">
+    <h3>Add Address to Partner</h3>
+    
+    <div class="form-group">
+      <label>Search Addresses</label>
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm" 
+        (input)="onSearch()"
+        placeholder="Search addresses (min 3 characters)...">
+    </div>
+
+    <div class="form-group">
+      <label for="addressSelect">Select Address *</label>
+      <select id="addressSelect" [(ngModel)]="selectedAddressId" required>
+        <option value="">-- Select an address --</option>
+        <option *ngFor="let addr of availableAddresses()" [value]="addr.id">
+          {{ addr.streetLine1 }}, {{ addr.city }}, {{ addr.countryCode }}
+        </option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="addressType">Address Type</label>
+      <select id="addressType" [(ngModel)]="newAddressDetail.addressType">
+        <option value="BILLING">Billing</option>
+        <option value="SHIPPING">Shipping</option>
+        <option value="MAIN">Main</option>
+        <option value="OTHER">Other</option>
+      </select>
+    </div>
+
+    <div class="checkbox-group">
+      <label>
+        <input type="checkbox" [(ngModel)]="newAddressDetail.isPrimary">
+        Primary Address
+      </label>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn-primary" (click)="onSubmitAdd()">Add Address</button>
+      <button class="btn-secondary" (click)="toggleAddForm()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading">Loading partner addresses...</div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="error">
+    <p>{{ error }}</p>
+    <button (click)="loadPartnerAddresses()">Retry</button>
+  </div>
+
+  <!-- Partner Addresses List -->
+  <div class="address-list" *ngIf="!loading && !error">
+    <h3>Partner Addresses ({{ partnerAddresses.length }})</h3>
+    
+    <div *ngIf="partnerAddresses.length === 0" class="empty-state">
+      <p>No addresses assigned to this partner yet.</p>
+      <p>Click "Add Address" to assign an existing address or "Create New Address" to create one first.</p>
+    </div>
+
+    <div class="address-grid">
+      <div *ngFor="let addressDetail of partnerAddresses" class="address-tile">
+        <div class="address-info">
+          <div class="address-text">
+            <strong>{{ getAddressDisplay(addressDetail) }}</strong>
+            <div class="address-meta">
+              <span class="badge" [class.primary]="addressDetail.isPrimary">
+                {{ addressDetail.isPrimary ? 'PRIMARY' : 'SECONDARY' }}
+              </span>
+              <span class="badge type">{{ addressDetail.addressType || 'N/A' }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="address-actions">
+          <button class="btn-danger" (click)="onDelete(addressDetail)">Remove</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

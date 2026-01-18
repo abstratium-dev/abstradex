@@ -23,7 +23,7 @@ This project is based on the Abstracore template. To sync with baseline updates 
 bash scripts/sync-base.sh
 ```
 
-⚠️ **IMPORTANT**: Avoid modifying the `/core` directory to minimize merge conflicts during updates. Keep custom logic in `/demo` or other feature packages.
+⚠️ **IMPORTANT**: Avoid modifying the `/core` directory to minimize merge conflicts during updates. Keep custom logic in `/partner` or other feature packages.
 
 ## 🏗️ Project Structure
 

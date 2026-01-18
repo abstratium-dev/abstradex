@@ -17,20 +17,25 @@ public class ConfigResource {
     @ConfigProperty(name = "client.log.level")
     String clientLogLevel;
 
+    @ConfigProperty(name = "addresses.country.default")
+    String defaultCountry;
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public SuccessResponse config() {
-        return new SuccessResponse(clientLogLevel, BuildInfo.BUILD_TIMESTAMP);
+        return new SuccessResponse(clientLogLevel, BuildInfo.BUILD_TIMESTAMP, defaultCountry);
     }
 
     @RegisterForReflection
     public static class SuccessResponse {
         public String logLevel;
         public String baselineBuildTimestamp;
+        public String defaultCountry;
         
-        public SuccessResponse(String logLevel, String baselineBuildTimestamp) {
+        public SuccessResponse(String logLevel, String baselineBuildTimestamp, String defaultCountry) {
             this.logLevel = logLevel;
             this.baselineBuildTimestamp = baselineBuildTimestamp;
+            this.defaultCountry = defaultCountry;
         }
     }
 }

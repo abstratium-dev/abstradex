@@ -240,7 +240,16 @@ describe('AuthService (BFF Pattern)', () => {
       
       service.initialize().subscribe(() => {
         expect(service.isExpired()).toBe(true);
-        done();
+        
+        // The expiry timer will trigger signout() immediately for expired tokens
+        // We need to flush the logout request to avoid "Expected no open requests" error
+        setTimeout(() => {
+          const logoutReq = httpMock.match('/api/auth/logout');
+          if (logoutReq.length > 0) {
+            logoutReq[0].flush({});
+          }
+          done();
+        }, 100);
       });
 
       const req = httpMock.expectOne('/api/core/userinfo');
@@ -291,10 +300,38 @@ describe('AuthService (BFF Pattern)', () => {
   });
 
   describe('Signout', () => {
-    it('should set window.location.href to logout endpoint', () => {
+    it('should reset token, call logout endpoint, and navigate to sign-out on success', () => {
       service.signout();
       
-      expect(mockWindow.location.href).toBe('/api/auth/logout');
+      // Verify token was reset
+      expect(service.isAuthenticated()).toBe(false);
+      expect(service.getEmail()).toBe(ANONYMOUS.email);
+      
+      // Verify HTTP call to logout endpoint
+      const req = httpMock.expectOne('/api/auth/logout');
+      expect(req.request.method).toBe('GET');
+      
+      // Simulate successful response
+      req.flush({});
+      
+      // Verify navigation to sign-out
+      expect(routerSpy.navigate).toHaveBeenCalledWith(['/sign-out']);
+    });
+
+    it('should navigate to sign-out even if logout endpoint fails', () => {
+      service.signout();
+      
+      // Verify token was reset
+      expect(service.isAuthenticated()).toBe(false);
+      
+      // Verify HTTP call to logout endpoint
+      const req = httpMock.expectOne('/api/auth/logout');
+      
+      // Simulate error response
+      req.flush('Server error', { status: 500, statusText: 'Internal Server Error' });
+      
+      // Verify navigation to sign-out still happens
+      expect(routerSpy.navigate).toHaveBeenCalledWith(['/sign-out']);
     });
   });
 

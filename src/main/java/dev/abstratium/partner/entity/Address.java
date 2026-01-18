@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -48,6 +50,7 @@ public class Address {
     @Column(name = "is_verified", nullable = false)
     private boolean isVerified = false;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "address", fetch = FetchType.LAZY)
     private Set<AddressDetail> addressDetails = new HashSet<>();
 

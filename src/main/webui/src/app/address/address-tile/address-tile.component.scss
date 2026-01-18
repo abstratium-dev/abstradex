@@ -1,33 +1,17 @@
 // Most tile styles are defined globally in styles.scss
-// Only partner-specific overrides here
 
-.partner-icon {
-  flex-shrink: 0;
-  
-  .type-icon-large {
-    font-size: 2.5rem;
-    display: block;
-  }
-}
-
-.partner-name {
-  font-size: 1.25rem;
+.address-display {
+  font-size: 1.1rem;
   font-weight: 600;
   margin: 0 0 0.25rem 0;
   color: var(--color-text-primary);
 }
 
-.partner-number {
+.country-code {
   font-size: 0.875rem;
   color: var(--color-text-secondary);
-  margin: 0 0 0.25rem 0;
-}
-
-.partner-address {
-  font-size: 0.75rem;
-  color: var(--color-text-secondary);
   margin: 0;
-  font-style: italic;
+  text-transform: uppercase;
 }
 
 .tile-actions {

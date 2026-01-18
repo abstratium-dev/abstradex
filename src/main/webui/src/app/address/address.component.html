@@ -1,0 +1,123 @@
+<div class="container">
+  <div class="page-header">
+    <h1>Addresses</h1>
+    <div class="header-actions">
+      <button class="btn-add" (click)="toggleAddForm()" [disabled]="formSubmitting">
+        {{ showAddForm ? 'Cancel' : '+ Add Address' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="filter-section">
+    <div class="filter-input-wrapper">
+      <input 
+        #searchInput
+        type="text" 
+        class="filter-input"
+        [(ngModel)]="searchTerm"
+        (input)="onSearch()"
+        placeholder="Search addresses (min 3 characters)..."
+        [disabled]="loading()"
+        autofocus>
+      <button 
+        *ngIf="searchTerm" 
+        class="filter-clear-button"
+        (click)="clearSearch()"
+        title="Clear search">
+        ✕
+      </button>
+    </div>
+  </div>
+  
+  <div *ngIf="loading()" class="loading">
+    <p>Loading addresses...</p>
+  </div>
+
+  <div *ngIf="error()" class="error-box">
+    <p>{{ error() }}</p>
+    <button (click)="onRetry()">Retry</button>
+  </div>
+
+  <div *ngIf="showAddForm" class="form-container">
+    <h2>{{ editingAddress ? 'Edit Address' : 'Create New Address' }}</h2>
+
+    <form (ngSubmit)="onSubmitAdd()">
+      <div *ngIf="formError" class="error-box">
+        {{ formError }}
+      </div>
+
+      <div class="form-group">
+        <label for="streetLine1">Street Address *</label>
+        <input type="text" id="streetLine1" [(ngModel)]="newAddress.streetLine1" name="streetLine1" required [disabled]="formSubmitting">
+      </div>
+
+      <div class="form-group">
+        <label for="streetLine2">Street Address Line 2</label>
+        <input type="text" id="streetLine2" [(ngModel)]="newAddress.streetLine2" name="streetLine2" [disabled]="formSubmitting">
+      </div>
+
+      <div class="form-group">
+        <label for="city">City *</label>
+        <input type="text" id="city" [(ngModel)]="newAddress.city" name="city" required [disabled]="formSubmitting">
+      </div>
+
+      <div class="form-group">
+        <label for="stateProvince">State/Province</label>
+        <input type="text" id="stateProvince" [(ngModel)]="newAddress.stateProvince" name="stateProvince" [disabled]="formSubmitting">
+      </div>
+
+      <div class="form-group">
+        <label for="postalCode">Postal Code</label>
+        <input type="text" id="postalCode" [(ngModel)]="newAddress.postalCode" name="postalCode" [disabled]="formSubmitting">
+      </div>
+
+      <div class="form-group">
+        <label for="countryCode">Country *</label>
+        <input 
+          type="text" 
+          id="countryCode" 
+          [(ngModel)]="newAddress.countryCode" 
+          name="countryCode" 
+          list="countries-list"
+          maxlength="2" 
+          required 
+          [disabled]="formSubmitting"
+          placeholder="Type to search countries...">
+        <datalist id="countries-list">
+          <option *ngFor="let country of countries()" [value]="country.code">{{ country.name }}</option>
+        </datalist>
+      </div>
+
+      <div class="checkbox-group">
+        <label>
+          <input type="checkbox" [(ngModel)]="newAddress.isVerified" name="isVerified" [disabled]="formSubmitting">
+          Verified
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-primary" [disabled]="formSubmitting">
+          {{ formSubmitting ? (editingAddress ? 'Updating...' : 'Creating...') : (editingAddress ? 'Update Address' : 'Create Address') }}
+        </button>
+        <button type="button" class="btn-secondary" (click)="toggleAddForm()" [disabled]="formSubmitting">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div *ngIf="!loading() && !error() && addresses().length === 0" class="info-message">
+    <p>No addresses found. Click "Add Address" to create your first address.</p>
+  </div>
+
+  <div *ngIf="!loading() && !error() && addresses().length > 0">
+    <div class="address-list">
+      <address-tile 
+        *ngFor="let address of addresses()" 
+        [address]="address"
+        (delete)="deleteAddress($event)"
+        (edit)="editAddress($event)">
+      </address-tile>
+    </div>
+  </div>
+</div>

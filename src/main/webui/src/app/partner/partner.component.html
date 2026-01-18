@@ -42,17 +42,17 @@
     <button (click)="onRetry()">Retry</button>
   </div>
 
-  <!-- Add Partner Form -->
+  <!-- Add/Edit Partner Form -->
   <div *ngIf="showAddForm" class="form-container">
-    <h2>Create New Partner</h2>
+    <h2>{{ editingPartner ? 'Edit Partner' : 'Create New Partner' }}</h2>
 
     <form (ngSubmit)="onSubmitAdd()">
       <div *ngIf="formError" class="error-box">
         {{ formError }}
       </div>
 
-      <!-- Partner Type Selection -->
-      <div *ngIf="!partnerType" class="partner-type-selection">
+      <!-- Partner Type Selection (only for new partners) -->
+      <div *ngIf="!partnerType && !editingPartner" class="partner-type-selection">
         <p class="selection-prompt">What type of partner are you creating?</p>
         <div class="type-buttons">
           <button type="button" class="type-button" (click)="selectPartnerType('natural')" [disabled]="formSubmitting">
@@ -249,7 +249,7 @@
 
         <div class="form-actions">
           <button type="submit" class="btn-primary" [disabled]="formSubmitting">
-            {{ formSubmitting ? 'Creating...' : 'Create Partner' }}
+            {{ formSubmitting ? (editingPartner ? 'Updating...' : 'Creating...') : (editingPartner ? 'Update Partner' : 'Create Partner') }}
           </button>
           <button type="button" class="btn-secondary" (click)="toggleAddForm()" [disabled]="formSubmitting">
             Cancel

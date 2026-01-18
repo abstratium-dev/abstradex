@@ -1,7 +1,8 @@
-import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { Demo, Partner, ModelService } from './model.service';
+import { Address, Country, ModelService, Partner } from './model.service';
+import { AddressDetail } from './models/address-detail.model';
 
 @Injectable({
   providedIn: 'root',
@@ -10,76 +11,6 @@ export class Controller {
 
   private modelService = inject(ModelService);
   private http = inject(HttpClient);
-
-  loadDemos() {
-    this.modelService.setDemosLoading(true);
-    this.modelService.setDemosError(null);
-    
-    this.http.get<Demo[]>('/api/demo').subscribe({
-      next: (demos) => {
-        this.modelService.setDemos(demos);
-        this.modelService.setDemosLoading(false);
-      },
-      error: (err) => {
-        console.error('Error loading demos:', err);
-        this.modelService.setDemos([]);
-        this.modelService.setDemosError('Failed to load demos');
-        this.modelService.setDemosLoading(false);
-      }
-    });
-  }
-
-  async createDemo(): Promise<Demo> {
-    try {
-      const response = await firstValueFrom(
-        this.http.post<Demo>('/api/demo', {})
-      );
-      // Reload demos list after successful creation
-      this.loadDemos();
-      return response;
-    } catch (error) {
-      console.error('Error creating demo:', error);
-      throw error;
-    }
-  }
-
-  async updateDemo(demo: Demo): Promise<Demo> {
-    try {
-      const response = await firstValueFrom(
-        this.http.put<Demo>('/api/demo', demo)
-      );
-      // Reload demos list after successful update
-      this.loadDemos();
-      return response;
-    } catch (error) {
-      console.error('Error updating demo:', error);
-      throw error;
-    }
-  }
-
-  async deleteDemo(id: string): Promise<void> {
-    try {
-      await firstValueFrom(
-        this.http.delete<void>(`/api/demo/${id}`)
-      );
-      // Reload demos list after successful deletion
-      this.loadDemos();
-    } catch (error) {
-      console.error('Error deleting demo:', error);
-      throw error;
-    }
-  }
-
-  async triggerError(): Promise<void> {
-    try {
-      await firstValueFrom(
-        this.http.get<void>('/api/demo/error')
-      );
-    } catch (error) {
-      console.error('Error response:', error);
-      throw error;
-    }
-  }
 
   async loadConfig(): Promise<{logLevel: string}> {
     try {
@@ -153,6 +84,118 @@ export class Controller {
       this.loadPartners();
     } catch (error) {
       console.error('Error deleting partner:', error);
+      throw error;
+    }
+  }
+
+  loadAddresses(searchTerm?: string) {
+    this.modelService.setAddressesLoading(true);
+    this.modelService.setAddressesError(null);
+    
+    const url = searchTerm && searchTerm.trim() 
+      ? `/api/address?search=${encodeURIComponent(searchTerm)}`
+      : '/api/address';
+    
+    this.http.get<Address[]>(url).subscribe({
+      next: (addresses) => {
+        this.modelService.setAddresses(addresses);
+        this.modelService.setAddressesLoading(false);
+      },
+      error: (err) => {
+        console.error('Error loading addresses:', err);
+        this.modelService.setAddresses([]);
+        this.modelService.setAddressesError('Failed to load addresses');
+        this.modelService.setAddressesLoading(false);
+      }
+    });
+  }
+
+  async createAddress(address: Address): Promise<Address> {
+    try {
+      const response = await firstValueFrom(
+        this.http.post<Address>('/api/address', address)
+      );
+      // Reload addresses list after successful creation
+      this.loadAddresses();
+      return response;
+    } catch (error) {
+      console.error('Error creating address:', error);
+      throw error;
+    }
+  }
+
+  async updateAddress(address: Address): Promise<Address> {
+    try {
+      const response = await firstValueFrom(
+        this.http.put<Address>('/api/address', address)
+      );
+      // Reload addresses list after successful update
+      this.loadAddresses();
+      return response;
+    } catch (error) {
+      console.error('Error updating address:', error);
+      throw error;
+    }
+  }
+
+  async deleteAddress(id: string): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.http.delete<void>(`/api/address/${id}`)
+      );
+      // Reload addresses list after successful deletion
+      this.loadAddresses();
+    } catch (error) {
+      console.error('Error deleting address:', error);
+      throw error;
+    }
+  }
+
+  async loadCountries(): Promise<void> {
+    try {
+      const countries = await firstValueFrom(
+        this.http.get<Country[]>('/api/address/countries')
+      );
+      this.modelService.setCountries(countries);
+    } catch (error) {
+      console.error('Error loading countries:', error);
+      throw error;
+    }
+  }
+
+  // Partner Address Management
+  async loadPartnerAddresses(partnerNumber: string): Promise<AddressDetail[]> {
+    try {
+      return await firstValueFrom(
+        this.http.get<AddressDetail[]>(`/api/partner/${partnerNumber}/address`)
+      );
+    } catch (error) {
+      console.error('Error loading partner addresses:', error);
+      throw error;
+    }
+  }
+
+  async addAddressToPartner(partnerNumber: string, addressId: string, addressDetail: AddressDetail): Promise<AddressDetail> {
+    try {
+      return await firstValueFrom(
+        this.http.post<AddressDetail>(
+          `/api/partner/${partnerNumber}/address?addressId=${addressId}`,
+          addressDetail
+        )
+      );
+    } catch (error) {
+      console.error('Error adding address to partner:', error);
+      throw error;
+    }
+  }
+
+  async removeAddressFromPartner(partnerNumber: string, addressDetailId: string): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.http.delete<void>(`/api/partner/${partnerNumber}/address/${addressDetailId}`)
+      );
+    } catch (error) {
+      console.error('Error removing address from partner:', error);
       throw error;
     }
   }

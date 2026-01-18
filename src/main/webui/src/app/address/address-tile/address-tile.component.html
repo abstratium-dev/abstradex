@@ -1,0 +1,30 @@
+<div class="tile" (click)="closeContextMenu()">
+  <div class="tile-header">
+    <div class="tile-info">
+      <h3 class="address-display">{{ getAddressDisplay() }}</h3>
+      <p class="country-code">{{ address.countryCode }}</p>
+    </div>
+    <div class="tile-actions">
+      <span class="status-badge" [class.verified]="address.isVerified" [class.unverified]="!address.isVerified">
+        {{ address.isVerified ? 'Verified' : 'Unverified' }}
+      </span>
+      <div class="context-menu-wrapper">
+        <button class="btn-context-menu" 
+                (click)="toggleContextMenu($event)" 
+                title="More actions">
+          ⋮
+        </button>
+        <div class="context-menu" *ngIf="showContextMenu">
+          <button class="context-menu-item" (click)="onEdit($event)">
+            <span class="menu-icon">✏️</span>
+            <span>Edit Address</span>
+          </button>
+          <button class="context-menu-item context-menu-item-danger" (click)="onDelete($event)">
+            <span class="menu-icon">🗑️</span>
+            <span>Delete Address</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

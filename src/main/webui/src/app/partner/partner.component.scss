@@ -15,7 +15,7 @@
   .selection-prompt {
     font-size: 1.1rem;
     margin-bottom: 1.5rem;
-    color: var(--text-color);
+    color: var(--color-text-primary);
   }
 
   .type-buttons {
@@ -32,17 +32,17 @@
     align-items: center;
     gap: 0.75rem;
     padding: 2rem 1.5rem;
-    border: 2px solid var(--border-color);
+    border: 2px solid var(--color-border-secondary);
     border-radius: 8px;
-    background: var(--card-bg);
+    background: var(--color-bg-secondary);
     cursor: pointer;
     transition: all 0.2s ease;
 
     &:hover:not(:disabled) {
-      border-color: var(--primary-color);
-      background: var(--hover-bg);
+      border-color: var(--color-primary);
+      background: var(--color-bg-tertiary);
       transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 8px var(--shadow-primary);
     }
 
     &:disabled {
@@ -57,22 +57,14 @@
     .type-label {
       font-size: 1.1rem;
       font-weight: 600;
-      color: var(--text-color);
+      color: var(--color-text-primary);
     }
 
     .type-description {
       font-size: 0.9rem;
-      color: var(--text-muted);
+      color: var(--color-text-secondary);
     }
   }
-}
-
-// Tile-specific styles moved to partner-tile.component.scss
-
-.partner-list {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
 }
 
 .checkbox-group {

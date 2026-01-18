@@ -3,8 +3,9 @@ import { Injectable, inject, signal } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { WINDOW } from './window.token';
+import { Router } from '@angular/router';
 
-export const CLIENT_ID = 'abstratium-abstradex';
+export const CLIENT_ID = 'abstratium-abstracore'; // TODO set the client id properly
 export const ISSUER = 'https://abstrauth.abstratium.dev';
 export const ROLE_USER = CLIENT_ID + '_user';
 
@@ -45,6 +46,7 @@ export const ANONYMOUS: Token = {
 })
 export class AuthService {
     private http = inject(HttpClient);
+    private router = inject(Router);
     private window = inject(WINDOW);
 
     token$ = signal<Token>(ANONYMOUS);
@@ -148,8 +150,24 @@ export class AuthService {
     signout() {
         console.debug('[AUTH] signout() called');
         this.resetToken();
-        console.debug('[AUTH] Redirecting to logout endpoint');
-        this.window.location.href = '/api/auth/logout';
+        console.debug('[AUTH] Calling logout endpoint to invalidate session');
+
+        // don't follow the redirect, just call the endpoint, then navigate to sign-out.
+        // this prevents the browser going to the logout url and following 
+        // the redirect to /sign-out, which results in a 404,
+        // since quinoa is configured to ignore calls to /api and so quarkus
+        // sends a 404 since it can't find sign-out. using navigation, we don't
+        // lose the angular application context.
+        this.http.get('/api/auth/logout', { observe: 'response' }).subscribe({
+            next: () => {
+                console.debug('[AUTH] Logout endpoint called successfully');
+                this.router.navigate(['/sign-out']);
+            },
+            error: (err) => {
+                console.error('[AUTH] Error calling logout endpoint:', err);
+                this.router.navigate(['/sign-out']);
+            }
+        });
     }
 
     hasRole(role: string): boolean {

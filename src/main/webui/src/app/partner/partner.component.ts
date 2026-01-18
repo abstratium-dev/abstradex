@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, Signal, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ToastService } from '../core/toast/toast.service';
 import { ConfirmDialogService } from '../core/confirm-dialog/confirm-dialog.service';
 import { AutofocusDirective } from '../core/autofocus.directive';
@@ -17,6 +18,7 @@ import { Controller } from '../controller';
 export class PartnerComponent implements OnInit {
   private modelService = inject(ModelService);
   private controller = inject(Controller);
+  private router = inject(Router);
   private toastService = inject(ToastService);
   private confirmService = inject(ConfirmDialogService);
 
@@ -24,11 +26,12 @@ export class PartnerComponent implements OnInit {
   loading: Signal<boolean> = this.modelService.partnersLoading$;
   error: Signal<string | null> = this.modelService.partnersError$;
 
-  // Add Partner Form state
+  // Add/Edit Partner Form state
   showAddForm = false;
   formSubmitting = false;
   formError: string | null = null;
   partnerType: 'natural' | 'legal' | null = null;
+  editingPartner: Partner | null = null;
   newNaturalPerson: Partial<NaturalPerson> = {
     active: true,
     notes: ''
@@ -76,7 +79,7 @@ export class PartnerComponent implements OnInit {
   toggleAddForm(): void {
     this.showAddForm = !this.showAddForm;
     if (this.showAddForm) {
-      this.formError = null;
+      this.editingPartner = null;
       this.resetForm();
     }
   }
@@ -136,12 +139,21 @@ export class PartnerComponent implements OnInit {
     this.formError = null;
 
     try {
-      await this.controller.createPartner(partnerData as Partner);
-      this.toastService.success('Partner created successfully');
+      if (this.editingPartner) {
+        // Update existing partner
+        await this.controller.updatePartner(partnerData as Partner);
+        this.toastService.success('Partner updated successfully');
+      } else {
+        // Create new partner
+        await this.controller.createPartner(partnerData as Partner);
+        this.toastService.success('Partner created successfully');
+      }
       this.showAddForm = false;
+      this.editingPartner = null;
       this.resetForm();
     } catch (err: any) {
-      this.formError = err.error?.detail || 'Failed to create partner. Please try again.';
+      const action = this.editingPartner ? 'update' : 'create';
+      this.formError = err.error?.detail || `Failed to ${action} partner. Please try again.`;
     } finally {
       this.formSubmitting = false;
     }
@@ -169,12 +181,47 @@ export class PartnerComponent implements OnInit {
   }
 
   editPartner(partner: Partner): void {
-    // TODO: Implement edit functionality
-    this.toastService.info('Edit functionality coming soon');
+    this.editingPartner = partner;
+    this.showAddForm = true;
+    
+    // Determine partner type and populate form
+    const np = partner as NaturalPerson;
+    const le = partner as LegalEntity;
+    
+    if (np.firstName || np.lastName) {
+      this.partnerType = 'natural';
+      this.newNaturalPerson = {
+        id: partner.id,
+        firstName: np.firstName,
+        lastName: np.lastName,
+        middleName: np.middleName,
+        title: np.title,
+        dateOfBirth: np.dateOfBirth,
+        taxId: np.taxId,
+        preferredLanguage: np.preferredLanguage,
+        active: partner.active,
+        notes: partner.notes,
+        partnerType: partner.partnerType
+      };
+    } else if (le.legalName) {
+      this.partnerType = 'legal';
+      this.newLegalEntity = {
+        id: partner.id,
+        legalName: le.legalName,
+        tradingName: le.tradingName,
+        registrationNumber: le.registrationNumber,
+        taxId: le.taxId,
+        legalForm: le.legalForm,
+        incorporationDate: le.incorporationDate,
+        jurisdiction: le.jurisdiction,
+        active: partner.active,
+        notes: partner.notes,
+        partnerType: partner.partnerType
+      };
+    }
   }
 
   manageAddresses(partner: Partner): void {
-    // TODO: Implement address management
-    this.toastService.info('Address management coming soon');
+    this.router.navigate(['/partners', partner.partnerNumber, 'addresses']);
   }
 }
