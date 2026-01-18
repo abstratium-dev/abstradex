@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastService } from '../core/toast/toast.service';
 import { ConfirmDialogService } from '../core/confirm-dialog/confirm-dialog.service';
+import { AutocompleteComponent, AutocompleteOption } from '../core/autocomplete/autocomplete.component';
 import { Controller } from '../controller';
 import { ModelService } from '../model.service';
 import { Address } from '../models/address.model';
@@ -11,7 +12,7 @@ import { AddressDetail } from '../models/address-detail.model';
 
 @Component({
   selector: 'app-partner-address',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AutocompleteComponent],
   templateUrl: './partner-address.component.html',
   styleUrl: './partner-address.component.scss'
 })
@@ -26,7 +27,6 @@ export class PartnerAddressComponent implements OnInit {
 
   partnerNumber = '';
   partnerAddresses: AddressDetail[] = [];
-  availableAddresses: Signal<Address[]> = this.modelService.addresses$;
   loading = false;
   error: string | null = null;
 
@@ -38,15 +38,20 @@ export class PartnerAddressComponent implements OnInit {
     addressType: 'BILLING'
   };
 
-  // Search
-  searchTerm = '';
-  private searchTimeout: any;
+  // Autocomplete fetch function
+  fetchAddresses = async (searchTerm: string): Promise<AutocompleteOption[]> => {
+    await this.controller.loadAddresses(searchTerm || undefined);
+    const addresses = this.modelService.addresses$();
+    return addresses.map(addr => ({
+      value: addr.id || '',
+      label: this.formatAddressLabel(addr)
+    }));
+  };
 
   ngOnInit(): void {
     this.partnerNumber = this.route.snapshot.paramMap.get('partnerNumber') || '';
     if (this.partnerNumber) {
       this.loadPartnerAddresses();
-      this.loadAvailableAddresses();
     }
   }
 
@@ -63,26 +68,17 @@ export class PartnerAddressComponent implements OnInit {
     }
   }
 
-  async loadAvailableAddresses(): Promise<void> {
-    try {
-      this.controller.loadAddresses(this.searchTerm || undefined);
-    } catch (err) {
-      console.error('Error loading addresses:', err);
-    }
+  formatAddressLabel(addr: Address): string {
+    const parts = [
+      addr.streetLine1,
+      addr.city,
+      this.modelService.getCountryName(addr.countryCode || '')
+    ].filter(p => p);
+    return parts.join(', ');
   }
 
-  onSearch(): void {
-    if (this.searchTimeout) {
-      clearTimeout(this.searchTimeout);
-    }
-
-    const trimmedSearch = this.searchTerm.trim();
-    
-    if (trimmedSearch.length === 0 || trimmedSearch.length >= 3) {
-      this.searchTimeout = setTimeout(() => {
-        this.loadAvailableAddresses();
-      }, 300);
-    }
+  onAddressSelected(option: AutocompleteOption): void {
+    this.selectedAddressId = option.value;
   }
 
   toggleAddForm(): void {
@@ -149,6 +145,7 @@ export class PartnerAddressComponent implements OnInit {
   getAddressDisplay(addressDetail: AddressDetail): string {
     const addr = addressDetail.address;
     if (!addr) return 'Unknown address';
-    return `${addr.streetLine1}, ${addr.city}, ${addr.countryCode}`;
+    const countryName = this.modelService.getCountryName(addr.countryCode || '');
+    return `${addr.streetLine1}, ${addr.city}, ${countryName}`;
   }
 }

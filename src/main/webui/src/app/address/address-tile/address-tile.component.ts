@@ -1,6 +1,6 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Address } from '../../model.service';
+import { Address, ModelService } from '../../model.service';
 
 @Component({
   selector: 'address-tile',
@@ -9,6 +9,8 @@ import { Address } from '../../model.service';
   styleUrl: './address-tile.component.scss'
 })
 export class AddressTileComponent {
+  private modelService = inject(ModelService);
+  
   @Input({ required: true }) address!: Address;
   @Output() delete = new EventEmitter<Address>();
   @Output() edit = new EventEmitter<Address>();
@@ -45,5 +47,9 @@ export class AddressTileComponent {
       this.address.postalCode
     ].filter(p => p);
     return parts.join(', ');
+  }
+
+  getCountryName(): string {
+    return this.modelService.getCountryName(this.address.countryCode || '');
   }
 }

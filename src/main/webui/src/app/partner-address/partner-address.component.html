@@ -8,9 +8,6 @@
     <button class="btn-primary" (click)="toggleAddForm()">
       {{ showAddForm ? 'Cancel' : '+ Add Address' }}
     </button>
-    <button class="btn-secondary" (click)="goToAddressManagement()">
-      Create New Address
-    </button>
   </div>
 
   <!-- Add Address Form -->
@@ -18,22 +15,20 @@
     <h3>Add Address to Partner</h3>
     
     <div class="form-group">
-      <label>Search Addresses</label>
-      <input 
-        type="text" 
-        [(ngModel)]="searchTerm" 
-        (input)="onSearch()"
-        placeholder="Search addresses (min 3 characters)...">
-    </div>
-
-    <div class="form-group">
-      <label for="addressSelect">Select Address *</label>
-      <select id="addressSelect" [(ngModel)]="selectedAddressId" required>
-        <option value="">-- Select an address --</option>
-        <option *ngFor="let addr of availableAddresses()" [value]="addr.id">
-          {{ addr.streetLine1 }}, {{ addr.city }}, {{ addr.countryCode }}
-        </option>
-      </select>
+      <label for="addressAutocomplete">Search and Select Address *</label>
+      <app-autocomplete
+        id="addressAutocomplete"
+        [(ngModel)]="selectedAddressId"
+        [fetchOptions]="fetchAddresses"
+        [placeholder]="'Search addresses (min 3 characters)...'"
+        [minSearchLength]="3"
+        [required]="true"
+        (optionSelected)="onAddressSelected($event)"
+      ></app-autocomplete>
+      <small class="form-hint">
+        Can't find the address? 
+        <button type="button" class="btn-link" (click)="goToAddressManagement()">Create a new address</button>
+      </small>
     </div>
 
     <div class="form-group">

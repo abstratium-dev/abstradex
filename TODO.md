@@ -4,6 +4,7 @@ TODOs to be resolved by the developer, NOT THE LLM.
 
 ## Today
 
+- move autocomplete component into abstracore.
 - search for more todo comments that need to be resolved
 - replace DEMO_ERROR and similar error codes in ErrorCode.java with partner related error codes and actually use them.
 

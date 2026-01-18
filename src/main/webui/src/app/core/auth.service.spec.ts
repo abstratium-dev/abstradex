@@ -300,7 +300,7 @@ describe('AuthService (BFF Pattern)', () => {
   });
 
   describe('Signout', () => {
-    it('should reset token, call logout endpoint, and navigate to sign-out on success', () => {
+    it('should reset token, call logout endpoint, and navigate to signed-out on success', () => {
       service.signout();
       
       // Verify token was reset
@@ -314,11 +314,11 @@ describe('AuthService (BFF Pattern)', () => {
       // Simulate successful response
       req.flush({});
       
-      // Verify navigation to sign-out
-      expect(routerSpy.navigate).toHaveBeenCalledWith(['/sign-out']);
+      // Verify navigation to signed-out
+      expect(routerSpy.navigate).toHaveBeenCalledWith(['/signed-out']);
     });
 
-    it('should navigate to sign-out even if logout endpoint fails', () => {
+    it('should navigate to signed-out even if logout endpoint fails', () => {
       service.signout();
       
       // Verify token was reset
@@ -330,8 +330,8 @@ describe('AuthService (BFF Pattern)', () => {
       // Simulate error response
       req.flush('Server error', { status: 500, statusText: 'Internal Server Error' });
       
-      // Verify navigation to sign-out still happens
-      expect(routerSpy.navigate).toHaveBeenCalledWith(['/sign-out']);
+      // Verify navigation to signed-out still happens
+      expect(routerSpy.navigate).toHaveBeenCalledWith(['/signed-out']);
     });
   });
 

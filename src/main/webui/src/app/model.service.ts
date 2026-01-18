@@ -63,7 +63,15 @@ export class ModelService {
     this.addressesError.set(error);
   }
 
-  setCountries(countries: Country[]) {
+  setCountries(countries: Country[]): void {
     this.countries.set(countries);
+  }
+
+  /**
+   * Get country name by code
+   */
+  getCountryName(code: string): string {
+    const country = this.countries().find(c => c.code === code);
+    return country?.name || code;
   }
 }

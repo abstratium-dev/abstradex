@@ -152,20 +152,22 @@ export class AuthService {
         this.resetToken();
         console.debug('[AUTH] Calling logout endpoint to invalidate session');
 
-        // don't follow the redirect, just call the endpoint, then navigate to sign-out.
+        // don't follow the redirect, just call the endpoint, then navigate to signed-out.
         // this prevents the browser going to the logout url and following 
-        // the redirect to /sign-out, which results in a 404,
+        // the redirect to /signed-out, which results in a 404,
         // since quinoa is configured to ignore calls to /api and so quarkus
-        // sends a 404 since it can't find sign-out. using navigation, we don't
+        // sends a 404 since it can't find signed-out. using navigation, we don't
         // lose the angular application context.
-        this.http.get('/api/auth/logout', { observe: 'response' }).subscribe({
+        this.http.get('/api/auth/logout', {
+            redirect: 'manual'
+        }).subscribe({
             next: () => {
                 console.debug('[AUTH] Logout endpoint called successfully');
-                this.router.navigate(['/sign-out']);
+                this.router.navigate(['/signed-out']);
             },
             error: (err) => {
                 console.error('[AUTH] Error calling logout endpoint:', err);
-                this.router.navigate(['/sign-out']);
+                this.router.navigate(['/signed-out']);
             }
         });
     }
