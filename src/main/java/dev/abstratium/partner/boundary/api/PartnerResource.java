@@ -4,7 +4,12 @@ import java.util.List;
 
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import dev.abstratium.core.Roles;
+import dev.abstratium.partner.boundary.dto.PartnerCreateRequest;
+import dev.abstratium.partner.entity.LegalEntity;
+import dev.abstratium.partner.entity.NaturalPerson;
 import dev.abstratium.partner.entity.Partner;
 import dev.abstratium.partner.service.PartnerService;
 import jakarta.annotation.security.RolesAllowed;
@@ -27,6 +32,9 @@ public class PartnerResource {
 
     @Inject
     PartnerService partnerService;
+
+    @Inject
+    ObjectMapper objectMapper;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -54,7 +62,19 @@ public class PartnerResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({Roles.USER})
-    public Partner create(Partner partner) {
+    public Partner create(PartnerCreateRequest request) {
+        // Determine partner type based on fields present in the request
+        Partner partner;
+        if (request.has("firstName") || request.has("lastName")) {
+            // Natural Person
+            partner = objectMapper.convertValue(request.getProperties(), NaturalPerson.class);
+        } else if (request.has("legalName")) {
+            // Legal Entity
+            partner = objectMapper.convertValue(request.getProperties(), LegalEntity.class);
+        } else {
+            throw new IllegalArgumentException("Cannot determine partner type from request. " +
+                "Provide either firstName/lastName for Natural Person or legalName for Legal Entity.");
+        }
         return partnerService.create(partner);
     }
 
@@ -62,7 +82,19 @@ public class PartnerResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({Roles.USER})
-    public Partner update(Partner partner) {
+    public Partner update(PartnerCreateRequest request) {
+        // Determine partner type based on fields present in the request
+        Partner partner;
+        if (request.has("firstName") || request.has("lastName")) {
+            // Natural Person
+            partner = objectMapper.convertValue(request.getProperties(), NaturalPerson.class);
+        } else if (request.has("legalName")) {
+            // Legal Entity
+            partner = objectMapper.convertValue(request.getProperties(), LegalEntity.class);
+        } else {
+            throw new IllegalArgumentException("Cannot determine partner type from request. " +
+                "Provide either firstName/lastName for Natural Person or legalName for Legal Entity.");
+        }
         return partnerService.update(partner);
     }
 

@@ -33,7 +33,22 @@ public class PartnerService {
 
     @Transactional
     public Partner create(Partner partner) {
+        // Ensure partner is always active when first created
+        partner.setActive(true);
+        
+        // Get and increment next partner number from sequence table
+        // This works across MySQL, PostgreSQL, H2, and MS SQL
+        em.createNativeQuery("UPDATE T_partner_sequence SET next_val = next_val + 1 WHERE id = 1")
+            .executeUpdate();
+        
+        Long nextPartnerNumber = ((Number) em.createNativeQuery(
+            "SELECT next_val - 1 FROM T_partner_sequence WHERE id = 1")
+            .getSingleResult()).longValue();
+        
+        partner.setPartnerNumberSeq(nextPartnerNumber);
+        
         em.persist(partner);
+        em.flush();
         return partner;
     }
 
@@ -48,8 +63,9 @@ public class PartnerService {
             .orElse(null);
         
         if (existing != null) {
-            // Preserve audit fields
+            // Preserve audit fields and partner number
             partner.setCreatedAt(existing.getCreatedAt());
+            partner.setPartnerNumberSeq(existing.getPartnerNumberSeq());
         }
         Partner updated = em.merge(partner);
         em.flush();
@@ -77,19 +93,18 @@ public class PartnerService {
         String jpql = """
             SELECT DISTINCT p FROM Partner p
             LEFT JOIN FETCH p.partnerType
-            WHERE LOWER(p.partnerNumber) LIKE :search
+            WHERE CAST(p.partnerNumberSeq AS string) LIKE :search
                OR LOWER(p.notes) LIKE :search
                OR (TYPE(p) = NaturalPerson AND (
                    LOWER(TREAT(p AS NaturalPerson).firstName) LIKE :search
                    OR LOWER(TREAT(p AS NaturalPerson).lastName) LIKE :search
-                   OR LOWER(TREAT(p AS NaturalPerson).email) LIKE :search
                ))
                OR (TYPE(p) = LegalEntity AND (
-                   LOWER(TREAT(p AS LegalEntity).companyName) LIKE :search
+                   LOWER(TREAT(p AS LegalEntity).legalName) LIKE :search
+                   OR LOWER(TREAT(p AS LegalEntity).tradingName) LIKE :search
                    OR LOWER(TREAT(p AS LegalEntity).registrationNumber) LIKE :search
-                   OR LOWER(TREAT(p AS LegalEntity).email) LIKE :search
                ))
-            ORDER BY p.partnerNumber
+            ORDER BY p.partnerNumberSeq
             """;
         
         return em.createQuery(jpql, Partner.class)

@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.startsWith;
 
 @QuarkusTest
 class PartnerResourceTest {
@@ -51,24 +52,23 @@ class PartnerResourceTest {
     @Test
     @TestSecurity(user = "testuser", roles = {Roles.USER})
     void testCreatePartner() {
-        String partnerNumber = "P-" + System.currentTimeMillis();
-        
         given()
             .contentType(ContentType.JSON)
             .body("""
                 {
-                    "partnerNumber": "%s",
+                    "firstName": "John",
+                    "lastName": "Doe",
                     "partnerType": {"id": "%s"},
-                    "active": true,
                     "notes": "Test partner"
                 }
-                """.formatted(partnerNumber, partnerTypeId))
+                """.formatted(partnerTypeId))
             .when()
             .post("/api/partner")
             .then()
             .statusCode(200)
             .body("id", notNullValue())
-            .body("partnerNumber", is(partnerNumber))
+            .body("partnerNumber", notNullValue())
+            .body("partnerNumber", startsWith("P"))
             .body("active", is(true))
             .body("notes", is("Test partner"))
             .body("createdAt", notNullValue())
@@ -91,16 +91,16 @@ class PartnerResourceTest {
     @TestSecurity(user = "testuser", roles = {Roles.USER})
     void testGetPartnerById() {
         // First create a partner
-        String partnerNumber = "P-" + System.currentTimeMillis();
         String partnerId = given()
             .contentType(ContentType.JSON)
             .body("""
                 {
-                    "partnerNumber": "%s",
+                    "firstName": "Jane",
+                    "lastName": "Smith",
                     "partnerType": {"id": "%s"},
                     "active": true
                 }
-                """.formatted(partnerNumber, partnerTypeId))
+                """.formatted(partnerTypeId))
             .when()
             .post("/api/partner")
             .then()
@@ -118,24 +118,24 @@ class PartnerResourceTest {
             .log().all()  // Log the full response
             .statusCode(200)
             .body("id", is(partnerId))
-            .body("partnerNumber", is(partnerNumber));
+            .body("partnerNumber", notNullValue())
+            .body("partnerNumber", startsWith("P"));
     }
 
     @Test
     @TestSecurity(user = "testuser", roles = {Roles.USER})
     void testUpdatePartner() {
         // First create a partner
-        String partnerNumber = "P-" + System.currentTimeMillis();
         String partnerId = given()
             .contentType(ContentType.JSON)
             .body("""
                 {
-                    "partnerNumber": "%s",
+                    "firstName": "Bob",
+                    "lastName": "Johnson",
                     "partnerType": {"id": "%s"},
-                    "active": true,
                     "notes": "Original notes"
                 }
-                """.formatted(partnerNumber, partnerTypeId))
+                """.formatted(partnerTypeId))
             .when()
             .post("/api/partner")
             .then()
@@ -149,12 +149,13 @@ class PartnerResourceTest {
             .body("""
                 {
                     "id": "%s",
-                    "partnerNumber": "%s",
+                    "firstName": "Bob",
+                    "lastName": "Johnson",
                     "partnerType": {"id": "%s"},
                     "active": false,
                     "notes": "Updated notes"
                 }
-                """.formatted(partnerId, partnerNumber, partnerTypeId))
+                """.formatted(partnerId, partnerTypeId))
             .when()
             .put("/api/partner")
             .then()
@@ -168,16 +169,15 @@ class PartnerResourceTest {
     @TestSecurity(user = "testuser", roles = {Roles.USER})
     void testDeletePartner() {
         // First create a partner
-        String partnerNumber = "P-" + System.currentTimeMillis();
         String partnerId = given()
             .contentType(ContentType.JSON)
             .body("""
                 {
-                    "partnerNumber": "%s",
-                    "partnerType": {"id": "%s"},
-                    "active": true
+                    "firstName": "Alice",
+                    "lastName": "Williams",
+                    "partnerType": {"id": "%s"}
                 }
-                """.formatted(partnerNumber, partnerTypeId))
+                """.formatted(partnerTypeId))
             .when()
             .post("/api/partner")
             .then()

@@ -1,0 +1,46 @@
+<div class="tile" (click)="closeContextMenu()">
+  <div class="tile-header">
+    <div class="partner-icon">
+      <span class="type-icon-large">{{ getPartnerIcon() }}</span>
+    </div>
+    <div class="tile-info">
+      <h3 class="partner-name">{{ getPartnerName() }}</h3>
+      <p class="partner-number">{{ partner.partnerNumber }}</p>
+      <p class="partner-address" *ngIf="getPartnerAddress()">
+        {{ getPartnerAddress() }}
+      </p>
+    </div>
+    <div class="tile-actions">
+      <span class="status-badge" [class.active]="partner.active" [class.inactive]="!partner.active">
+        {{ partner.active ? 'Active' : 'Inactive' }}
+      </span>
+      <div class="context-menu-wrapper">
+        <button class="btn-icon btn-context-menu" 
+                (click)="toggleContextMenu($event)" 
+                title="More actions">
+          ⋮
+        </button>
+        <div class="context-menu" *ngIf="showContextMenu">
+          <button class="context-menu-item" (click)="onEdit($event)">
+            <span class="menu-icon">✏️</span>
+            <span>Edit Partner</span>
+          </button>
+          <button class="context-menu-item" (click)="onManageAddresses($event)">
+            <span class="menu-icon">📍</span>
+            <span>Manage Addresses</span>
+          </button>
+          <button class="context-menu-item context-menu-item-danger" (click)="onDelete($event)">
+            <span class="menu-icon">🗑️</span>
+            <span>Delete Partner</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="tile-body" *ngIf="partner.notes || partner.createdAt">
+    <p *ngIf="partner.notes" class="notes">{{ partner.notes }}</p>
+    <p *ngIf="partner.createdAt" class="metadata">
+      Created: {{ formatDate(partner.createdAt) }}
+    </p>
+  </div>
+</div>

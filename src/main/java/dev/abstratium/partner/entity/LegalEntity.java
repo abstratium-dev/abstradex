@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -37,6 +39,7 @@ public class LegalEntity extends Partner {
     @Column(name = "jurisdiction", length = 100)
     private String jurisdiction;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "employers", fetch = FetchType.LAZY)
     private Set<NaturalPerson> employees = new HashSet<>();
 

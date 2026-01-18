@@ -12,12 +12,14 @@
   <div class="filter-section">
     <div class="filter-input-wrapper">
       <input 
+        #searchInput
         type="text" 
         class="filter-input"
         [(ngModel)]="searchTerm"
         (input)="onSearch()"
-        placeholder="Search partners by number, name, email, or notes..."
-        [disabled]="loading()">
+        placeholder="Search partners by number, name, email, or notes... (min 3 characters)"
+        [disabled]="loading()"
+        autofocus>
       <button 
         *ngIf="searchTerm" 
         class="filter-clear-button"
@@ -49,47 +51,210 @@
         {{ formError }}
       </div>
 
-      <div class="form-group">
-        <label for="partnerNumber">Partner Number *</label>
-        <input 
-          type="text" 
-          id="partnerNumber" 
-          [(ngModel)]="newPartner.partnerNumber" 
-          name="partnerNumber"
-          placeholder="e.g., P-001"
-          required
-          [disabled]="formSubmitting">
+      <!-- Partner Type Selection -->
+      <div *ngIf="!partnerType" class="partner-type-selection">
+        <p class="selection-prompt">What type of partner are you creating?</p>
+        <div class="type-buttons">
+          <button type="button" class="type-button" (click)="selectPartnerType('natural')" [disabled]="formSubmitting">
+            <span class="type-icon">👤</span>
+            <span class="type-label">Natural Person</span>
+            <span class="type-description">Individual person</span>
+          </button>
+          <button type="button" class="type-button" (click)="selectPartnerType('legal')" [disabled]="formSubmitting">
+            <span class="type-icon">🏢</span>
+            <span class="type-label">Legal Entity</span>
+            <span class="type-description">Company or organization</span>
+          </button>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label for="notes">Notes</label>
-        <textarea 
-          id="notes" 
-          [(ngModel)]="newPartner.notes" 
-          name="notes"
-          rows="3"
-          placeholder="Optional notes about this partner"
-          [disabled]="formSubmitting"></textarea>
-      </div>
-
-      <div class="form-group checkbox-group">
-        <label>
+      <!-- Natural Person Form -->
+      <div *ngIf="partnerType === 'natural'">
+        <div class="form-group">
+          <label for="firstName">First Name *</label>
           <input 
-            type="checkbox" 
-            [(ngModel)]="newPartner.active" 
-            name="active"
+            type="text" 
+            id="firstName" 
+            [(ngModel)]="newNaturalPerson.firstName" 
+            name="firstName"
+            placeholder="Enter first name"
+            required
             [disabled]="formSubmitting">
-          Active
-        </label>
+        </div>
+
+        <div class="form-group">
+          <label for="lastName">Last Name *</label>
+          <input 
+            type="text" 
+            id="lastName" 
+            [(ngModel)]="newNaturalPerson.lastName" 
+            name="lastName"
+            placeholder="Enter last name"
+            required
+            [disabled]="formSubmitting">
+        </div>
+
+        <div class="form-group">
+          <label for="middleName">Middle Name</label>
+          <input 
+            type="text" 
+            id="middleName" 
+            [(ngModel)]="newNaturalPerson.middleName" 
+            name="middleName"
+            placeholder="Enter middle name (optional)"
+            [disabled]="formSubmitting">
+        </div>
+
+        <div class="form-group">
+          <label for="title">Title</label>
+          <input 
+            type="text" 
+            id="title" 
+            [(ngModel)]="newNaturalPerson.title" 
+            name="title"
+            placeholder="e.g., Mr., Mrs., Dr."
+            [disabled]="formSubmitting">
+        </div>
+
+        <div class="form-group">
+          <label for="dateOfBirth">Date of Birth</label>
+          <input 
+            type="date" 
+            id="dateOfBirth" 
+            [(ngModel)]="newNaturalPerson.dateOfBirth" 
+            name="dateOfBirth"
+            [disabled]="formSubmitting">
+        </div>
+
+        <div class="form-group">
+          <label for="taxId">Tax ID</label>
+          <input 
+            type="text" 
+            id="taxId" 
+            [(ngModel)]="newNaturalPerson.taxId" 
+            name="taxId"
+            placeholder="Enter tax ID (optional)"
+            [disabled]="formSubmitting">
+        </div>
       </div>
 
-      <div class="form-actions">
-        <button type="submit" class="btn-primary" [disabled]="formSubmitting">
-          {{ formSubmitting ? 'Creating...' : 'Create Partner' }}
-        </button>
-        <button type="button" class="btn-secondary" (click)="toggleAddForm()" [disabled]="formSubmitting">
-          Cancel
-        </button>
+      <!-- Legal Entity Form -->
+      <div *ngIf="partnerType === 'legal'">
+        <div class="form-group">
+          <label for="legalName">Legal Name *</label>
+          <input 
+            type="text" 
+            id="legalName" 
+            [(ngModel)]="newLegalEntity.legalName" 
+            name="legalName"
+            placeholder="Enter legal name"
+            required
+            [disabled]="formSubmitting">
+        </div>
+
+        <div class="form-group">
+          <label for="tradingName">Trading Name</label>
+          <input 
+            type="text" 
+            id="tradingName" 
+            [(ngModel)]="newLegalEntity.tradingName" 
+            name="tradingName"
+            placeholder="Enter trading name (optional)"
+            [disabled]="formSubmitting">
+        </div>
+
+        <div class="form-group">
+          <label for="registrationNumber">Registration Number</label>
+          <input 
+            type="text" 
+            id="registrationNumber" 
+            [(ngModel)]="newLegalEntity.registrationNumber" 
+            name="registrationNumber"
+            placeholder="Enter registration number"
+            [disabled]="formSubmitting">
+        </div>
+
+        <div class="form-group">
+          <label for="legalTaxId">Tax ID</label>
+          <input 
+            type="text" 
+            id="legalTaxId" 
+            [(ngModel)]="newLegalEntity.taxId" 
+            name="legalTaxId"
+            placeholder="Enter tax ID"
+            [disabled]="formSubmitting">
+        </div>
+
+        <div class="form-group">
+          <label for="legalForm">Legal Form</label>
+          <input 
+            type="text" 
+            id="legalForm" 
+            [(ngModel)]="newLegalEntity.legalForm" 
+            name="legalForm"
+            placeholder="e.g., LLC, Corporation, Partnership"
+            [disabled]="formSubmitting">
+        </div>
+
+        <div class="form-group">
+          <label for="incorporationDate">Incorporation Date</label>
+          <input 
+            type="date" 
+            id="incorporationDate" 
+            [(ngModel)]="newLegalEntity.incorporationDate" 
+            name="incorporationDate"
+            [disabled]="formSubmitting">
+        </div>
+
+        <div class="form-group">
+          <label for="jurisdiction">Jurisdiction</label>
+          <input 
+            type="text" 
+            id="jurisdiction" 
+            [(ngModel)]="newLegalEntity.jurisdiction" 
+            name="jurisdiction"
+            placeholder="Enter jurisdiction"
+            [disabled]="formSubmitting">
+        </div>
+      </div>
+
+      <!-- Common Fields (shown after type selection) -->
+      <div *ngIf="partnerType === 'natural'">
+        <div class="form-group">
+          <label for="notes">Notes</label>
+          <textarea 
+            id="notes" 
+            [(ngModel)]="newNaturalPerson.notes" 
+            name="notes"
+            rows="3"
+            placeholder="Optional notes about this partner"
+            [disabled]="formSubmitting"></textarea>
+        </div>
+      </div>
+
+      <div *ngIf="partnerType === 'legal'">
+        <div class="form-group">
+          <label for="notesLegal">Notes</label>
+          <textarea 
+            id="notesLegal" 
+            [(ngModel)]="newLegalEntity.notes" 
+            name="notesLegal"
+            rows="3"
+            placeholder="Optional notes about this partner"
+            [disabled]="formSubmitting"></textarea>
+        </div>
+      </div>
+
+      <div *ngIf="partnerType">
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" [disabled]="formSubmitting">
+            {{ formSubmitting ? 'Creating...' : 'Create Partner' }}
+          </button>
+          <button type="button" class="btn-secondary" (click)="toggleAddForm()" [disabled]="formSubmitting">
+            Cancel
+          </button>
+        </div>
       </div>
     </form>
   </div>
@@ -100,32 +265,13 @@
 
   <div *ngIf="!loading() && !error() && partners().length > 0">
     <div class="partner-list">
-      <div class="tile" *ngFor="let partner of partners()">
-        <div class="tile-header">
-          <div class="tile-info">
-            <h3 class="tile-title">{{ partner.partnerNumber }}</h3>
-            <p class="tile-subtitle" *ngIf="partner.partnerType">
-              Type: {{ partner.partnerType.typeCode }}
-            </p>
-          </div>
-          <div class="tile-actions">
-            <span class="status-badge" [class.active]="partner.active" [class.inactive]="!partner.active">
-              {{ partner.active ? 'Active' : 'Inactive' }}
-            </span>
-            <button class="btn-icon btn-icon-danger" 
-                    (click)="deletePartner(partner)" 
-                    title="Delete partner">
-              🗑️
-            </button>
-          </div>
-        </div>
-        <div class="tile-body" *ngIf="partner.notes || partner.createdAt">
-          <p *ngIf="partner.notes" class="notes">{{ partner.notes }}</p>
-          <p *ngIf="partner.createdAt" class="metadata">
-            Created: {{ formatDate(partner.createdAt) }}
-          </p>
-        </div>
-      </div>
+      <partner-tile 
+        *ngFor="let partner of partners()" 
+        [partner]="partner"
+        (delete)="deletePartner($event)"
+        (edit)="editPartner($event)"
+        (manageAddresses)="manageAddresses($event)">
+      </partner-tile>
     </div>
   </div>
 </div>

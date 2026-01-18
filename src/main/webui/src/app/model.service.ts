@@ -4,7 +4,7 @@ import { Config } from './models/config.model';
 import { Partner } from './models/partner.model';
 
 // Re-export models for backward compatibility
-export type { Demo, Config, Partner };
+export type { Demo, Config, Partner, NaturalPerson, LegalEntity } from './models';
 
 @Injectable({
   providedIn: 'root',

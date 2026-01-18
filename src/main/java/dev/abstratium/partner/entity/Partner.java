@@ -20,6 +20,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "T_partner")
@@ -31,8 +32,8 @@ public class Partner {
     @Column(length = 36)
     private String id;
 
-    @Column(name = "partner_number", unique = true, nullable = false, length = 100)
-    private String partnerNumber;
+    @Column(name = "partner_number_seq", unique = true, nullable = false)
+    private Long partnerNumberSeq;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "partner_type_id")
@@ -99,12 +100,20 @@ public class Partner {
         this.id = id;
     }
 
-    public String getPartnerNumber() {
-        return partnerNumber;
+    public Long getPartnerNumberSeq() {
+        return partnerNumberSeq;
     }
 
-    public void setPartnerNumber(String partnerNumber) {
-        this.partnerNumber = partnerNumber;
+    public void setPartnerNumberSeq(Long partnerNumberSeq) {
+        this.partnerNumberSeq = partnerNumberSeq;
+    }
+
+    @Transient
+    public String getPartnerNumber() {
+        if (partnerNumberSeq == null) {
+            return null;
+        }
+        return String.format("P%08d", partnerNumberSeq);
     }
 
     public PartnerType getPartnerType() {
