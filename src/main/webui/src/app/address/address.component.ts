@@ -4,13 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { ToastService } from '../core/toast/toast.service';
 import { ConfirmDialogService } from '../core/confirm-dialog/confirm-dialog.service';
 import { AutofocusDirective } from '../core/autofocus.directive';
+import { AutocompleteComponent, AutocompleteOption } from '../core/autocomplete/autocomplete.component';
 import { AddressTileComponent } from './address-tile/address-tile.component';
 import { Address, Country, ModelService } from '../model.service';
 import { Controller } from '../controller';
 
 @Component({
   selector: 'app-address',
-  imports: [CommonModule, FormsModule, AutofocusDirective, AddressTileComponent],
+  imports: [CommonModule, FormsModule, AutofocusDirective, AddressTileComponent, AutocompleteComponent],
   templateUrl: './address.component.html',
   styleUrl: './address.component.scss'
 })
@@ -31,14 +32,30 @@ export class AddressComponent implements OnInit {
   formSubmitting = false;
   formError: string | null = null;
   editingAddress: Address | null = null;
-  newAddress: Partial<Address> = {
+  newAddress: Address = {
     isVerified: false
-  };
+  } as Address;
 
   // Search state
   searchTerm = '';
   private searchTimeout: any;
   @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
+
+  // Country autocomplete
+  fetchCountries = async (searchTerm: string): Promise<AutocompleteOption[]> => {
+    const countries = this.countries();
+    const lowerSearch = searchTerm.toLowerCase();
+    const filtered = searchTerm 
+      ? countries.filter(c => 
+          c.name.toLowerCase().includes(lowerSearch) || 
+          c.code.toLowerCase().includes(lowerSearch)
+        )
+      : countries;
+    return filtered.map(c => ({
+      value: c.code,
+      label: c.name
+    }));
+  };
 
   ngOnInit(): void {
     this.controller.loadAddresses();
@@ -84,8 +101,9 @@ export class AddressComponent implements OnInit {
     this.newAddress = {
       isVerified: false,
       countryCode: this.config()?.defaultCountry || 'DE'
-    };
+    } as Address;
     this.formError = null;
+    this.editingAddress = null;
   }
 
   onRetry(): void {

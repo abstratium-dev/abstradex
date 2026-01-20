@@ -164,38 +164,38 @@ export class Controller {
   }
 
   // Partner Address Management
-  async loadPartnerAddresses(partnerNumber: string): Promise<AddressDetail[]> {
+  async loadPartnerAddresses(partnerId: string): Promise<AddressDetail[]> {
     try {
       return await firstValueFrom(
-        this.http.get<AddressDetail[]>(`/api/partner/${partnerNumber}/address`)
+        this.http.get<AddressDetail[]>(`/api/partner/${partnerId}/address`)
       );
     } catch (error) {
-      console.error('Error loading partner addresses:', error);
+      console.error('Failed to load partner addresses:', error);
       throw error;
     }
   }
 
-  async addAddressToPartner(partnerNumber: string, addressId: string, addressDetail: AddressDetail): Promise<AddressDetail> {
+  async addAddressToPartner(partnerId: string, addressId: string, addressDetail: AddressDetail): Promise<AddressDetail> {
     try {
       return await firstValueFrom(
         this.http.post<AddressDetail>(
-          `/api/partner/${partnerNumber}/address?addressId=${addressId}`,
+          `/api/partner/${partnerId}/address?addressId=${addressId}`,
           addressDetail
         )
       );
     } catch (error) {
-      console.error('Error adding address to partner:', error);
+      console.error('Failed to add address to partner:', error);
       throw error;
     }
   }
 
-  async removeAddressFromPartner(partnerNumber: string, addressDetailId: string): Promise<void> {
+  async removeAddressFromPartner(partnerId: string, addressDetailId: string): Promise<void> {
     try {
       await firstValueFrom(
-        this.http.delete<void>(`/api/partner/${partnerNumber}/address/${addressDetailId}`)
+        this.http.delete<void>(`/api/partner/${partnerId}/address/${addressDetailId}`)
       );
     } catch (error) {
-      console.error('Error removing address from partner:', error);
+      console.error('Failed to remove address from partner:', error);
       throw error;
     }
   }

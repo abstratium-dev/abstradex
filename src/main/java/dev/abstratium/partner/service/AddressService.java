@@ -61,7 +61,7 @@ public class AddressService {
         existing.setCountryCode(address.getCountryCode());
         existing.setValidFrom(address.getValidFrom());
         existing.setValidTo(address.getValidTo());
-        existing.setVerified(address.isVerified());
+        existing.setIsVerified(address.isVerified());
         
         return em.merge(existing);
     }

@@ -10,19 +10,20 @@
 
   .back-button {
     padding: 0.5rem 1rem;
-    background: var(--surface-color);
-    border: 1px solid var(--border-color);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border-secondary);
     border-radius: 4px;
     cursor: pointer;
-    color: var(--text-color);
+    color: var(--color-text-primary);
 
     &:hover {
-      background: var(--hover-color);
+      background: var(--color-bg-hover);
     }
   }
 
   h2 {
     margin: 0;
+    color: var(--color-text-primary);
   }
 }
 
@@ -33,14 +34,45 @@
 }
 
 .add-form {
-  background: var(--surface-color);
-  border: 1px solid var(--border-color);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
   border-radius: 8px;
   padding: 1.5rem;
   margin-bottom: 2rem;
 
   h3 {
     margin-top: 0;
+    color: var(--color-text-primary);
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+    position: relative;
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--color-text-primary);
+    }
+
+    input, select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--color-border-secondary);
+      border-radius: 4px;
+      font-size: 1rem;
+      box-sizing: border-box;
+      font-family: inherit;
+      background: var(--color-bg-primary);
+      color: var(--color-text-primary);
+
+      &:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 2px var(--shadow-primary);
+      }
+    }
   }
 }
 
@@ -60,12 +92,18 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  background: var(--surface-color);
-  border: 1px solid var(--border-color);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
   border-radius: 8px;
+  transition: box-shadow 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 2px 4px var(--shadow-sm);
+  }
 
   .address-info {
     flex: 1;
+    color: var(--color-text-primary);
   }
 
   .address-meta {
@@ -78,17 +116,17 @@
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
     font-size: 0.75rem;
-    background: var(--secondary-color);
-    color: var(--text-color);
+    background: var(--color-badge-secondary-bg);
+    color: var(--color-badge-secondary-text);
 
     &.primary {
-      background: var(--primary-color);
+      background: var(--color-primary);
       color: white;
     }
 
     &.type {
-      background: var(--info-color);
-      color: white;
+      background: var(--color-badge-primary-bg);
+      color: var(--color-badge-primary-text);
     }
   }
 }
@@ -96,31 +134,34 @@
 .empty-state {
   text-align: center;
   padding: 3rem;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .loading, .error {
   text-align: center;
   padding: 2rem;
+  color: var(--color-text-primary);
 }
 
 .form-hint {
   display: block;
   margin-top: 0.5rem;
   font-size: 0.875rem;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
+  position: relative;
+  z-index: 1;
 }
 
 .btn-link {
   background: none;
   border: none;
-  color: var(--primary-color);
+  color: var(--color-link-primary);
   cursor: pointer;
   padding: 0;
   font-size: inherit;
   text-decoration: underline;
 
   &:hover {
-    color: var(--primary-hover);
+    color: var(--color-link-hover);
   }
 }

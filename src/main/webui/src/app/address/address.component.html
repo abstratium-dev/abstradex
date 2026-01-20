@@ -48,44 +48,41 @@
 
       <div class="form-group">
         <label for="streetLine1">Street Address *</label>
-        <input type="text" id="streetLine1" [(ngModel)]="newAddress.streetLine1" name="streetLine1" required [disabled]="formSubmitting">
+        <input type="text" id="streetLine1" [(ngModel)]="newAddress.streetLine1" name="streetLine1" autocomplete="address-line1" required [disabled]="formSubmitting">
       </div>
 
       <div class="form-group">
         <label for="streetLine2">Street Address Line 2</label>
-        <input type="text" id="streetLine2" [(ngModel)]="newAddress.streetLine2" name="streetLine2" [disabled]="formSubmitting">
+        <input type="text" id="streetLine2" [(ngModel)]="newAddress.streetLine2" name="streetLine2" autocomplete="address-line2" [disabled]="formSubmitting">
       </div>
 
       <div class="form-group">
         <label for="city">City *</label>
-        <input type="text" id="city" [(ngModel)]="newAddress.city" name="city" required [disabled]="formSubmitting">
+        <input type="text" id="city" [(ngModel)]="newAddress.city" name="city" autocomplete="address-level2" required [disabled]="formSubmitting">
       </div>
 
       <div class="form-group">
         <label for="stateProvince">State/Province</label>
-        <input type="text" id="stateProvince" [(ngModel)]="newAddress.stateProvince" name="stateProvince" [disabled]="formSubmitting">
+        <input type="text" id="stateProvince" [(ngModel)]="newAddress.stateProvince" name="stateProvince" autocomplete="address-level1" [disabled]="formSubmitting">
       </div>
 
       <div class="form-group">
         <label for="postalCode">Postal Code</label>
-        <input type="text" id="postalCode" [(ngModel)]="newAddress.postalCode" name="postalCode" [disabled]="formSubmitting">
+        <input type="text" id="postalCode" [(ngModel)]="newAddress.postalCode" name="postalCode" autocomplete="postal-code" [disabled]="formSubmitting">
       </div>
 
       <div class="form-group">
         <label for="countryCode">Country *</label>
-        <input 
-          type="text" 
-          id="countryCode" 
-          [(ngModel)]="newAddress.countryCode" 
-          name="countryCode" 
-          list="countries-list"
-          maxlength="2" 
-          required 
-          [disabled]="formSubmitting"
-          placeholder="Type to search countries...">
-        <datalist id="countries-list">
-          <option *ngFor="let country of countries()" [value]="country.code">{{ country.name }}</option>
-        </datalist>
+        <abs-autocomplete
+          id="countryCode"
+          name="countryCode"
+          [(ngModel)]="newAddress.countryCode"
+          [fetchOptions]="fetchCountries"
+          [placeholder]="'Search countries...'"
+          [minSearchLength]="0"
+          [required]="true"
+          [debounceMs]="100"
+        ></abs-autocomplete>
       </div>
 
       <div class="checkbox-group">

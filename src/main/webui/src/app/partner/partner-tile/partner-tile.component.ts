@@ -1,6 +1,8 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Partner, NaturalPerson, LegalEntity } from '../../model.service';
+import { AddressDetail } from '../../models/address-detail.model';
+import { ModelService } from '../../model.service';
 
 @Component({
   selector: 'partner-tile',
@@ -9,7 +11,10 @@ import { Partner, NaturalPerson, LegalEntity } from '../../model.service';
   styleUrl: './partner-tile.component.scss'
 })
 export class PartnerTileComponent {
+  private modelService = inject(ModelService);
+
   @Input({ required: true }) partner!: Partner;
+  @Input() addressDetails: AddressDetail[] = [];
   @Output() delete = new EventEmitter<Partner>();
   @Output() edit = new EventEmitter<Partner>();
   @Output() manageAddresses = new EventEmitter<Partner>();
@@ -69,11 +74,38 @@ export class PartnerTileComponent {
   }
 
   getPartnerAddress(): string | null {
-    const le = this.partner as LegalEntity;
-    if (le.jurisdiction) {
-      return le.jurisdiction;
+    if (!this.addressDetails || this.addressDetails.length === 0) {
+      return null;
     }
-    return null;
+
+    // Find primary address first
+    let preferredDetail = this.addressDetails.find(ad => ad.isPrimary);
+    
+    // If no primary, find first billing address
+    if (!preferredDetail) {
+      preferredDetail = this.addressDetails.find(ad => ad.addressType === 'BILLING');
+    }
+    
+    // If no billing, find first shipping address
+    if (!preferredDetail) {
+      preferredDetail = this.addressDetails.find(ad => ad.addressType === 'SHIPPING');
+    }
+    
+    // If still nothing, just take the first one
+    if (!preferredDetail) {
+      preferredDetail = this.addressDetails[0];
+    }
+
+    const addr = preferredDetail.address;
+    if (!addr) return null;
+
+    const countryName = this.modelService.getCountryName(addr.countryCode || '');
+    const parts = [
+      addr.city,
+      countryName
+    ].filter(p => p);
+    
+    return parts.join(', ') || null;
   }
 
   formatDate(date: string | undefined): string {

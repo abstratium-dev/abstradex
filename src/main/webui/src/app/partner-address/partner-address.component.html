@@ -1,7 +1,7 @@
 <div class="partner-address-container">
   <div class="header">
     <button class="back-button" (click)="goBack()">← Back</button>
-    <h2>Manage Addresses for Partner {{ partnerNumber }}</h2>
+    <h2>Addresses for Partner {{ partner?.partnerNumber || 'Loading...' }}</h2>
   </div>
 
   <div class="actions">
@@ -16,15 +16,16 @@
     
     <div class="form-group">
       <label for="addressAutocomplete">Search and Select Address *</label>
-      <app-autocomplete
+      <abs-autocomplete
         id="addressAutocomplete"
+        name="addressAutocomplete"
         [(ngModel)]="selectedAddressId"
         [fetchOptions]="fetchAddresses"
         [placeholder]="'Search addresses (min 3 characters)...'"
         [minSearchLength]="3"
         [required]="true"
         (optionSelected)="onAddressSelected($event)"
-      ></app-autocomplete>
+      ></abs-autocomplete>
       <small class="form-hint">
         Can't find the address? 
         <button type="button" class="btn-link" (click)="goToAddressManagement()">Create a new address</button>
@@ -36,8 +37,6 @@
       <select id="addressType" [(ngModel)]="newAddressDetail.addressType">
         <option value="BILLING">Billing</option>
         <option value="SHIPPING">Shipping</option>
-        <option value="MAIN">Main</option>
-        <option value="OTHER">Other</option>
       </select>
     </div>
 

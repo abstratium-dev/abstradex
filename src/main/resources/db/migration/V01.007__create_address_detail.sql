@@ -9,7 +9,7 @@ CREATE TABLE T_address_detail (
     valid_to TIMESTAMP,
     CONSTRAINT fk_address_detail_partner FOREIGN KEY (partner_id) REFERENCES T_partner(id) ON DELETE CASCADE,
     CONSTRAINT fk_address_detail_address FOREIGN KEY (address_id) REFERENCES T_address(id) ON DELETE CASCADE,
-    CONSTRAINT chk_address_type CHECK (address_type IN ('BILLING', 'SHIPPING', 'REGISTERED', 'CORRESPONDENCE', 'OTHER'))
+    CONSTRAINT chk_address_type CHECK (address_type IN ('BILLING', 'SHIPPING'))
 );
 
 -- Create indices for common queries

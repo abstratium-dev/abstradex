@@ -8,6 +8,7 @@ import { AutofocusDirective } from '../core/autofocus.directive';
 import { PartnerTileComponent } from './partner-tile/partner-tile.component';
 import { Partner, NaturalPerson, LegalEntity, ModelService } from '../model.service';
 import { Controller } from '../controller';
+import { AddressDetail } from '../models/address-detail.model';
 
 @Component({
   selector: 'app-partner',
@@ -46,8 +47,28 @@ export class PartnerComponent implements OnInit {
   private searchTimeout: any;
   @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
 
+  // Partner addresses map
+  partnerAddresses: Map<string, AddressDetail[]> = new Map();
+
   ngOnInit(): void {
     this.controller.loadPartners();
+    this.loadAllPartnerAddresses();
+  }
+
+  async loadAllPartnerAddresses(): Promise<void> {
+    const partners = this.partners();
+    for (const partner of partners) {
+      try {
+        const addresses = await this.controller.loadPartnerAddresses(partner.id);
+        this.partnerAddresses.set(partner.id, addresses);
+      } catch (err) {
+        console.error(`Failed to load addresses for partner ${partner.id}:`, err);
+      }
+    }
+  }
+
+  getPartnerAddresses(partnerId: string): AddressDetail[] {
+    return this.partnerAddresses.get(partnerId) || [];
   }
 
   onSearch(): void {
@@ -222,6 +243,6 @@ export class PartnerComponent implements OnInit {
   }
 
   manageAddresses(partner: Partner): void {
-    this.router.navigate(['/partners', partner.partnerNumber, 'addresses']);
+    this.router.navigate(['/partners', partner.id, 'addresses']);
   }
 }

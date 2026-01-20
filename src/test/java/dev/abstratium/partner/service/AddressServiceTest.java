@@ -26,7 +26,7 @@ public class AddressServiceTest {
         address.setStateProvince("IL");
         address.setPostalCode("62701");
         address.setCountryCode("US");
-        address.setVerified(false);
+        address.setIsVerified(false);
 
         Address created = addressService.create(address);
         assertNotNull(created.getId());

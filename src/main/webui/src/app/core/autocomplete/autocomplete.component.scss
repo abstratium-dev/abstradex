@@ -11,23 +11,26 @@
 
 .autocomplete-input {
   width: 100%;
-  padding: 0.5rem;
-  padding-right: 2rem;
-  border: 1px solid var(--border-color);
+  padding: 0.75rem;
+  padding-right: 2.5rem;
+  border: 1px solid var(--color-border-secondary);
   border-radius: 4px;
   font-size: 1rem;
-  background: var(--input-bg);
-  color: var(--text-color);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  box-sizing: border-box;
+  font-family: inherit;
 
   &:focus {
     outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.1);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px var(--shadow-primary);
   }
 
   &:disabled {
-    background: var(--disabled-bg);
+    background: var(--color-bg-secondary);
     cursor: not-allowed;
+    opacity: 0.6;
   }
 }
 
@@ -36,7 +39,7 @@
   right: 0.5rem;
   background: none;
   border: none;
-  color: var(--text-secondary);
+  color: var(--color-text-tertiary);
   cursor: pointer;
   padding: 0.25rem;
   font-size: 1.2rem;
@@ -44,9 +47,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
 
   &:hover {
-    color: var(--text-color);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+  }
+  
+  &:active {
+    background: var(--color-border-primary);
   }
 }
 
@@ -56,10 +66,10 @@
   left: 0;
   right: 0;
   margin-top: 0.25rem;
-  background: var(--surface-color);
-  border: 1px solid var(--border-color);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
   border-radius: 4px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px var(--shadow-sm);
   z-index: 1000;
   max-height: 300px;
   overflow-y: auto;
@@ -73,25 +83,32 @@
   padding: 0.75rem 1rem;
   cursor: pointer;
   transition: background-color 0.15s;
+  color: var(--color-text-primary);
+  background: transparent;
+  border-bottom: 1px solid var(--color-border-light);
+
+  &:last-child {
+    border-bottom: none;
+  }
 
   &.highlighted {
-    background: var(--hover-color);
+    background: var(--color-bg-hover);
   }
 
   &.selected {
-    background: var(--primary-color);
+    background: var(--color-primary);
     color: white;
   }
 
   &:hover:not(.loading):not(.no-results):not(.hint) {
-    background: var(--hover-color);
+    background: var(--color-bg-hover);
   }
 
   &.loading,
   &.no-results,
   &.hint {
     cursor: default;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-style: italic;
   }
 }

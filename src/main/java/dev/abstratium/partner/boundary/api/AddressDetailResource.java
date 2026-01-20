@@ -19,7 +19,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
-@Path("/api/partner/{partnerNumber}/address")
+@Path("/api/partner/{partnerId}/address")
 @Tag(name = "Partner Address", description = "Partner address management endpoints")
 public class AddressDetailResource {
 
@@ -29,8 +29,8 @@ public class AddressDetailResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({Roles.USER})
-    public List<AddressDetail> getPartnerAddresses(@PathParam("partnerNumber") String partnerNumber) {
-        return addressDetailService.findByPartnerId(partnerNumber);
+    public List<AddressDetail> getPartnerAddresses(@PathParam("partnerId") String partnerId) {
+        return addressDetailService.findByPartnerId(partnerId);
     }
 
     @POST
@@ -38,10 +38,10 @@ public class AddressDetailResource {
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({Roles.USER})
     public AddressDetail addAddressToPartner(
-            @PathParam("partnerNumber") String partnerNumber,
+            @PathParam("partnerId") String partnerId,
             @QueryParam("addressId") String addressId,
             AddressDetail addressDetail) {
-        return addressDetailService.create(partnerNumber, addressId, addressDetail);
+        return addressDetailService.create(partnerId, addressId, addressDetail);
     }
 
     @DELETE

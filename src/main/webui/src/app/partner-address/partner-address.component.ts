@@ -9,6 +9,7 @@ import { Controller } from '../controller';
 import { ModelService } from '../model.service';
 import { Address } from '../models/address.model';
 import { AddressDetail } from '../models/address-detail.model';
+import { Partner } from '../models/partner.model';
 
 @Component({
   selector: 'app-partner-address',
@@ -25,7 +26,8 @@ export class PartnerAddressComponent implements OnInit {
   private toastService = inject(ToastService);
   private confirmService = inject(ConfirmDialogService);
 
-  partnerNumber = '';
+  partnerId = '';
+  partner: Partner | null = null;
   partnerAddresses: AddressDetail[] = [];
   loading = false;
   error: string | null = null;
@@ -33,7 +35,7 @@ export class PartnerAddressComponent implements OnInit {
   // Add address form
   showAddForm = false;
   selectedAddressId = '';
-  newAddressDetail: Partial<AddressDetail> = {
+  newAddressDetail: AddressDetail = {
     isPrimary: false,
     addressType: 'BILLING'
   };
@@ -49,9 +51,26 @@ export class PartnerAddressComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    this.partnerNumber = this.route.snapshot.paramMap.get('partnerNumber') || '';
-    if (this.partnerNumber) {
+    this.partnerId = this.route.snapshot.paramMap.get('partnerId') || '';
+    if (this.partnerId) {
+      this.loadPartnerData();
       this.loadPartnerAddresses();
+    }
+  }
+
+  async loadPartnerData(): Promise<void> {
+    try {
+      // Load all partners to find the one we need
+      await this.controller.loadPartners();
+      const partners = this.modelService.partners$();
+      this.partner = partners.find(p => p.id === this.partnerId) || null;
+      
+      if (!this.partner) {
+        this.error = 'Partner not found';
+        this.toastService.error(this.error);
+      }
+    } catch (err) {
+      console.error('Failed to load partner data:', err);
     }
   }
 
@@ -59,7 +78,7 @@ export class PartnerAddressComponent implements OnInit {
     this.loading = true;
     this.error = null;
     try {
-      this.partnerAddresses = await this.controller.loadPartnerAddresses(this.partnerNumber);
+      this.partnerAddresses = await this.controller.loadPartnerAddresses(this.partnerId);
     } catch (err) {
       this.error = 'Failed to load partner addresses';
       this.toastService.error(this.error);
@@ -69,10 +88,11 @@ export class PartnerAddressComponent implements OnInit {
   }
 
   formatAddressLabel(addr: Address): string {
+    const countryName = this.modelService.getCountryName(addr.countryCode || '');
     const parts = [
       addr.streetLine1,
       addr.city,
-      this.modelService.getCountryName(addr.countryCode || '')
+      countryName
     ].filter(p => p);
     return parts.join(', ');
   }
@@ -93,7 +113,7 @@ export class PartnerAddressComponent implements OnInit {
     this.newAddressDetail = {
       isPrimary: false,
       addressType: 'BILLING'
-    };
+    } as AddressDetail;
   }
 
   async onSubmitAdd(): Promise<void> {
@@ -104,9 +124,9 @@ export class PartnerAddressComponent implements OnInit {
 
     try {
       await this.controller.addAddressToPartner(
-        this.partnerNumber,
+        this.partnerId,
         this.selectedAddressId,
-        this.newAddressDetail as AddressDetail
+        this.newAddressDetail
       );
       this.toastService.success('Address added to partner');
       this.showAddForm = false;
@@ -125,7 +145,7 @@ export class PartnerAddressComponent implements OnInit {
 
     if (confirmed && addressDetail.id) {
       try {
-        await this.controller.removeAddressFromPartner(this.partnerNumber, addressDetail.id);
+        await this.controller.removeAddressFromPartner(this.partnerId, addressDetail.id);
         this.toastService.success('Address removed from partner');
         await this.loadPartnerAddresses();
       } catch (err) {
@@ -146,6 +166,11 @@ export class PartnerAddressComponent implements OnInit {
     const addr = addressDetail.address;
     if (!addr) return 'Unknown address';
     const countryName = this.modelService.getCountryName(addr.countryCode || '');
-    return `${addr.streetLine1}, ${addr.city}, ${countryName}`;
+    const parts = [
+      addr.streetLine1,
+      addr.city,
+      countryName
+    ].filter(p => p);
+    return parts.join(', ');
   }
 }

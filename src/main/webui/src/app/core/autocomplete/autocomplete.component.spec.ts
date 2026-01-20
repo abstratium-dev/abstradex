@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, flush } from '@angular/core/testing';
 import { AutocompleteComponent, AutocompleteOption } from './autocomplete.component';
 import { FormsModule } from '@angular/forms';
 
@@ -139,8 +139,10 @@ describe('AutocompleteComponent', () => {
 
   describe('Search Functionality', () => {
     it('should fetch options when search term is valid', fakeAsync(() => {
+      mockFetchOptions.calls.reset();
       component.searchTerm.set('test');
       tick(300); // debounce delay
+      tick(); // Allow promise to resolve
       
       expect(mockFetchOptions).toHaveBeenCalledWith('test');
     }));
@@ -155,13 +157,16 @@ describe('AutocompleteComponent', () => {
     }));
 
     it('should fetch options when search term is empty', fakeAsync(() => {
+      mockFetchOptions.calls.reset();
       component.searchTerm.set('');
       tick(300);
+      tick(); // Allow promise to resolve
       
       expect(mockFetchOptions).toHaveBeenCalledWith('');
     }));
 
     it('should set loading state during fetch', fakeAsync(() => {
+      mockFetchOptions.calls.reset();
       let resolvePromise: (value: AutocompleteOption[]) => void;
       const promise = new Promise<AutocompleteOption[]>(resolve => {
         resolvePromise = resolve;
@@ -172,6 +177,7 @@ describe('AutocompleteComponent', () => {
       tick(300);
       
       expect(component.isLoading()).toBe(true);
+      expect(component.options()).toEqual([]); // Options cleared immediately
       
       resolvePromise!(mockOptions);
       tick();
@@ -181,11 +187,17 @@ describe('AutocompleteComponent', () => {
     }));
 
     it('should handle fetch errors gracefully', fakeAsync(() => {
+      mockFetchOptions.calls.reset();
       mockFetchOptions.and.returnValue(Promise.reject('Error'));
       spyOn(console, 'error');
       
       component.searchTerm.set('test');
       tick(300);
+      
+      // After debounce, loading should be true and options cleared
+      expect(component.isLoading()).toBe(true);
+      expect(component.options()).toEqual([]);
+      
       tick(); // Allow promise to reject
       
       expect(component.options()).toEqual([]);

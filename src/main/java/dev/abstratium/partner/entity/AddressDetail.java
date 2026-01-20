@@ -76,8 +76,8 @@ public class AddressDetail {
         return isPrimary;
     }
 
-    public void setPrimary(boolean primary) {
-        isPrimary = primary;
+    public void setIsPrimary(boolean isPrimary) {
+        this.isPrimary = isPrimary;
     }
 
     public String getAddressType() {

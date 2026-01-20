@@ -138,8 +138,8 @@ public class Address {
         return isVerified;
     }
 
-    public void setVerified(boolean verified) {
-        isVerified = verified;
+    public void setIsVerified(boolean isVerified) {
+        this.isVerified = isVerified;
     }
 
     public Set<AddressDetail> getAddressDetails() {

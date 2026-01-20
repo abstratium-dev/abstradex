@@ -9,7 +9,7 @@ import { SignedOutComponent } from './core/signed-out/signed-out.component';
 export const routes: Routes = [
   { path: '',           component: PartnerComponent, canActivate: [authGuard] },
   { path: 'partners',   component: PartnerComponent, canActivate: [authGuard] },
-  { path: 'partners/:partnerNumber/addresses', component: PartnerAddressComponent, canActivate: [authGuard] },
+  { path: 'partners/:partnerId/addresses', component: PartnerAddressComponent, canActivate: [authGuard] },
   { path: 'addresses',  component: AddressComponent, canActivate: [authGuard] },
   { path: 'signed-out', component: SignedOutComponent },
   { path: '**',         component: NotFoundComponent }

@@ -8,7 +8,7 @@ export interface AutocompleteOption {
 }
 
 @Component({
-  selector: 'app-autocomplete',
+  selector: 'abs-autocomplete',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './autocomplete.component.html',
@@ -54,14 +54,33 @@ export class AutocompleteComponent implements ControlValueAccessor {
     });
   }
 
-  writeValue(value: string | null): void {
+  async writeValue(value: string | null): Promise<void> {
     this.selectedValue.set(value);
-    // If we have a value but no label, try to find it in current options
-    if (value && !this.selectedLabel()) {
-      const option = this.options().find(opt => opt.value === value);
-      if (option) {
+    
+    // If we have a value, fetch options to find the label
+    if (value) {
+      // First check current options
+      let option = this.options().find(opt => opt.value === value);
+      
+      // If not found, fetch all options to find it
+      if (!option && this.fetchOptions) {
+        try {
+          const allOptions = await this.fetchOptions('');
+          option = allOptions.find(opt => opt.value === value);
+          if (option) {
+            this.selectedLabel.set(option.label);
+            this.searchTerm.set(option.label);
+          }
+        } catch (error) {
+          console.error('Error fetching options for value:', error);
+        }
+      } else if (option) {
         this.selectedLabel.set(option.label);
+        this.searchTerm.set(option.label);
       }
+    } else {
+      this.selectedLabel.set(null);
+      this.searchTerm.set('');
     }
   }
 
@@ -160,6 +179,7 @@ export class AutocompleteComponent implements ControlValueAccessor {
     if (trimmedTerm.length === 0 || trimmedTerm.length >= this.minSearchLength) {
       this.searchTimeout = setTimeout(async () => {
         this.isLoading.set(true);
+        this.options.set([]); // Clear old results immediately
         try {
           const results = await this.fetchOptions(trimmedTerm);
           this.options.set(results);
