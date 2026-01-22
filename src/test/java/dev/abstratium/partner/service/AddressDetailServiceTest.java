@@ -33,6 +33,7 @@ public class AddressDetailServiceTest {
         // Create a partner
         Partner partner = new Partner();
         partner.setActive(true);
+        partner.setPartnerNumberSeq(1L);
         em.persist(partner);
         em.flush();
 
@@ -41,15 +42,16 @@ public class AddressDetailServiceTest {
         address.setStreetLine1("123 Test St");
         address.setCity("Test City");
         address.setCountryCode("US");
-        address.setIsVerified(true);
+        address.setVerified(true);
         Address createdAddress = addressService.create(address);
 
         // Create address detail with isPrimary = true
         AddressDetail addressDetail = new AddressDetail();
-        addressDetail.setIsPrimary(true);
+        addressDetail.setPrimary(true);
         addressDetail.setAddressType("BILLING");
 
         AddressDetail created = addressDetailService.create(partner.getId(), createdAddress.getId(), addressDetail);
+        em.flush(); // Ensure address detail is persisted to database
         
         assertNotNull(created.getId());
         assertTrue(created.isPrimary(), "isPrimary should be true after creation");
@@ -71,9 +73,10 @@ public class AddressDetailServiceTest {
         address.setCountryCode("CH");
         address.setStateProvince("Vaud");
         address.setPostalCode("1007");
-        address.setIsVerified(true);
+        address.setVerified(true);
 
         Address created = addressService.create(address);
+        em.flush(); // Ensure address is persisted to database
         
         assertNotNull(created.getId());
         assertTrue(created.isVerified(), "isVerified should be true after creation");
@@ -91,6 +94,7 @@ public class AddressDetailServiceTest {
         // Create a partner
         Partner partner = new Partner();
         partner.setActive(true);
+        partner.setPartnerNumberSeq(2L);
         em.persist(partner);
         em.flush();
 
@@ -109,16 +113,18 @@ public class AddressDetailServiceTest {
 
         // Create first address detail as primary
         AddressDetail addressDetail1 = new AddressDetail();
-        addressDetail1.setIsPrimary(true);
+        addressDetail1.setPrimary(true);
         addressDetail1.setAddressType("BILLING");
         AddressDetail created1 = addressDetailService.create(partner.getId(), createdAddress1.getId(), addressDetail1);
+        em.flush(); // Ensure first address detail is persisted
         assertTrue(created1.isPrimary());
 
         // Create second address detail as primary - should unset the first one
         AddressDetail addressDetail2 = new AddressDetail();
-        addressDetail2.setIsPrimary(true);
+        addressDetail2.setPrimary(true);
         addressDetail2.setAddressType("SHIPPING");
         AddressDetail created2 = addressDetailService.create(partner.getId(), createdAddress2.getId(), addressDetail2);
+        em.flush(); // Ensure second address detail is persisted and first is updated
         assertTrue(created2.isPrimary());
 
         // Verify first address is no longer primary

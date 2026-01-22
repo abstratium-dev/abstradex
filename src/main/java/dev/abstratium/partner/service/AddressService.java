@@ -46,27 +46,6 @@ public class AddressService {
     }
 
     @Transactional
-    public Address update(Address address) {
-        Address existing = em.find(Address.class, address.getId());
-        if (existing == null) {
-            throw new IllegalArgumentException("Address not found: " + address.getId());
-        }
-        
-        // Update fields
-        existing.setStreetLine1(address.getStreetLine1());
-        existing.setStreetLine2(address.getStreetLine2());
-        existing.setCity(address.getCity());
-        existing.setStateProvince(address.getStateProvince());
-        existing.setPostalCode(address.getPostalCode());
-        existing.setCountryCode(address.getCountryCode());
-        existing.setValidFrom(address.getValidFrom());
-        existing.setValidTo(address.getValidTo());
-        existing.setIsVerified(address.isVerified());
-        
-        return em.merge(existing);
-    }
-
-    @Transactional
     public void delete(String id) {
         Address address = em.find(Address.class, id);
         if (address != null) {

@@ -27,11 +27,10 @@ export class AddressComponent implements OnInit {
   countries: Signal<Country[]> = this.modelService.countries$;
   config = this.modelService.config$;
 
-  // Add/Edit Address Form state
+  // Add Address Form state
   showAddForm = false;
   formSubmitting = false;
   formError: string | null = null;
-  editingAddress: Address | null = null;
   newAddress: Address = {
     isVerified: false
   } as Address;
@@ -58,11 +57,11 @@ export class AddressComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    this.controller.loadAddresses();
+    // Don't load addresses automatically - wait for user to search
     this.controller.loadCountries();
     
     // Set default country if not editing
-    if (!this.editingAddress && this.config()?.defaultCountry) {
+    if (this.config()?.defaultCountry) {
       this.newAddress.countryCode = this.config()!.defaultCountry;
     }
   }
@@ -74,25 +73,29 @@ export class AddressComponent implements OnInit {
 
     const trimmedSearch = this.searchTerm.trim();
     
-    if (trimmedSearch.length === 0 || trimmedSearch.length >= 3) {
+    // Only search if 3 or more characters
+    if (trimmedSearch.length >= 3) {
       this.searchTimeout = setTimeout(() => {
-        this.controller.loadAddresses(trimmedSearch || undefined);
+        this.controller.loadAddresses(trimmedSearch);
         setTimeout(() => {
           this.searchInput?.nativeElement.focus();
         }, 100);
       }, 300);
+    } else if (trimmedSearch.length === 0) {
+      // Clear results when search is empty
+      this.modelService.setAddresses([]);
     }
   }
 
   clearSearch(): void {
     this.searchTerm = '';
-    this.controller.loadAddresses();
+    // Clear addresses list when search is cleared
+    this.modelService.setAddresses([]);
   }
 
   toggleAddForm(): void {
     this.showAddForm = !this.showAddForm;
     if (this.showAddForm) {
-      this.editingAddress = null;
       this.resetForm();
     }
   }
@@ -103,7 +106,6 @@ export class AddressComponent implements OnInit {
       countryCode: this.config()?.defaultCountry || 'DE'
     } as Address;
     this.formError = null;
-    this.editingAddress = null;
   }
 
   onRetry(): void {
@@ -128,19 +130,12 @@ export class AddressComponent implements OnInit {
     this.formError = null;
 
     try {
-      if (this.editingAddress) {
-        await this.controller.updateAddress(this.newAddress as Address);
-        this.toastService.success('Address updated successfully');
-      } else {
-        await this.controller.createAddress(this.newAddress as Address);
-        this.toastService.success('Address created successfully');
-      }
+      await this.controller.createAddress(this.newAddress as Address);
+      this.toastService.success('Address created successfully');
       this.showAddForm = false;
-      this.editingAddress = null;
       this.resetForm();
     } catch (err: any) {
-      const action = this.editingAddress ? 'update' : 'create';
-      this.formError = err.error?.detail || `Failed to ${action} address. Please try again.`;
+      this.formError = err.error?.detail || 'Failed to create address. Please try again.';
     } finally {
       this.formSubmitting = false;
     }
@@ -165,11 +160,5 @@ export class AddressComponent implements OnInit {
     } catch (err: any) {
       this.toastService.error('Failed to delete address. Please try again.');
     }
-  }
-
-  editAddress(address: Address): void {
-    this.editingAddress = address;
-    this.showAddForm = true;
-    this.newAddress = { ...address };
   }
 }

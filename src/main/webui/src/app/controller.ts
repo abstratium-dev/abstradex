@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { Address, Country, ModelService, Partner } from './model.service';
 import { AddressDetail } from './models/address-detail.model';
+import { ContactDetail } from './models/contact-detail.model';
 
 @Injectable({
   providedIn: 'root',
@@ -124,20 +125,6 @@ export class Controller {
     }
   }
 
-  async updateAddress(address: Address): Promise<Address> {
-    try {
-      const response = await firstValueFrom(
-        this.http.put<Address>('/api/address', address)
-      );
-      // Reload addresses list after successful update
-      this.loadAddresses();
-      return response;
-    } catch (error) {
-      console.error('Error updating address:', error);
-      throw error;
-    }
-  }
-
   async deleteAddress(id: string): Promise<void> {
     try {
       await firstValueFrom(
@@ -196,6 +183,57 @@ export class Controller {
       );
     } catch (error) {
       console.error('Failed to remove address from partner:', error);
+      throw error;
+    }
+  }
+
+  // Partner Contact Management
+  async loadPartnerContacts(partnerId: string): Promise<ContactDetail[]> {
+    try {
+      return await firstValueFrom(
+        this.http.get<ContactDetail[]>(`/api/partner/${partnerId}/contact`)
+      );
+    } catch (error) {
+      console.error('Failed to load partner contacts:', error);
+      throw error;
+    }
+  }
+
+  async addContactToPartner(partnerId: string, contactDetail: ContactDetail): Promise<ContactDetail> {
+    try {
+      return await firstValueFrom(
+        this.http.post<ContactDetail>(
+          `/api/partner/${partnerId}/contact`,
+          contactDetail
+        )
+      );
+    } catch (error) {
+      console.error('Failed to add contact to partner:', error);
+      throw error;
+    }
+  }
+
+  async updateContact(partnerId: string, contactId: string, contactDetail: ContactDetail): Promise<ContactDetail> {
+    try {
+      return await firstValueFrom(
+        this.http.put<ContactDetail>(
+          `/api/partner/${partnerId}/contact/${contactId}`,
+          contactDetail
+        )
+      );
+    } catch (error) {
+      console.error('Failed to update contact:', error);
+      throw error;
+    }
+  }
+
+  async removeContactFromPartner(partnerId: string, contactId: string): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.http.delete<void>(`/api/partner/${partnerId}/contact/${contactId}`)
+      );
+    } catch (error) {
+      console.error('Failed to remove contact from partner:', error);
       throw error;
     }
   }

@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,8 +16,11 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
+import org.hibernate.annotations.Immutable;
+
 @Entity
 @Table(name = "T_address")
+@Immutable
 public class Address {
 
     @Id
@@ -47,6 +51,7 @@ public class Address {
     @Column(name = "valid_to")
     private LocalDateTime validTo;
 
+    @JsonProperty("isVerified")
     @Column(name = "is_verified", nullable = false)
     private boolean isVerified = false;
 
@@ -138,8 +143,8 @@ public class Address {
         return isVerified;
     }
 
-    public void setIsVerified(boolean isVerified) {
-        this.isVerified = isVerified;
+    public void setVerified(boolean verified) {
+        this.isVerified = verified;
     }
 
     public Set<AddressDetail> getAddressDetails() {

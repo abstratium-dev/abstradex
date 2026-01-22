@@ -3,6 +3,8 @@ package dev.abstratium.partner.entity;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -28,6 +30,7 @@ public class AddressDetail {
     @JoinColumn(name = "address_id", nullable = false)
     private Address address;
 
+    @JsonProperty("isPrimary")
     @Column(name = "is_primary", nullable = false)
     private boolean isPrimary = false;
 
@@ -76,8 +79,8 @@ public class AddressDetail {
         return isPrimary;
     }
 
-    public void setIsPrimary(boolean isPrimary) {
-        this.isPrimary = isPrimary;
+    public void setPrimary(boolean primary) {
+        this.isPrimary = primary;
     }
 
     public String getAddressType() {

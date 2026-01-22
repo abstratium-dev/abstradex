@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -29,6 +31,7 @@ public class Tag {
     @Column(name = "description", length = 255)
     private String description;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "tag", fetch = FetchType.LAZY)
     private Set<PartnerTag> partnerTags = new HashSet<>();
 

@@ -10,6 +10,7 @@ import { ModelService } from '../model.service';
 import { Address } from '../models/address.model';
 import { AddressDetail } from '../models/address-detail.model';
 import { Partner } from '../models/partner.model';
+import { PartnerService } from '../partner.service';
 
 @Component({
   selector: 'app-partner-address',
@@ -25,6 +26,7 @@ export class PartnerAddressComponent implements OnInit {
   private location = inject(Location);
   private toastService = inject(ToastService);
   private confirmService = inject(ConfirmDialogService);
+  private partnerService = inject(PartnerService);
 
   partnerId = '';
   partner: Partner | null = null;
@@ -39,6 +41,11 @@ export class PartnerAddressComponent implements OnInit {
     isPrimary: false,
     addressType: 'BILLING'
   };
+
+  getPartnerName(): string {
+    if (!this.partner) return 'Loading...';
+    return this.partnerService.getPartnerName(this.partner);
+  }
 
   // Autocomplete fetch function
   fetchAddresses = async (searchTerm: string): Promise<AutocompleteOption[]> => {
@@ -64,7 +71,7 @@ export class PartnerAddressComponent implements OnInit {
       await this.controller.loadPartners();
       const partners = this.modelService.partners$();
       this.partner = partners.find(p => p.id === this.partnerId) || null;
-      
+
       if (!this.partner) {
         this.error = 'Partner not found';
         this.toastService.error(this.error);
@@ -173,4 +180,10 @@ export class PartnerAddressComponent implements OnInit {
     ].filter(p => p);
     return parts.join(', ');
   }
+
+  getPartnerNumberAndName() {
+    if (this.partner == null) return "";
+    return this.partner.partnerNumber + " " + this.partnerService.getPartnerName(this.partner)
+  }
+
 }

@@ -39,7 +39,7 @@
   </div>
 
   <div *ngIf="showAddForm" class="form-container">
-    <h2>{{ editingAddress ? 'Edit Address' : 'Create New Address' }}</h2>
+    <h2>Create New Address</h2>
 
     <form (ngSubmit)="onSubmitAdd()">
       <div *ngIf="formError" class="error-box">
@@ -94,7 +94,7 @@
 
       <div class="form-actions">
         <button type="submit" class="btn-primary" [disabled]="formSubmitting">
-          {{ formSubmitting ? (editingAddress ? 'Updating...' : 'Creating...') : (editingAddress ? 'Update Address' : 'Create Address') }}
+          {{ formSubmitting ? 'Creating...' : 'Create Address' }}
         </button>
         <button type="button" class="btn-secondary" (click)="toggleAddForm()" [disabled]="formSubmitting">
           Cancel
@@ -112,8 +112,7 @@
       <address-tile 
         *ngFor="let address of addresses()" 
         [address]="address"
-        (delete)="deleteAddress($event)"
-        (edit)="editAddress($event)">
+        (delete)="deleteAddress($event)">
       </address-tile>
     </div>
   </div>

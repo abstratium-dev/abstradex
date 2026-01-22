@@ -97,46 +97,6 @@ public class AddressResourceTest {
 
     @Test
     @TestSecurity(user = "testuser", roles = {Roles.USER})
-    public void testUpdateAddress() {
-        // Create an address first
-        String id = given()
-            .contentType(ContentType.JSON)
-            .body("""
-                {
-                    "streetLine1": "789 Update St",
-                    "city": "Update City",
-                    "postalCode": "99999",
-                    "countryCode": "US"
-                }
-                """)
-        .when()
-            .post("/api/address")
-        .then()
-            .statusCode(200)
-            .extract().path("id");
-
-        // Update the address
-        given()
-            .contentType(ContentType.JSON)
-            .body("""
-                {
-                    "id": "%s",
-                    "streetLine1": "789 Updated St",
-                    "city": "Updated City",
-                    "postalCode": "88888",
-                    "countryCode": "US"
-                }
-                """.formatted(id))
-        .when()
-            .put("/api/address")
-        .then()
-            .statusCode(200)
-            .body("streetLine1", is("789 Updated St"))
-            .body("city", is("Updated City"));
-    }
-
-    @Test
-    @TestSecurity(user = "testuser", roles = {Roles.USER})
     public void testDeleteAddress() {
         // Create an address first
         String id = given()

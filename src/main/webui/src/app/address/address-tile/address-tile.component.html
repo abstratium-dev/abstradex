@@ -15,10 +15,6 @@
           ⋮
         </button>
         <div class="context-menu" *ngIf="showContextMenu">
-          <button class="context-menu-item" (click)="onEdit($event)">
-            <span class="menu-icon">✏️</span>
-            <span>Edit Address</span>
-          </button>
           <button class="context-menu-item context-menu-item-danger" (click)="onDelete($event)">
             <span class="menu-icon">🗑️</span>
             <span>Delete Address</span>

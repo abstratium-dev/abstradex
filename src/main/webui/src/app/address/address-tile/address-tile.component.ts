@@ -13,7 +13,6 @@ export class AddressTileComponent {
   
   @Input({ required: true }) address!: Address;
   @Output() delete = new EventEmitter<Address>();
-  @Output() edit = new EventEmitter<Address>();
 
   showContextMenu = false;
 
@@ -32,19 +31,15 @@ export class AddressTileComponent {
     this.delete.emit(this.address);
   }
 
-  onEdit(event: Event): void {
-    event.stopPropagation();
-    this.closeContextMenu();
-    this.edit.emit(this.address);
-  }
-
   getAddressDisplay(): string {
+    const countryName = this.modelService.getCountryName(this.address.countryCode || '');
     const parts = [
       this.address.streetLine1,
       this.address.streetLine2,
       this.address.city,
       this.address.stateProvince,
-      this.address.postalCode
+      this.address.postalCode,
+      countryName
     ].filter(p => p);
     return parts.join(', ');
   }

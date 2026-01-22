@@ -14,7 +14,6 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -57,14 +56,6 @@ public class AddressResource {
     @RolesAllowed({Roles.USER})
     public Address create(Address address) {
         return addressService.create(address);
-    }
-
-    @PUT
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @RolesAllowed({Roles.USER})
-    public Address update(Address address) {
-        return addressService.update(address);
     }
 
     @DELETE

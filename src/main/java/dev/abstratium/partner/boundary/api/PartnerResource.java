@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.abstratium.core.Roles;
 import dev.abstratium.partner.boundary.dto.PartnerCreateRequest;
+import dev.abstratium.partner.dto.PartnerSearchResult;
 import dev.abstratium.partner.entity.LegalEntity;
 import dev.abstratium.partner.entity.NaturalPerson;
 import dev.abstratium.partner.entity.Partner;
@@ -39,11 +40,9 @@ public class PartnerResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({Roles.USER})
-    public List<Partner> getAll(@QueryParam("search") String searchTerm) {
-        if (searchTerm != null && !searchTerm.trim().isEmpty()) {
-            return partnerService.search(searchTerm);
-        }
-        return partnerService.findAll();
+    public List<PartnerSearchResult> getAll(@QueryParam("search") String searchTerm) {
+        // Always use searchWithAddress to include address lines
+        return partnerService.searchWithAddress(searchTerm);
     }
 
     @GET

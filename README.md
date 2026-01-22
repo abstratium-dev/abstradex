@@ -43,11 +43,11 @@ Run the following command to start Quarkus in Dev Mode with the Angular live-rel
 ./mvnw quarkus:dev
 ```
 
-Backend: http://localhost:8080
+Backend: http://localhost:8082
 
 Frontend: Automatically proxied by Quinoa
 
-Dev UI: http://localhost:8080/q/dev
+Dev UI: http://localhost:8082/q/dev
 
 ## 📝 Governance
 

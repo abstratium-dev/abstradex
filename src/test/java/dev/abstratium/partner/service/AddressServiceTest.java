@@ -26,7 +26,7 @@ public class AddressServiceTest {
         address.setStateProvince("IL");
         address.setPostalCode("62701");
         address.setCountryCode("US");
-        address.setIsVerified(false);
+        address.setVerified(false);
 
         Address created = addressService.create(address);
         assertNotNull(created.getId());
@@ -37,26 +37,6 @@ public class AddressServiceTest {
         assertNotNull(found);
         assertEquals(created.getId(), found.getId());
         assertEquals("123 Main St", found.getStreetLine1());
-    }
-
-    @Test
-    @Transactional
-    public void testUpdateAddress() {
-        Address address = new Address();
-        address.setStreetLine1("456 Oak Ave");
-        address.setCity("Chicago");
-        address.setStateProvince("IL");
-        address.setPostalCode("60601");
-        address.setCountryCode("US");
-
-        Address created = addressService.create(address);
-        
-        created.setStreetLine1("789 Elm St");
-        created.setCity("Aurora");
-        
-        Address updated = addressService.update(created);
-        assertEquals("789 Elm St", updated.getStreetLine1());
-        assertEquals("Aurora", updated.getCity());
     }
 
     @Test

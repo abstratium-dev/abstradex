@@ -257,4 +257,25 @@ public class Countries {
         new Country("ZM", "Zambia"),
         new Country("ZW", "Zimbabwe")
     };
+    
+    /**
+     * Get country name by ISO 3166-1 alpha-2 code
+     * @param code Two-letter country code (e.g., "US", "GB")
+     * @return Country name or the code itself if not found
+     */
+    public static String getCountryName(String code) {
+        if (code == null || code.trim().isEmpty()) {
+            return code;
+        }
+        
+        String upperCode = code.toUpperCase();
+        for (Country country : countries) {
+            if (country.code().equals(upperCode)) {
+                return country.name();
+            }
+        }
+        
+        // Return the code itself if not found
+        return code;
+    }
 }

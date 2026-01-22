@@ -1,0 +1,23 @@
+<div class="contact-tile">
+  <div class="contact-icon">{{ getContactIcon() }}</div>
+  
+  <div class="contact-info">
+    <div class="contact-type">
+      {{ getContactTypeLabel() }}
+      <span *ngIf="contact.isPrimary" class="badge primary">Primary</span>
+      <span *ngIf="contact.isVerified" class="badge verified">✓ Verified</span>
+    </div>
+    <div class="contact-value">{{ getContactDisplay() }}</div>
+  </div>
+
+  <div class="contact-actions">
+    <button type="button" class="btn-icon" (click)="toggleContextMenu($event)" [class.active]="showContextMenu">
+      ⋮
+    </button>
+    
+    <div class="context-menu" *ngIf="showContextMenu" (click)="closeContextMenu()">
+      <button type="button" (click)="onEdit($event)">Edit</button>
+      <button type="button" class="danger" (click)="onDelete($event)">Delete</button>
+    </div>
+  </div>
+</div>

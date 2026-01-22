@@ -17,8 +17,8 @@ Note: The `latest` tag always refers to the most recently built and pushed image
 
 ```bash
 docker run -it --rm \
-  -p 127.0.0.1:8080:8080 \
-  -p 127.0.0.1:9002:9002 \
+  -p 127.0.0.1:8082:8082 \
+  -p 127.0.0.1:9004:9004 \
   --network abstratium \
   -e QUARKUS_DATASOURCE_JDBC_URL=jdbc:mysql://abstratium-mysql:3306/abstradex \
   -e QUARKUS_DATASOURCE_USERNAME=abstradex \
@@ -26,7 +26,7 @@ docker run -it --rm \
   -e ABSTRATIUM_CLIENT_SECRET="${ABSTRATIUM_CLIENT_SECRET}" \
   -e CSRF_TOKEN_SIGNATURE_KEY="KU/PESqYGdsE0psW7aOaXF/tszvDKCecFo/1u3tSKoQmo4YZfEjZNvUppot1svY1Yj9oub4GSy/5mueqfRlKOw==" \
   -e COOKIE_ENCRYPTION_SECRET="dnde2xhez89RGV0nJHqSR8Khu3SFCE6fxqCgDzu9Hng=" \
-  -e OAUTH_REDIRECT_URI="http://localhost:8080/oauth/callback" \
+  -e OAUTH_REDIRECT_URI="http://localhost:8082/oauth/callback" \
   -e QUARKUS_MANAGEMENT_HOST=0.0.0.0 \
   ghcr.io/abstratium-dev/abstradex:latest
 ```

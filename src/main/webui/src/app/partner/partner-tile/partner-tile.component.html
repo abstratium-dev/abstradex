@@ -7,8 +7,21 @@
       <h3 class="partner-name">{{ getPartnerName() }}</h3>
       <p class="partner-number">{{ partner.partnerNumber }}</p>
       <p class="partner-address" *ngIf="getPartnerAddress()">
-        {{ getPartnerAddress() }}
+        📍 {{ getPartnerAddress() }}
       </p>
+      <div class="partner-contacts" *ngIf="partner.email || partner.phone || partner.website">
+        <p *ngIf="partner.email" class="contact-item">📧 {{ partner.email }}</p>
+        <p *ngIf="partner.phone" class="contact-item">📞 {{ partner.phone }}</p>
+        <p *ngIf="partner.website" class="contact-item">🌐 {{ partner.website }}</p>
+      </div>
+      <div class="partner-tags" *ngIf="partner.tags && partner.tags.length > 0">
+        <span *ngFor="let tag of partner.tags" 
+              class="tag-badge" 
+              [style.background-color]="tag.colorHex || '#6c757d'"
+              [title]="tag.description || tag.tagName">
+          {{ tag.tagName }}
+        </span>
+      </div>
     </div>
     <div class="tile-actions">
       <span class="status-badge" [class.active]="partner.active" [class.inactive]="!partner.active">
@@ -28,6 +41,14 @@
           <button class="context-menu-item" (click)="onManageAddresses($event)">
             <span class="menu-icon">📍</span>
             <span>Manage Addresses</span>
+          </button>
+          <button class="context-menu-item" (click)="onManageContacts($event)">
+            <span class="menu-icon">📞</span>
+            <span>Manage Contacts</span>
+          </button>
+          <button class="context-menu-item" (click)="onManageTags($event)">
+            <span class="menu-icon">🏷️</span>
+            <span>Manage Tags</span>
           </button>
           <button class="context-menu-item context-menu-item-danger" (click)="onDelete($event)">
             <span class="menu-icon">🗑️</span>

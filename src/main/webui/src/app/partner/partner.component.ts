@@ -8,7 +8,6 @@ import { AutofocusDirective } from '../core/autofocus.directive';
 import { PartnerTileComponent } from './partner-tile/partner-tile.component';
 import { Partner, NaturalPerson, LegalEntity, ModelService } from '../model.service';
 import { Controller } from '../controller';
-import { AddressDetail } from '../models/address-detail.model';
 
 @Component({
   selector: 'app-partner',
@@ -47,28 +46,8 @@ export class PartnerComponent implements OnInit {
   private searchTimeout: any;
   @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
 
-  // Partner addresses map
-  partnerAddresses: Map<string, AddressDetail[]> = new Map();
-
   ngOnInit(): void {
-    this.controller.loadPartners();
-    this.loadAllPartnerAddresses();
-  }
-
-  async loadAllPartnerAddresses(): Promise<void> {
-    const partners = this.partners();
-    for (const partner of partners) {
-      try {
-        const addresses = await this.controller.loadPartnerAddresses(partner.id);
-        this.partnerAddresses.set(partner.id, addresses);
-      } catch (err) {
-        console.error(`Failed to load addresses for partner ${partner.id}:`, err);
-      }
-    }
-  }
-
-  getPartnerAddresses(partnerId: string): AddressDetail[] {
-    return this.partnerAddresses.get(partnerId) || [];
+    // Don't load partners automatically - wait for user to search
   }
 
   onSearch(): void {
@@ -79,22 +58,26 @@ export class PartnerComponent implements OnInit {
 
     const trimmedSearch = this.searchTerm.trim();
     
-    // Only search if 3 or more characters, or if empty (to show all)
-    if (trimmedSearch.length === 0 || trimmedSearch.length >= 3) {
+    // Only search if 3 or more characters
+    if (trimmedSearch.length >= 3) {
       // Debounce search to avoid excessive API calls
       this.searchTimeout = setTimeout(() => {
-        this.controller.loadPartners(trimmedSearch || undefined);
+        this.controller.loadPartners(trimmedSearch);
         // Restore focus after search completes
         setTimeout(() => {
           this.searchInput?.nativeElement.focus();
         }, 100);
       }, 300);
+    } else if (trimmedSearch.length === 0) {
+      // Clear results when search is empty
+      this.modelService.setPartners([]);
     }
   }
 
   clearSearch(): void {
     this.searchTerm = '';
-    this.controller.loadPartners();
+    // Clear partners list when search is cleared
+    this.modelService.setPartners([]);
   }
 
   toggleAddForm(): void {
@@ -244,5 +227,13 @@ export class PartnerComponent implements OnInit {
 
   manageAddresses(partner: Partner): void {
     this.router.navigate(['/partners', partner.id, 'addresses']);
+  }
+
+  manageContacts(partner: Partner): void {
+    this.router.navigate(['/partners', partner.id, 'contacts']);
+  }
+
+  manageTags(partner: Partner): void {
+    this.router.navigate(['/partners', partner.id, 'tags']);
   }
 }

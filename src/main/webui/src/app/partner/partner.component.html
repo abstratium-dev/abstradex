@@ -77,6 +77,7 @@
             id="firstName" 
             [(ngModel)]="newNaturalPerson.firstName" 
             name="firstName"
+            autocomplete="given-name"
             placeholder="Enter first name"
             required
             [disabled]="formSubmitting">
@@ -89,6 +90,7 @@
             id="lastName" 
             [(ngModel)]="newNaturalPerson.lastName" 
             name="lastName"
+            autocomplete="family-name"
             placeholder="Enter last name"
             required
             [disabled]="formSubmitting">
@@ -101,6 +103,7 @@
             id="middleName" 
             [(ngModel)]="newNaturalPerson.middleName" 
             name="middleName"
+            autocomplete="additional-name"
             placeholder="Enter middle name (optional)"
             [disabled]="formSubmitting">
         </div>
@@ -112,6 +115,7 @@
             id="title" 
             [(ngModel)]="newNaturalPerson.title" 
             name="title"
+            autocomplete="honorific-prefix"
             placeholder="e.g., Mr., Mrs., Dr."
             [disabled]="formSubmitting">
         </div>
@@ -123,6 +127,7 @@
             id="dateOfBirth" 
             [(ngModel)]="newNaturalPerson.dateOfBirth" 
             name="dateOfBirth"
+            autocomplete="bday"
             [disabled]="formSubmitting">
         </div>
 
@@ -133,6 +138,7 @@
             id="taxId" 
             [(ngModel)]="newNaturalPerson.taxId" 
             name="taxId"
+            autocomplete="off"
             placeholder="Enter tax ID (optional)"
             [disabled]="formSubmitting">
         </div>
@@ -147,6 +153,7 @@
             id="legalName" 
             [(ngModel)]="newLegalEntity.legalName" 
             name="legalName"
+            autocomplete="organization"
             placeholder="Enter legal name"
             required
             [disabled]="formSubmitting">
@@ -159,6 +166,7 @@
             id="tradingName" 
             [(ngModel)]="newLegalEntity.tradingName" 
             name="tradingName"
+            autocomplete="off"
             placeholder="Enter trading name (optional)"
             [disabled]="formSubmitting">
         </div>
@@ -170,6 +178,7 @@
             id="registrationNumber" 
             [(ngModel)]="newLegalEntity.registrationNumber" 
             name="registrationNumber"
+            autocomplete="off"
             placeholder="Enter registration number"
             [disabled]="formSubmitting">
         </div>
@@ -181,6 +190,7 @@
             id="legalTaxId" 
             [(ngModel)]="newLegalEntity.taxId" 
             name="legalTaxId"
+            autocomplete="off"
             placeholder="Enter tax ID"
             [disabled]="formSubmitting">
         </div>
@@ -192,6 +202,7 @@
             id="legalForm" 
             [(ngModel)]="newLegalEntity.legalForm" 
             name="legalForm"
+            autocomplete="off"
             placeholder="e.g., LLC, Corporation, Partnership"
             [disabled]="formSubmitting">
         </div>
@@ -203,6 +214,7 @@
             id="incorporationDate" 
             [(ngModel)]="newLegalEntity.incorporationDate" 
             name="incorporationDate"
+            autocomplete="off"
             [disabled]="formSubmitting">
         </div>
 
@@ -213,6 +225,7 @@
             id="jurisdiction" 
             [(ngModel)]="newLegalEntity.jurisdiction" 
             name="jurisdiction"
+            autocomplete="off"
             placeholder="Enter jurisdiction"
             [disabled]="formSubmitting">
         </div>
@@ -268,10 +281,11 @@
       <partner-tile 
         *ngFor="let partner of partners()" 
         [partner]="partner"
-        [addressDetails]="getPartnerAddresses(partner.id)"
         (delete)="deletePartner($event)"
         (edit)="editPartner($event)"
-        (manageAddresses)="manageAddresses($event)">
+        (manageAddresses)="manageAddresses($event)"
+        (manageContacts)="manageContacts($event)"
+        (manageTags)="manageTags($event)">
       </partner-tile>
     </div>
   </div>

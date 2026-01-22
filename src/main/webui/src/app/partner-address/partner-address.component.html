@@ -1,7 +1,7 @@
 <div class="partner-address-container">
   <div class="header">
     <button class="back-button" (click)="goBack()">← Back</button>
-    <h2>Addresses for Partner {{ partner?.partnerNumber || 'Loading...' }}</h2>
+    <h2>Addresses for Partner {{ getPartnerNumberAndName() || 'Loading...' }}</h2>
   </div>
 
   <div class="actions">

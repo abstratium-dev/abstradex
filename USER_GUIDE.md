@@ -67,8 +67,8 @@ Generate the required secrets for the application.
    docker run -d \
      --name abstradex \
      --network abstratium \
-     -p 127.0.0.1:41080:8080 \
-     -p 127.0.0.1:9002:9002 \
+     -p 127.0.0.1:41082:8082 \
+     -p 127.0.0.1:9004:9004 \
      -e QUARKUS_DATASOURCE_JDBC_URL="jdbc:mysql://abstratium-mysql:3306/abstradex" \
      -e QUARKUS_DATASOURCE_USERNAME="abstradex" \
      -e QUARKUS_DATASOURCE_PASSWORD="YOUR_SECURE_PASSWORD" \
@@ -85,7 +85,7 @@ Generate the required secrets for the application.
    - `CSRF_TOKEN_SIGNATURE_KEY`: CSRF token signature key (min 32 chars, generate with `openssl rand -base64 64`)
    
    **Optional Environment Variables:**
-   - `QUARKUS_OIDC_AUTH_SERVER_URL`: OIDC server URL (default: http://abstratium-abstrauth:8080/realms/abstratium)
+   - `QUARKUS_OIDC_AUTH_SERVER_URL`: OIDC server URL (default: http://abstratium-abstrauth:8082/realms/abstratium)
    - `QUARKUS_OIDC_CLIENT_ID`: OAuth2 client ID (default: abstradex)
    - `QUARKUS_OIDC_CREDENTIALS_SECRET`: OAuth2 client secret
 
@@ -93,13 +93,13 @@ Generate the required secrets for the application.
    ```bash
    docker ps
    docker logs abstradex
-   curl http://localhost:41080/m/health
-   curl http://localhost:41080/m/info
+   curl http://localhost:41081/m/health
+   curl http://localhost:41081/m/info
    ```
 
 4. **Access the application**:
-   - Main application: http://localhost:41080
-   - Management interface: http://localhost:9002/m/info
+   - Main application: http://localhost:41081
+   - Management interface: http://localhost:9004/m/info
 
 ### Prerequisites
 
@@ -118,7 +118,7 @@ None
 
 ## Account and Role Management
 
-This component requires that users can authenticate using an oauth authorization server. That requires that an administrator signs into something like `abstratium-abstrauth` first, to create the oauth2 client. The callback url should be `http://localhost:8080/oauth/callback` and one for the production environment, also ending in `/oauth/callback`. Use the `client_id` and `client_secret` that it provides, to set the values of the environment variables above, so that users can sign in.
+This component requires that users can authenticate using an oauth authorization server. That requires that an administrator signs into something like `abstratium-abstrauth` first, to create the oauth2 client. The callback url should be `http://localhost:8082/oauth/callback` and one for the production environment, also ending in `/oauth/callback`. Use the `client_id` and `client_secret` that it provides, to set the values of the environment variables above, so that users can sign in.
 
 ## Partner Management
 
@@ -133,11 +133,11 @@ Abstradex provides a centralized system for managing your business partners:
 
 This project provides several endpoints for monitoring:
 
-- **Health Check**: `http://localhost:9002/m/health`
+- **Health Check**: `http://localhost:9004/m/health`
   - Returns application health status
   - Includes database connectivity check
 
-- **Info Endpoint**: `http://localhost:9002/m/info`
+- **Info Endpoint**: `http://localhost:9004/m/info`
   - Returns build information, version, and configuration
   - Useful for verifying deployment
 

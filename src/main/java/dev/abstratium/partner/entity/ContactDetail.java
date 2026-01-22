@@ -2,6 +2,8 @@ package dev.abstratium.partner.entity;
 
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -19,6 +21,7 @@ public class ContactDetail {
     @Column(length = 36)
     private String id;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "partner_id", nullable = false)
     private Partner partner;
@@ -32,9 +35,11 @@ public class ContactDetail {
     @Column(name = "label", length = 100)
     private String label;
 
+    @JsonProperty("isPrimary")
     @Column(name = "is_primary", nullable = false)
     private boolean isPrimary = false;
 
+    @JsonProperty("isVerified")
     @Column(name = "is_verified", nullable = false)
     private boolean isVerified = false;
 

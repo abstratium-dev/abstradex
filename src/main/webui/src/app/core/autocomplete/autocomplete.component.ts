@@ -161,7 +161,7 @@ export class AutocompleteComponent implements ControlValueAccessor {
     }
   }
 
-  private performSearch(term: string): void {
+  performSearch(term: string): void {
     if (this.searchTimeout) {
       clearTimeout(this.searchTimeout);
     }
