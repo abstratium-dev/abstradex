@@ -7,6 +7,12 @@ TODOs to be resolved by the developer, NOT THE LLM.
 - search for more todo comments that need to be resolved
 - replace DEMO_ERROR and similar error codes in ErrorCode.java with partner related error codes and actually use them.
 
+
+what is this warning?
+```
+2026-01-23 22:40:38,455 WARN  [io.qua.deployment] (main) [skey:] Run time configuration should not be consumed in Build Steps, use RuntimeValue<io.quarkiverse.resteasy.problem.ProblemRuntimeConfig> in a @Recorder constructor instead at io.quarkiverse.resteasy.problem.ProblemRuntimeConfig config of void io.quarkiverse.resteasy.problem.deployment.ProblemProcessor.applyRuntimeConfig(io.quarkiverse.resteasy.problem.postprocessing.ProblemRecorder,io.quarkiverse.resteasy.problem.ProblemRuntimeConfig) of class io.quarkiverse.resteasy.problem.deployment.ProblemProcessor
+```
+
 ## Tomorrow
 
 - e2e tests
