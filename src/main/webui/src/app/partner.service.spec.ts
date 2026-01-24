@@ -58,7 +58,9 @@ describe('PartnerService', () => {
       const partner: NaturalPerson = {
         id: '1',
         partnerNumber: 'P001',
-        active: true
+        active: true,
+        firstName: undefined,
+        lastName: undefined
       };
       expect(service.getPartnerName(partner)).toBe('Unnamed Person');
     });
@@ -88,7 +90,8 @@ describe('PartnerService', () => {
       const partner: LegalEntity = {
         id: '2',
         partnerNumber: 'P002',
-        active: true
+        active: true,
+        legalName: undefined
       };
       expect(service.getPartnerName(partner)).toBe('Unnamed Entity');
     });
