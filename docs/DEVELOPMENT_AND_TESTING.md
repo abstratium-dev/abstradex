@@ -13,9 +13,10 @@ First add env vars:
 
 That file should contain:
 
-    export ABSTRATIUM_CLIENT_SECRET=... (taken from the abstrauth application)
-    export COOKIE_ENCRYPTION_SECRET=... (generated with `openssl rand -base64 32`)
-    export CSRF_TOKEN_SIGNATURE_KEY=... (generated with `openssl rand -base64 64`)
+    export ABSTRATIUM_CLIENT_ID="abstratium-TODO"
+    export ABSTRATIUM_CLIENT_SECRET="... (taken from the abstrauth application)"
+    export CSRF_TOKEN_SIGNATURE_KEY="... (generated with `openssl rand -base64 64`)"
+    export COOKIE_ENCRYPTION_SECRET="... (generated with `openssl rand -base64 32`)"
 
 The application uses Quarkus. Run it with either `./mvnw quarkus:dev` or `quarkus dev` if you have installed the Quarkus CLI.
 
