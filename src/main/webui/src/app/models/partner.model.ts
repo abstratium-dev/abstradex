@@ -5,7 +5,7 @@ export interface PartnerType {
 }
 
 export interface Tag {
-  id: string;
+  id?: string;
   tagName: string;
   colorHex?: string;
   description?: string;

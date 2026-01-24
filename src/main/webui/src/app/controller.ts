@@ -4,6 +4,8 @@ import { firstValueFrom } from 'rxjs';
 import { Address, Country, ModelService, Partner } from './model.service';
 import { AddressDetail } from './models/address-detail.model';
 import { ContactDetail } from './models/contact-detail.model';
+import { Tag } from './models/partner.model';
+import { PartnerTag } from './models/partner-tag.model';
 
 @Injectable({
   providedIn: 'root',
@@ -234,6 +236,77 @@ export class Controller {
       );
     } catch (error) {
       console.error('Failed to remove contact from partner:', error);
+      throw error;
+    }
+  }
+
+  // Tag Management
+  async loadTags(searchTerm?: string): Promise<Tag[]> {
+    try {
+      const url = searchTerm && searchTerm.trim() 
+        ? `/api/tag?search=${encodeURIComponent(searchTerm)}`
+        : '/api/tag';
+      return await firstValueFrom(
+        this.http.get<Tag[]>(url)
+      );
+    } catch (error) {
+      console.error('Failed to load tags:', error);
+      throw error;
+    }
+  }
+
+  async createTag(tag: Tag): Promise<Tag> {
+    try {
+      return await firstValueFrom(
+        this.http.post<Tag>('/api/tag', tag)
+      );
+    } catch (error) {
+      console.error('Failed to create tag:', error);
+      throw error;
+    }
+  }
+
+  async deleteTag(tagId: string): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.http.delete<void>(`/api/tag/${tagId}`)
+      );
+    } catch (error) {
+      console.error('Failed to delete tag:', error);
+      throw error;
+    }
+  }
+
+  // Partner Tag Management
+  async loadPartnerTags(partnerId: string): Promise<Tag[]> {
+    try {
+      return await firstValueFrom(
+        this.http.get<Tag[]>(`/api/partner/${partnerId}/tag`)
+      );
+    } catch (error) {
+      console.error('Failed to load partner tags:', error);
+      throw error;
+    }
+  }
+
+  async addTagToPartner(partnerId: string, tagId: string): Promise<PartnerTag> {
+    try {
+      return await firstValueFrom(
+        this.http.post<PartnerTag>(`/api/partner/${partnerId}/tag/${tagId}`, {})
+      );
+    } catch (error) {
+      console.error('Failed to add tag to partner:', error);
+      throw error;
+    }
+  }
+
+  async removeTagFromPartner(partnerId: string, tagId: string): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.http.delete<void>(`/api/partner/${partnerId}/tag/${tagId}`)
+      );
+    } catch (error) {
+      console.error('Failed to remove tag from partner:', error);
       throw error;
     }
   }

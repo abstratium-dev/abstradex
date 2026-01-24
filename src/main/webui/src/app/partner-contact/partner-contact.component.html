@@ -1,0 +1,110 @@
+<div class="container">
+  <div class="page-header">
+    <h2>Contacts for Partner {{ getPartnerNumberAndName() || 'Loading...' }}</h2>
+    <button class="btn-secondary" (click)="goBack()">← Back</button>
+  </div>
+
+  <div class="form-actions">
+    <button class="btn-primary" (click)="toggleAddForm()">
+      {{ showForm ? 'Cancel' : (editingContact ? 'Cancel Edit' : '+ Add Contact') }}
+    </button>
+  </div>
+
+  <!-- Add/Edit Contact Form -->
+  <div class="form-container" *ngIf="showForm">
+    <h3>{{ editingContact ? 'Edit Contact' : 'Add New Contact' }}</h3>
+    
+    <div class="form-group">
+      <label for="contactType">Contact Type *</label>
+      <select id="contactType" [(ngModel)]="contactForm.contactType" required>
+        <option *ngFor="let type of contactTypes" [value]="type">{{ type }}</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="contactValue">Contact Value *</label>
+      <input 
+        type="text" 
+        id="contactValue" 
+        [(ngModel)]="contactForm.contactValue" 
+        placeholder="Enter contact value"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="label">Label</label>
+      <input 
+        type="text" 
+        id="label" 
+        [(ngModel)]="contactForm.label" 
+        placeholder="e.g., Work, Personal, Main Office"
+      />
+    </div>
+
+    <div class="checkbox-group">
+      <label>
+        <input type="checkbox" [(ngModel)]="contactForm.isPrimary">
+        Primary Contact
+      </label>
+    </div>
+
+    <div class="checkbox-group">
+      <label>
+        <input type="checkbox" [(ngModel)]="contactForm.isVerified">
+        Verified
+      </label>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn-primary" (click)="onSubmit()">
+        {{ editingContact ? 'Update Contact' : 'Add Contact' }}
+      </button>
+      <button class="btn-secondary" (click)="toggleAddForm()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading"><p>Loading partner contacts...</p></div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="error-box">
+    <p>{{ error }}</p>
+    <button class="btn-primary" (click)="loadPartnerContacts()">Retry</button>
+  </div>
+
+  <!-- Partner Contacts List -->
+  <div *ngIf="!loading && !error">
+    <h3>Partner Contacts ({{ partnerContacts.length }})</h3>
+    
+    <div *ngIf="partnerContacts.length === 0" class="info-message">
+      <p>No contacts assigned to this partner yet.</p>
+      <p>Click "Add Contact" to create a new contact.</p>
+    </div>
+
+    <div class="contact-grid">
+      <div *ngFor="let contact of partnerContacts" class="contact-tile">
+        <div class="contact-info">
+          <div class="contact-icon">{{ getContactTypeIcon(contact.contactType || '') }}</div>
+          <div class="contact-text">
+            <div class="contact-value">{{ contact.contactValue }}</div>
+            <div class="contact-meta">
+              <span class="contact-type">{{ contact.contactType }}</span>
+              <span *ngIf="contact.label" class="contact-label">{{ contact.label }}</span>
+            </div>
+            <div class="badge-list">
+              <span class="badge" [class.badge-primary]="contact.isPrimary" [class.badge-secondary]="!contact.isPrimary">
+                {{ contact.isPrimary ? 'PRIMARY' : 'SECONDARY' }}
+              </span>
+              <span class="badge badge-success" *ngIf="contact.isVerified">VERIFIED</span>
+            </div>
+          </div>
+        </div>
+        <div class="contact-actions">
+          <button class="btn-secondary" (click)="onEdit(contact)">Edit</button>
+          <button class="btn-danger" (click)="onDelete(contact)">Remove</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

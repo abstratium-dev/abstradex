@@ -1,0 +1,130 @@
+<div class="container">
+  <div class="page-header">
+    <h2>Tags for Partner {{ getPartnerNumberAndName() || 'Loading...' }}</h2>
+    <button class="btn-secondary" (click)="goBack()">← Back</button>
+  </div>
+
+  <div class="form-actions">
+    <button class="btn-primary" (click)="toggleAddForm()">
+      {{ showAddForm ? 'Cancel' : '+ Add Existing Tag' }}
+    </button>
+    <button class="btn-secondary" (click)="toggleCreateForm()">
+      {{ showCreateForm ? 'Cancel' : '+ Create New Tag' }}
+    </button>
+  </div>
+
+  <!-- Add Existing Tag Form -->
+  <div class="form-container" *ngIf="showAddForm">
+    <h3>Add Existing Tag to Partner</h3>
+    
+    <div class="form-group">
+      <label for="tagSelect">Select Tag *</label>
+      <select id="tagSelect" [(ngModel)]="selectedTagId" required>
+        <option value="">-- Select a tag --</option>
+        <option *ngFor="let tag of getAvailableTags()" [value]="tag.id">
+          {{ tag.tagName }}
+        </option>
+      </select>
+      <small class="form-hint" *ngIf="getAvailableTags().length === 0">
+        All available tags have already been added to this partner.
+      </small>
+    </div>
+
+    <div class="form-actions">
+      <button 
+        class="btn-primary" 
+        (click)="onAddExistingTag()"
+        [disabled]="!selectedTagId"
+      >
+        Add Tag
+      </button>
+      <button class="btn-secondary" (click)="toggleAddForm()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Create New Tag Form -->
+  <div class="form-container" *ngIf="showCreateForm">
+    <h3>Create New Tag</h3>
+    
+    <div class="form-group">
+      <label for="tagName">Tag Name *</label>
+      <input 
+        type="text" 
+        id="tagName" 
+        [(ngModel)]="newTag.tagName" 
+        placeholder="Enter tag name"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="colorHex">Color</label>
+      <div class="color-input-group">
+        <input 
+          type="color" 
+          id="colorHex" 
+          [(ngModel)]="newTag.colorHex"
+          class="color-picker"
+        />
+        <input 
+          type="text" 
+          [(ngModel)]="newTag.colorHex" 
+          placeholder="#3B82F6"
+          class="color-text"
+        />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea 
+        id="description" 
+        [(ngModel)]="newTag.description" 
+        placeholder="Enter tag description (optional)"
+        rows="3"
+      ></textarea>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn-primary" (click)="onCreateNewTag()">
+        Create and Add Tag
+      </button>
+      <button class="btn-secondary" (click)="toggleCreateForm()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading"><p>Loading partner tags...</p></div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="error-box">
+    <p>{{ error }}</p>
+    <button class="btn-primary" (click)="loadPartnerTags()">Retry</button>
+  </div>
+
+  <!-- Partner Tags List -->
+  <div *ngIf="!loading && !error">
+    <h3>Partner Tags ({{ partnerTags.length }})</h3>
+    
+    <div *ngIf="partnerTags.length === 0" class="info-message">
+      <p>No tags assigned to this partner yet.</p>
+      <p>Click "Add Existing Tag" to assign a tag or "Create New Tag" to create one.</p>
+    </div>
+
+    <div class="tag-grid">
+      <div *ngFor="let tag of partnerTags" class="tag-tile">
+        <div class="tag-info">
+          <div class="tag-badge" [ngStyle]="getTagStyle(tag)">
+            {{ tag.tagName }}
+          </div>
+          <div class="tag-details" *ngIf="tag.description">
+            <small>{{ tag.description }}</small>
+          </div>
+        </div>
+        <div class="tag-actions">
+          <button class="btn-danger" (click)="onRemoveTag(tag)">Remove</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

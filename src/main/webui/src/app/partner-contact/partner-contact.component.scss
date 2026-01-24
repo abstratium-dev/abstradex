@@ -1,0 +1,87 @@
+// Most styles are in global styles.scss
+// Only contact-specific overrides here
+
+.checkbox-group {
+  margin-bottom: 1rem;
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    color: var(--color-text-primary);
+
+    input[type="checkbox"] {
+      width: auto;
+      cursor: pointer;
+    }
+  }
+}
+
+.contact-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.contact-tile {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 8px;
+  transition: box-shadow 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 2px 4px var(--shadow-sm);
+  }
+
+  .contact-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .contact-icon {
+      font-size: 2rem;
+    }
+
+    .contact-text {
+      flex: 1;
+
+      .contact-value {
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: var(--color-text-primary);
+        margin-bottom: 0.25rem;
+      }
+
+      .contact-meta {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--color-text-secondary);
+
+        .contact-type {
+          font-weight: 500;
+        }
+
+        .contact-label {
+          font-style: italic;
+        }
+      }
+
+      .contact-badges {
+        display: flex;
+        gap: 0.5rem;
+      }
+    }
+  }
+
+  .contact-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+}

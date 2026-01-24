@@ -4,6 +4,8 @@ TODOs to be resolved by the developer, NOT THE LLM.
 
 ## Today
 
+- in order to integrate with other microservices, we need to export data in a shareable way. apache arrow format? csv?
+- sync upstream (test port)
 - search for more todo comments that need to be resolved
 - replace DEMO_ERROR and similar error codes in ErrorCode.java with partner related error codes and actually use them.
 
@@ -16,6 +18,9 @@ what is this warning?
 ## Tomorrow
 
 - e2e tests
+- ability to search by tag
+- double click partner tile to open a view that shows all of their info on one screen
+- ability to search by contact detail
 - add relationships between partners T_partner_relationship
 - add tags to partners T_partner_tag and T_tag
 - do we need T_sme_relationship? we can use tags

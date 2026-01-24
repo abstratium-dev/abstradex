@@ -1,0 +1,65 @@
+// Most styles are in global styles.scss
+// Only tag-specific overrides here
+
+.color-input-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+
+  .color-picker {
+    width: 60px;
+    height: 40px;
+    padding: 0.25rem;
+    cursor: pointer;
+  }
+
+  .color-text {
+    flex: 1;
+  }
+}
+
+.tag-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.tag-tile {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 8px;
+  transition: box-shadow 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 2px 4px var(--shadow-sm);
+  }
+
+  .tag-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .tag-badge {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      white-space: nowrap;
+    }
+
+    .tag-details {
+      flex: 1;
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+    }
+  }
+
+  .tag-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+}

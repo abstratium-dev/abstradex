@@ -972,6 +972,24 @@ button {
   color: white;
 }
 
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+
+  &.active {
+    background: var(--color-success);
+    color: white;
+  }
+
+  &.inactive {
+    background: var(--color-text-tertiary);
+    color: white;
+  }
+}
+
 /* ===== FILTER SECTION ===== */
 .filter-section {
   margin-bottom: 2rem;
@@ -1145,6 +1163,24 @@ button {
   
   .value {
     color: var(--color-text-primary);
+  }
+}
+
+.tile-body {
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border-primary);
+  
+  .notes {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    font-style: italic;
+  }
+  
+  .metadata {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--color-text-tertiary);
   }
 }
 
