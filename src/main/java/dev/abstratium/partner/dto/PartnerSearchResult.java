@@ -14,6 +14,8 @@ public class PartnerSearchResult {
     private String partnerType;
     private boolean active;
     private String notes;
+    private String createdAt;
+    private String updatedAt;
     
     // Natural Person fields
     private String firstName;
@@ -24,6 +26,7 @@ public class PartnerSearchResult {
     private String legalName;
     private String jurisdiction;
     private String registrationNumber;
+    private String incorporationDate;
     
     // Address line (formatted from preferred address)
     private String addressLine;
@@ -128,6 +131,14 @@ public class PartnerSearchResult {
         this.registrationNumber = registrationNumber;
     }
     
+    public String getIncorporationDate() {
+        return incorporationDate;
+    }
+    
+    public void setIncorporationDate(String incorporationDate) {
+        this.incorporationDate = incorporationDate;
+    }
+    
     public String getAddressLine() {
         return addressLine;
     }
@@ -166,5 +177,21 @@ public class PartnerSearchResult {
     
     public void setTags(List<Tag> tags) {
         this.tags = tags;
+    }
+    
+    public String getCreatedAt() {
+        return createdAt;
+    }
+    
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
+    }
+    
+    public String getUpdatedAt() {
+        return updatedAt;
+    }
+    
+    public void setUpdatedAt(String updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

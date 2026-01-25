@@ -7,17 +7,15 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.PrimaryKeyJoinColumn;
-import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "T_natural_person")
-@PrimaryKeyJoinColumn(name = "partner_id")
+@DiscriminatorValue(PartnerDiscriminator.NATURAL_PERSON)
 public class NaturalPerson extends Partner {
 
     @Column(name = "first_name", length = 100)
@@ -35,7 +33,7 @@ public class NaturalPerson extends Partner {
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
-    @Column(name = "tax_id", length = 50)
+    @Column(name = "tax_id_np", length = 50) // Renamed to avoid conflict with LegalEntity.taxId
     private String taxId;
 
     @Column(name = "preferred_language", length = 10)

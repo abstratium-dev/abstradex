@@ -1061,6 +1061,7 @@ button {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
   gap: 1.5rem;
+  align-items: stretch;
 }
 
 .tile {
@@ -1070,6 +1071,8 @@ button {
   padding: 1.5rem;
   box-shadow: 0 2px 4px var(--shadow-sm);
   transition: all 0.3s ease;
+  height: 100%; // Fill the grid cell to ensure equal height
+  box-sizing: border-box; // Include padding and border in height calculation
   
   &:hover {
     box-shadow: 0 4px 12px var(--shadow-md);

@@ -4,8 +4,6 @@ import java.util.List;
 
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import dev.abstratium.core.Roles;
 import dev.abstratium.partner.boundary.dto.PartnerCreateRequest;
 import dev.abstratium.partner.dto.PartnerSearchResult;
@@ -34,15 +32,12 @@ public class PartnerResource {
     @Inject
     PartnerService partnerService;
 
-    @Inject
-    ObjectMapper objectMapper;
-
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({Roles.USER})
     public List<PartnerSearchResult> getAll(@QueryParam("search") String searchTerm) {
-        // Always use searchWithAddress to include address lines
-        return partnerService.searchWithAddress(searchTerm);
+        // Always use searchWithAddressContactDetailsAndTags to include address lines, contact details, and tags
+        return partnerService.searchWithAddressContactDetailsAndTags(searchTerm);
     }
 
     @GET
@@ -62,18 +57,7 @@ public class PartnerResource {
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({Roles.USER})
     public Partner create(PartnerCreateRequest request) {
-        // Determine partner type based on fields present in the request
-        Partner partner;
-        if (request.has("firstName") || request.has("lastName")) {
-            // Natural Person
-            partner = objectMapper.convertValue(request.getProperties(), NaturalPerson.class);
-        } else if (request.has("legalName")) {
-            // Legal Entity
-            partner = objectMapper.convertValue(request.getProperties(), LegalEntity.class);
-        } else {
-            throw new IllegalArgumentException("Cannot determine partner type from request. " +
-                "Provide either firstName/lastName for Natural Person or legalName for Legal Entity.");
-        }
+        Partner partner = convertRequestToPartner(request);
         return partnerService.create(partner);
     }
 
@@ -82,19 +66,49 @@ public class PartnerResource {
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({Roles.USER})
     public Partner update(PartnerCreateRequest request) {
-        // Determine partner type based on fields present in the request
-        Partner partner;
-        if (request.has("firstName") || request.has("lastName")) {
-            // Natural Person
-            partner = objectMapper.convertValue(request.getProperties(), NaturalPerson.class);
-        } else if (request.has("legalName")) {
-            // Legal Entity
-            partner = objectMapper.convertValue(request.getProperties(), LegalEntity.class);
+        Partner partner = convertRequestToPartner(request);
+        return partnerService.update(partner);
+    }
+    
+    /**
+     * Convert PartnerCreateRequest DTO to appropriate Partner entity.
+     * Uses explicit field mapping instead of reflection for native compilation compatibility.
+     */
+    private Partner convertRequestToPartner(PartnerCreateRequest request) {
+        // Determine partner type based on fields present
+        boolean isNaturalPerson = request.getFirstName() != null || request.getLastName() != null;
+        boolean isLegalEntity = request.getLegalName() != null;
+        
+        if (isNaturalPerson) {
+            NaturalPerson np = new NaturalPerson();
+            np.setId(request.getId());
+            np.setActive(request.getActive() != null ? request.getActive() : true);
+            np.setNotes(request.getNotes());
+            np.setTitle(request.getTitle());
+            np.setFirstName(request.getFirstName());
+            np.setMiddleName(request.getMiddleName());
+            np.setLastName(request.getLastName());
+            np.setDateOfBirth(request.getDateOfBirth());
+            np.setTaxId(request.getTaxIdNp());
+            np.setPreferredLanguage(request.getPreferredLanguage());
+            return np;
+        } else if (isLegalEntity) {
+            LegalEntity le = new LegalEntity();
+            le.setId(request.getId());
+            le.setActive(request.getActive() != null ? request.getActive() : true);
+            le.setNotes(request.getNotes());
+            le.setLegalName(request.getLegalName());
+            le.setTradingName(request.getTradingName());
+            le.setRegistrationNumber(request.getRegistrationNumber());
+            le.setTaxId(request.getTaxId());
+            le.setLegalForm(request.getLegalForm());
+            le.setIncorporationDate(request.getIncorporationDate());
+            le.setJurisdiction(request.getJurisdiction());
+            return le;
         } else {
             throw new IllegalArgumentException("Cannot determine partner type from request. " +
                 "Provide either firstName/lastName for Natural Person or legalName for Legal Entity.");
         }
-        return partnerService.update(partner);
     }
 
     @DELETE

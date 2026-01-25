@@ -7,15 +7,13 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.PrimaryKeyJoinColumn;
-import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "T_legal_entity")
-@PrimaryKeyJoinColumn(name = "partner_id")
+@DiscriminatorValue(PartnerDiscriminator.LEGAL_ENTITY)
 public class LegalEntity extends Partner {
 
     @Column(name = "legal_name", length = 255)

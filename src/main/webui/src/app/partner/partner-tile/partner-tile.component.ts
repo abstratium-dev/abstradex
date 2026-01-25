@@ -18,6 +18,7 @@ export class PartnerTileComponent {
   @Output() manageAddresses = new EventEmitter<Partner>();
   @Output() manageContacts = new EventEmitter<Partner>();
   @Output() manageTags = new EventEmitter<Partner>();
+  @Output() viewOverview = new EventEmitter<Partner>();
 
   showContextMenu = false;
 
@@ -58,6 +59,17 @@ export class PartnerTileComponent {
     event.stopPropagation();
     this.closeContextMenu();
     this.manageTags.emit(this.partner);
+  }
+
+  onDoubleClick(): void {
+    this.closeContextMenu();
+    this.viewOverview.emit(this.partner);
+  }
+
+  onViewOverview(event: Event): void {
+    event.stopPropagation();
+    this.closeContextMenu();
+    this.viewOverview.emit(this.partner);
   }
 
   getPartnerIcon(): string {

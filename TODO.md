@@ -4,7 +4,23 @@ TODOs to be resolved by the developer, NOT THE LLM.
 
 ## Today
 
+- need to be able to edit tags - need a route and link in the header for that
+- 500 when editing legal entity
+- when adding/editing contact details, the type should influence the html5 input field (e.g. phone number should be a phone number input field)
+- the contact details displayed in partner-tile and partner-overview should be links, e.g. email->mailto, phone->tel, website->anchor, etc.
+
 - in order to integrate with other microservices, we need to export data in a shareable way. apache arrow format? csv?
+
+    Minor Issue: PartnerExportServiceTest (3 failures)
+    These failures are pre-existing transaction/visibility issues unrelated to our changes:
+
+    Tests create partners in 
+    Transactional
+    methods
+    Export service runs in same transaction but partners aren't visible
+    This is a test design issue, not a code issue
+
+
 - sync upstream (test port)
 - search for more todo comments that need to be resolved
 - replace DEMO_ERROR and similar error codes in ErrorCode.java with partner related error codes and actually use them.

@@ -10,6 +10,7 @@ import dev.abstratium.partner.entity.ContactDetail;
 import dev.abstratium.partner.entity.LegalEntity;
 import dev.abstratium.partner.entity.NaturalPerson;
 import dev.abstratium.partner.entity.Partner;
+import dev.abstratium.partner.entity.PartnerDiscriminator;
 import dev.abstratium.partner.entity.Tag;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -22,6 +23,9 @@ public class PartnerService {
     @Inject
     EntityManager em;
 
+    @Inject
+    PartnerExportService exportService;
+
     @Transactional
     public List<Partner> findAll() {
         return em.createQuery("SELECT p FROM Partner p", Partner.class).getResultList();
@@ -30,7 +34,7 @@ public class PartnerService {
     @Transactional
     public Partner findById(String id) {
         Partner partner = em.createQuery(
-            "SELECT p FROM Partner p LEFT JOIN FETCH p.partnerType WHERE p.id = :id", 
+            "SELECT p FROM Partner p WHERE p.id = :id", 
             Partner.class)
             .setParameter("id", id)
             .getResultStream()
@@ -57,13 +61,17 @@ public class PartnerService {
         
         em.persist(partner);
         em.flush();
+        
+        // Export partners to file
+        exportService.exportPartnersToFile();
+        
         return partner;
     }
 
     @Transactional
     public Partner update(Partner partner) {
         Partner existing = em.createQuery(
-            "SELECT p FROM Partner p LEFT JOIN FETCH p.partnerType WHERE p.id = :id", 
+            "SELECT p FROM Partner p WHERE p.id = :id", 
             Partner.class)
             .setParameter("id", partner.getId())
             .getResultStream()
@@ -77,6 +85,10 @@ public class PartnerService {
         }
         Partner updated = em.merge(partner);
         em.flush();
+        
+        // Export partners to file
+        exportService.exportPartnersToFile();
+        
         // Re-fetch to get the updated entity with partnerType loaded
         return findById(updated.getId());
     }
@@ -86,6 +98,10 @@ public class PartnerService {
         Partner partner = em.find(Partner.class, id);
         if (partner != null) {
             em.remove(partner);
+            em.flush();
+            
+            // Export partners to file
+            exportService.exportPartnersToFile();
         }
     }
 
@@ -100,7 +116,6 @@ public class PartnerService {
         // Search across partner fields and subclass fields (NaturalPerson and LegalEntity)
         String jpql = """
             SELECT DISTINCT p FROM Partner p
-            LEFT JOIN FETCH p.partnerType
             WHERE CAST(p.partnerNumberSeq AS string) LIKE :search
                OR LOWER(p.notes) LIKE :search
                OR (TYPE(p) = NaturalPerson AND (
@@ -121,7 +136,7 @@ public class PartnerService {
     }
     
     @Transactional
-    public List<PartnerSearchResult> searchWithAddress(String searchTerm) {
+    public List<PartnerSearchResult> searchWithAddressContactDetailsAndTags(String searchTerm) {
         List<Partner> partners = search(searchTerm);
         
         return partners.stream()
@@ -135,20 +150,23 @@ public class PartnerService {
         result.setPartnerNumber(partner.getPartnerNumber());
         result.setActive(partner.isActive());
         result.setNotes(partner.getNotes());
+        result.setCreatedAt(partner.getCreatedAt() != null ? partner.getCreatedAt().toString() : null);
+        result.setUpdatedAt(partner.getUpdatedAt() != null ? partner.getUpdatedAt().toString() : null);
         
         // Set type-specific fields
         if (partner instanceof NaturalPerson) {
             NaturalPerson np = (NaturalPerson) partner;
-            result.setPartnerType("NaturalPerson");
+            result.setPartnerType(PartnerDiscriminator.NATURAL_PERSON);
             result.setFirstName(np.getFirstName());
             result.setLastName(np.getLastName());
             result.setDateOfBirth(np.getDateOfBirth() != null ? np.getDateOfBirth().toString() : null);
         } else if (partner instanceof LegalEntity) {
             LegalEntity le = (LegalEntity) partner;
-            result.setPartnerType("LegalEntity");
+            result.setPartnerType(PartnerDiscriminator.LEGAL_ENTITY);
             result.setLegalName(le.getLegalName());
             result.setJurisdiction(le.getJurisdiction());
             result.setRegistrationNumber(le.getRegistrationNumber());
+            result.setIncorporationDate(le.getIncorporationDate() != null ? le.getIncorporationDate().toString() : null);
         }
         
         // Load and format preferred address using lazy loading

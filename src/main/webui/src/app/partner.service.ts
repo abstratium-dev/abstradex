@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { LegalEntity, NaturalPerson, Partner } from './models';
+import { PartnerDiscriminator } from './models/partner-discriminator';
 
 @Injectable({
   providedIn: 'root',
@@ -11,32 +12,24 @@ export class PartnerService {
     const np = partner as NaturalPerson;
     const le = partner as LegalEntity;
 
-    // Check if it's a NaturalPerson by checking for any NaturalPerson-specific fields
-    if ('firstName' in partner || 'lastName' in partner || 'middleName' in partner || 
-        'title' in partner || 'dateOfBirth' in partner) {
+    // Use partnerType discriminator from backend if available
+    if (partner.partnerType === PartnerDiscriminator.NATURAL_PERSON) {
       const parts = [np.title, np.firstName, np.middleName, np.lastName].filter(p => p);
-      return parts.join(' ') || 'Unnamed Person';
-    } 
-    // Check if it's a LegalEntity by checking for any LegalEntity-specific fields
-    else if ('legalName' in partner || 'tradingName' in partner || 
-             'registrationNumber' in partner || 'jurisdiction' in partner || 'legalForm' in partner) {
-      return le.tradingName || le.legalName || 'Unnamed Entity';
+      return parts.join(' ') || 'Unnamed Natural Person';
+    } else if (partner.partnerType === PartnerDiscriminator.LEGAL_ENTITY) {
+      return le.tradingName || le.legalName || 'Unnamed Legal Entity';
     }
     return 'Unknown type of partner';
   }
 
   getPartnerIcon(partner: Partner): string {
-    // Check if it's a NaturalPerson by checking for any NaturalPerson-specific fields
-    if ('firstName' in partner || 'lastName' in partner || 'middleName' in partner || 
-        'title' in partner || 'dateOfBirth' in partner) {
+    // Use the partnerType discriminator field from backend
+    if (partner.partnerType === PartnerDiscriminator.NATURAL_PERSON) {
       return '👤';
-    } 
-    // Check if it's a LegalEntity by checking for any LegalEntity-specific fields
-    else if ('legalName' in partner || 'tradingName' in partner || 
-             'registrationNumber' in partner || 'jurisdiction' in partner || 'legalForm' in partner) {
+    } else if (partner.partnerType === PartnerDiscriminator.LEGAL_ENTITY) {
       return '🏢';
     }
-    return '❓';
+    return '❓'; // Unknown type
   }
 
 }

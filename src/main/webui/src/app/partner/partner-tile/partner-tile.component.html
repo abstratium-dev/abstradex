@@ -1,4 +1,4 @@
-<div class="tile" (click)="closeContextMenu()">
+<div class="tile" (click)="closeContextMenu()" (dblclick)="onDoubleClick()">
   <div class="tile-header">
     <div class="partner-icon">
       <span class="type-icon-large">{{ getPartnerIcon() }}</span>
@@ -34,6 +34,10 @@
           ⋮
         </button>
         <div class="context-menu" *ngIf="showContextMenu">
+          <button class="context-menu-item" (click)="onViewOverview($event)">
+            <span class="menu-icon">👁️</span>
+            <span>View Overview</span>
+          </button>
           <button class="context-menu-item" (click)="onEdit($event)">
             <span class="menu-icon">✏️</span>
             <span>Edit Partner</span>

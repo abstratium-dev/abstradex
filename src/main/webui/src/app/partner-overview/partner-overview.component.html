@@ -1,0 +1,197 @@
+<div class="container">
+  <div class="page-header">
+    <h2>Partner Overview</h2>
+    <button class="btn-secondary" (click)="goBack()">← Back to Partners</button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading"><p>Loading partner details...</p></div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="error-box">
+    <p>{{ error }}</p>
+    <button class="btn-primary" (click)="goBack()">Back to Partners</button>
+  </div>
+
+  <!-- Partner Details -->
+  <div *ngIf="!loading && !error && partner" class="partner-overview">
+    <!-- Header Section -->
+    <div class="overview-header">
+      <div class="partner-icon-large">
+        <span class="type-icon-xlarge">{{ getPartnerIcon() }}</span>
+      </div>
+      <div class="partner-title">
+        <h1>{{ getPartnerName() }}</h1>
+        <p class="partner-number">{{ partner.partnerNumber }}</p>
+        <span class="status-badge" [class.active]="partner.active" [class.inactive]="!partner.active">
+          {{ partner.active ? 'Active' : 'Inactive' }}
+        </span>
+      </div>
+      <button class="btn-secondary" (click)="editPartner()">
+        ✏️
+      </button>
+    </div>
+
+    <!-- Basic Information -->
+    <div class="info-section">
+      <h3>Basic Information</h3>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="label">Partner Number:</span>
+          <span class="value">{{ partner.partnerNumber }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Status:</span>
+          <span class="value">{{ partner.active ? 'Active' : 'Inactive' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Created:</span>
+          <span class="value">{{ formatDate(partner.createdAt) }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Updated:</span>
+          <span class="value">{{ formatDate(partner.updatedAt) }}</span>
+        </div>
+        <div class="info-item" *ngIf="partner.partnerType">
+          <span class="label">Partner Type:</span>
+          <span class="value">{{ isNaturalPerson() ? 'Natural Person' : 'Legal Entity' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Natural Person Details -->
+    <div class="info-section" *ngIf="isNaturalPerson() && (asNaturalPerson().firstName || asNaturalPerson().lastName || asNaturalPerson().title || asNaturalPerson().middleName || asNaturalPerson().dateOfBirth || asNaturalPerson().taxId || asNaturalPerson().preferredLanguage)">
+      <div class="section-header">
+        <h3>Personal Information</h3>
+      </div>
+      <div class="info-grid">
+        <div class="info-item" *ngIf="asNaturalPerson().title">
+          <span class="label">Title:</span>
+          <span class="value">{{ asNaturalPerson().title }}</span>
+        </div>
+        <div class="info-item" *ngIf="asNaturalPerson().firstName">
+          <span class="label">First Name:</span>
+          <span class="value">{{ asNaturalPerson().firstName }}</span>
+        </div>
+        <div class="info-item" *ngIf="asNaturalPerson().middleName">
+          <span class="label">Middle Name:</span>
+          <span class="value">{{ asNaturalPerson().middleName }}</span>
+        </div>
+        <div class="info-item" *ngIf="asNaturalPerson().lastName">
+          <span class="label">Last Name:</span>
+          <span class="value">{{ asNaturalPerson().lastName }}</span>
+        </div>
+        <div class="info-item" *ngIf="asNaturalPerson().dateOfBirth">
+          <span class="label">Date of Birth:</span>
+          <span class="value">{{ formatDate(asNaturalPerson().dateOfBirth) }}</span>
+        </div>
+        <div class="info-item" *ngIf="asNaturalPerson().taxId">
+          <span class="label">Tax ID:</span>
+          <span class="value">{{ asNaturalPerson().taxId }}</span>
+        </div>
+        <div class="info-item" *ngIf="asNaturalPerson().preferredLanguage">
+          <span class="label">Preferred Language:</span>
+          <span class="value">{{ asNaturalPerson().preferredLanguage }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Legal Entity Details -->
+    <div class="info-section" *ngIf="isLegalEntity() && (asLegalEntity().legalName || asLegalEntity().tradingName || asLegalEntity().registrationNumber || asLegalEntity().taxId || asLegalEntity().legalForm || asLegalEntity().incorporationDate || asLegalEntity().jurisdiction)">
+      <div class="section-header">
+        <h3>Company Information</h3>
+      </div>
+      <div class="info-grid">
+        <div class="info-item" *ngIf="asLegalEntity().legalName">
+          <span class="label">Legal Name:</span>
+          <span class="value">{{ asLegalEntity().legalName }}</span>
+        </div>
+        <div class="info-item" *ngIf="asLegalEntity().tradingName">
+          <span class="label">Trading Name:</span>
+          <span class="value">{{ asLegalEntity().tradingName }}</span>
+        </div>
+        <div class="info-item" *ngIf="asLegalEntity().registrationNumber">
+          <span class="label">Registration Number:</span>
+          <span class="value">{{ asLegalEntity().registrationNumber }}</span>
+        </div>
+        <div class="info-item" *ngIf="asLegalEntity().taxId">
+          <span class="label">Tax ID:</span>
+          <span class="value">{{ asLegalEntity().taxId }}</span>
+        </div>
+        <div class="info-item" *ngIf="asLegalEntity().legalForm">
+          <span class="label">Legal Form:</span>
+          <span class="value">{{ asLegalEntity().legalForm }}</span>
+        </div>
+        <div class="info-item" *ngIf="asLegalEntity().incorporationDate">
+          <span class="label">Incorporation Date:</span>
+          <span class="value">{{ formatDate(asLegalEntity().incorporationDate) }}</span>
+        </div>
+        <div class="info-item" *ngIf="asLegalEntity().jurisdiction">
+          <span class="label">Jurisdiction:</span>
+          <span class="value">{{ asLegalEntity().jurisdiction }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact Information -->
+    <div class="info-section" *ngIf="contacts.length > 0">
+      <div class="section-header">
+        <h3>Contact Details</h3>
+        <button class="btn-icon" (click)="manageContacts()" title="Manage Contacts">✏️</button>
+      </div>
+      <div class="contact-list">
+        <div *ngFor="let contact of contacts" class="contact-item">
+          <div class="contact-header">
+            <span class="contact-type">{{ contact.contactType }}</span>
+            <span class="badge" *ngIf="contact.isPrimary">Primary</span>
+            <span class="badge badge-verified" *ngIf="contact.isVerified">✓ Verified</span>
+          </div>
+          <div class="contact-value">{{ contact.contactValue }}</div>
+          <div class="contact-label" *ngIf="contact.label">{{ contact.label }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Address Information -->
+    <div class="info-section" *ngIf="addresses.length > 0">
+      <div class="section-header">
+        <h3>Addresses</h3>
+        <button class="btn-icon" (click)="manageAddresses()" title="Manage Addresses">✏️</button>
+      </div>
+      <div class="address-list">
+        <div *ngFor="let addressDetail of addresses" class="address-item">
+          <div class="address-header">
+            <span class="address-type">{{ addressDetail.addressType }}</span>
+            <span class="badge" *ngIf="addressDetail.isPrimary">Primary</span>
+          </div>
+          <div class="address-value">{{ formatAddress(addressDetail) }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tags -->
+    <div class="info-section" *ngIf="partner.tags && partner.tags.length > 0">
+      <div class="section-header">
+        <h3>Tags</h3>
+        <button class="btn-icon" (click)="editPartner()" title="Manage Tags">✏️</button>
+      </div>
+      <div class="tag-list">
+        <span *ngFor="let tag of partner.tags" 
+              class="tag-badge" 
+              [style.background-color]="tag.colorHex || '#6c757d'"
+              [title]="tag.description || tag.tagName">
+          {{ tag.tagName }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="info-section" *ngIf="partner.notes">
+      <div class="section-header">
+        <h3>Notes</h3>
+        <button class="btn-icon" (click)="editPartner()" title="Edit Partner">✏️</button>
+      </div>
+      <p class="notes-text">{{ partner.notes }}</p>
+    </div>
+  </div>
+</div>

@@ -6,11 +6,13 @@ import { AddressComponent } from './address/address.component';
 import { PartnerAddressComponent } from './partner-address/partner-address.component';
 import { PartnerContactComponent } from './partner-contact/partner-contact.component';
 import { PartnerTagComponent } from './partner-tag/partner-tag.component';
+import { PartnerOverviewComponent } from './partner-overview/partner-overview.component';
 import { SignedOutComponent } from './core/signed-out/signed-out.component';
 
 export const routes: Routes = [
   { path: '',           component: PartnerComponent, canActivate: [authGuard] },
   { path: 'partners',   component: PartnerComponent, canActivate: [authGuard] },
+  { path: 'partners/:partnerId', component: PartnerOverviewComponent, canActivate: [authGuard] },
   { path: 'partners/:partnerId/addresses', component: PartnerAddressComponent, canActivate: [authGuard] },
   { path: 'partners/:partnerId/contacts', component: PartnerContactComponent, canActivate: [authGuard] },
   { path: 'partners/:partnerId/tags', component: PartnerTagComponent, canActivate: [authGuard] },

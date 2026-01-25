@@ -1,9 +1,3 @@
-export interface PartnerType {
-  id: string;
-  typeCode: string;
-  description?: string;
-}
-
 export interface Tag {
   id?: string;
   tagName: string;
@@ -15,7 +9,7 @@ export interface Partner {
   id: string;
   partnerNumber: string;
   partnerNumberSeq?: number;
-  partnerType?: PartnerType;
+  partnerType?: string;  // Type discriminator: "NATURAL_PERSON" or "LEGAL_ENTITY"
   createdAt?: string;
   updatedAt?: string;
   active: boolean;
@@ -43,6 +37,6 @@ export interface LegalEntity extends Partner {
   registrationNumber?: string;
   taxId?: string;
   legalForm?: string;
-  incorporationDate?: string;
+  incorporationDate?: string;  // ISO date string from backend
   jurisdiction?: string;
 }

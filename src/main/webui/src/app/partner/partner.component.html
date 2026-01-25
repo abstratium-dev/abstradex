@@ -278,15 +278,16 @@
 
   <div *ngIf="!loading() && !error() && partners().length > 0">
     <div class="partner-list">
-      <partner-tile 
-        *ngFor="let partner of partners()" 
+      <partner-tile
+        *ngFor="let partner of partners()"
         [partner]="partner"
         (delete)="deletePartner($event)"
         (edit)="editPartner($event)"
+        (viewOverview)="viewOverview($event)"
         (manageAddresses)="manageAddresses($event)"
         (manageContacts)="manageContacts($event)"
-        (manageTags)="manageTags($event)">
-      </partner-tile>
+        (manageTags)="manageTags($event)"
+      ></partner-tile>
     </div>
   </div>
 </div>

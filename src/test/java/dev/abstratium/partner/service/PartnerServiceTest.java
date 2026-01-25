@@ -195,7 +195,7 @@ public class PartnerServiceTest {
         em.flush();
 
         // Search with address
-        List<PartnerSearchResult> results = partnerService.searchWithAddress("David");
+        List<PartnerSearchResult> results = partnerService.searchWithAddressContactDetailsAndTags("David");
 
         assertFalse(results.isEmpty());
         PartnerSearchResult result = results.stream()
@@ -247,7 +247,7 @@ public class PartnerServiceTest {
         em.flush();
 
         // Search with address - should return primary address
-        List<PartnerSearchResult> results = partnerService.searchWithAddress("Primary Test");
+        List<PartnerSearchResult> results = partnerService.searchWithAddressContactDetailsAndTags("Primary Test");
 
         assertFalse(results.isEmpty());
         PartnerSearchResult result = results.stream()
@@ -273,7 +273,7 @@ public class PartnerServiceTest {
         partnerService.create(person);
 
         // Search with address
-        List<PartnerSearchResult> results = partnerService.searchWithAddress("Emily");
+        List<PartnerSearchResult> results = partnerService.searchWithAddressContactDetailsAndTags("Emily");
 
         assertFalse(results.isEmpty());
         PartnerSearchResult result = results.stream()
@@ -323,7 +323,7 @@ public class PartnerServiceTest {
         em.flush();
 
         // Search with address - should return billing address
-        List<PartnerSearchResult> results = partnerService.searchWithAddress("Frank");
+        List<PartnerSearchResult> results = partnerService.searchWithAddressContactDetailsAndTags("Frank");
 
         assertFalse(results.isEmpty());
         PartnerSearchResult result = results.stream()

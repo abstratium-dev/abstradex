@@ -9,13 +9,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.DiscriminatorType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -24,7 +24,8 @@ import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "T_partner")
-@Inheritance(strategy = InheritanceType.JOINED)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "partner_type", discriminatorType = DiscriminatorType.STRING)
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Partner {
 
@@ -34,11 +35,6 @@ public class Partner {
 
     @Column(name = "partner_number_seq", unique = true, nullable = false)
     private Long partnerNumberSeq;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "partner_type_id")
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "partners"})
-    private PartnerType partnerType;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -114,14 +110,6 @@ public class Partner {
             return null;
         }
         return String.format("P%08d", partnerNumberSeq);
-    }
-
-    public PartnerType getPartnerType() {
-        return partnerType;
-    }
-
-    public void setPartnerType(PartnerType partnerType) {
-        this.partnerType = partnerType;
     }
 
     public LocalDateTime getCreatedAt() {

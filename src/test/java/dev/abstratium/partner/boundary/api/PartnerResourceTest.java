@@ -1,29 +1,26 @@
 package dev.abstratium.partner.boundary.api;
 
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.startsWith;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import dev.abstratium.core.Roles;
-import dev.abstratium.partner.entity.LegalEntity;
-import dev.abstratium.partner.entity.NaturalPerson;
-import dev.abstratium.partner.entity.PartnerType;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import io.restassured.http.ContentType;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.Matchers.startsWith;
 
 @QuarkusTest
 class PartnerResourceTest {
 
     @Inject
     EntityManager em;
-
-    private String partnerTypeId;
 
     @BeforeEach
     @Transactional
@@ -37,16 +34,7 @@ class PartnerResourceTest {
         em.createQuery("DELETE FROM NaturalPerson").executeUpdate();
         em.createQuery("DELETE FROM LegalEntity").executeUpdate();
         em.createQuery("DELETE FROM Partner").executeUpdate();
-        em.createQuery("DELETE FROM PartnerType").executeUpdate();
         em.flush();
-
-        // Create a partner type for testing
-        PartnerType partnerType = new PartnerType();
-        partnerType.setTypeCode("NATURAL_PERSON");
-        partnerType.setDescription("Natural Person");
-        em.persist(partnerType);
-        em.flush();
-        partnerTypeId = partnerType.getId();
     }
 
     @Test
@@ -58,10 +46,9 @@ class PartnerResourceTest {
                 {
                     "firstName": "John",
                     "lastName": "Doe",
-                    "partnerType": {"id": "%s"},
                     "notes": "Test partner"
                 }
-                """.formatted(partnerTypeId))
+                """)
             .when()
             .post("/api/partner")
             .then()
@@ -97,10 +84,9 @@ class PartnerResourceTest {
                 {
                     "firstName": "Jane",
                     "lastName": "Smith",
-                    "partnerType": {"id": "%s"},
                     "active": true
                 }
-                """.formatted(partnerTypeId))
+                """)
             .when()
             .post("/api/partner")
             .then()
@@ -132,10 +118,9 @@ class PartnerResourceTest {
                 {
                     "firstName": "Bob",
                     "lastName": "Johnson",
-                    "partnerType": {"id": "%s"},
                     "notes": "Original notes"
                 }
-                """.formatted(partnerTypeId))
+                """)
             .when()
             .post("/api/partner")
             .then()
@@ -151,11 +136,10 @@ class PartnerResourceTest {
                     "id": "%s",
                     "firstName": "Bob",
                     "lastName": "Johnson",
-                    "partnerType": {"id": "%s"},
                     "active": false,
                     "notes": "Updated notes"
                 }
-                """.formatted(partnerId, partnerTypeId))
+                """.formatted(partnerId))
             .when()
             .put("/api/partner")
             .then()
@@ -174,10 +158,9 @@ class PartnerResourceTest {
             .body("""
                 {
                     "firstName": "Alice",
-                    "lastName": "Williams",
-                    "partnerType": {"id": "%s"}
+                    "lastName": "Williams"
                 }
-                """.formatted(partnerTypeId))
+                """)
             .when()
             .post("/api/partner")
             .then()

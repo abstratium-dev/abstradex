@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, Signal, ViewChild, ElementRef } from '@angular/core';
+import { Component, inject, OnInit, Signal, ViewChild, ElementRef, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -8,6 +8,8 @@ import { AutofocusDirective } from '../core/autofocus.directive';
 import { PartnerTileComponent } from './partner-tile/partner-tile.component';
 import { Partner, NaturalPerson, LegalEntity, ModelService } from '../model.service';
 import { Controller } from '../controller';
+import { PartnerService } from '../partner.service';
+import { PartnerDiscriminator } from '../models/partner-discriminator';
 
 @Component({
   selector: 'app-partner',
@@ -21,8 +23,17 @@ export class PartnerComponent implements OnInit {
   private router = inject(Router);
   private toastService = inject(ToastService);
   private confirmService = inject(ConfirmDialogService);
+  private partnerService = inject(PartnerService);
 
-  partners: Signal<Partner[]> = this.modelService.partners$;
+  // Sorted partners alphabetically by name
+  partners: Signal<Partner[]> = computed(() => {
+    const unsorted = this.modelService.partners$();
+    return [...unsorted].sort((a, b) => {
+      const nameA = this.partnerService.getPartnerName(a).toLowerCase();
+      const nameB = this.partnerService.getPartnerName(b).toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
+  });
   loading: Signal<boolean> = this.modelService.partnersLoading$;
   error: Signal<string | null> = this.modelService.partnersError$;
 
@@ -46,8 +57,22 @@ export class PartnerComponent implements OnInit {
   private searchTimeout: any;
   @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     // Don't load partners automatically - wait for user to search
+    
+    // Check if we're navigating from partner overview to edit
+    const navigation = this.router.getCurrentNavigation();
+    const state = navigation?.extras?.state || history.state;
+    if (state?.editPartnerId) {
+      // Load the partner and open edit form
+      const partnerId = state.editPartnerId;
+      // Search for the partner to load it
+      await this.controller.loadPartners();
+      const partner = this.partners().find(p => p.id === partnerId);
+      if (partner) {
+        this.editPartner(partner);
+      }
+    }
   }
 
   onSearch(): void {
@@ -126,17 +151,23 @@ export class PartnerComponent implements OnInit {
     // Validate based on partner type
     let partnerData: Partial<Partner>;
     if (this.partnerType === 'natural') {
-      if (!this.newNaturalPerson.firstName?.trim() || !this.newNaturalPerson.lastName?.trim()) {
-        this.formError = 'First name and last name are required';
-        return;
-      }
-      partnerData = this.newNaturalPerson;
+      const naturalPerson: NaturalPerson = {
+        ...this.newNaturalPerson as NaturalPerson,
+        partnerType: PartnerDiscriminator.NATURAL_PERSON,
+        id: this.editingPartner?.id || '',
+        partnerNumber: this.editingPartner?.partnerNumber || '',
+        active: this.newNaturalPerson.active ?? true
+      };
+      partnerData = naturalPerson;
     } else {
-      if (!this.newLegalEntity.legalName?.trim()) {
-        this.formError = 'Legal name is required';
-        return;
-      }
-      partnerData = this.newLegalEntity;
+      const legalEntity: LegalEntity = {
+        ...this.newLegalEntity as LegalEntity,
+        partnerType: PartnerDiscriminator.LEGAL_ENTITY,
+        id: this.editingPartner?.id || '',
+        partnerNumber: this.editingPartner?.partnerNumber || '',
+        active: this.newLegalEntity.active ?? true
+      };
+      partnerData = legalEntity;
     }
 
     this.formSubmitting = true;
@@ -223,6 +254,10 @@ export class PartnerComponent implements OnInit {
         partnerType: partner.partnerType
       };
     }
+  }
+
+  viewOverview(partner: Partner): void {
+    this.router.navigate(['/partners', partner.id]);
   }
 
   manageAddresses(partner: Partner): void {

@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { PartnerService } from './partner.service';
 import { Partner, NaturalPerson, LegalEntity } from './models';
+import { PartnerDiscriminator } from './models/partner-discriminator';
 
 describe('PartnerService', () => {
   let service: PartnerService;
@@ -23,6 +24,7 @@ describe('PartnerService', () => {
       const partner: NaturalPerson = {
         id: '1',
         partnerNumber: 'P001',
+        partnerType: 'NaturalPerson',
         active: true,
         title: 'Dr.',
         firstName: 'John',
@@ -36,6 +38,7 @@ describe('PartnerService', () => {
       const partner: NaturalPerson = {
         id: '1',
         partnerNumber: 'P001',
+        partnerType: 'NaturalPerson',
         active: true,
         firstName: 'Jane',
         lastName: 'Doe'
@@ -47,6 +50,7 @@ describe('PartnerService', () => {
       const partner: NaturalPerson = {
         id: '1',
         partnerNumber: 'P001',
+        partnerType: 'NaturalPerson',
         active: true,
         firstName: 'Alice',
         lastName: 'Johnson'
@@ -54,21 +58,23 @@ describe('PartnerService', () => {
       expect(service.getPartnerName(partner)).toBe('Alice Johnson');
     });
 
-    it('should return "Unnamed Person" for natural person with no name parts', () => {
+    it('should return "Unnamed Natural Person" for natural person with no name parts', () => {
       const partner: NaturalPerson = {
         id: '1',
         partnerNumber: 'P001',
+        partnerType: 'NaturalPerson',
         active: true,
         firstName: undefined,
         lastName: undefined
       };
-      expect(service.getPartnerName(partner)).toBe('Unnamed Person');
+      expect(service.getPartnerName(partner)).toBe('Unnamed Natural Person');
     });
 
     it('should return legal name for legal entity', () => {
       const partner: LegalEntity = {
         id: '2',
         partnerNumber: 'P002',
+        partnerType: PartnerDiscriminator.LEGAL_ENTITY,
         active: true,
         legalName: 'Acme Corporation'
       };
@@ -79,6 +85,7 @@ describe('PartnerService', () => {
       const partner: LegalEntity = {
         id: '2',
         partnerNumber: 'P002',
+        partnerType: PartnerDiscriminator.LEGAL_ENTITY,
         active: true,
         legalName: 'Acme Corporation Ltd',
         tradingName: 'Acme Corp'
@@ -86,14 +93,15 @@ describe('PartnerService', () => {
       expect(service.getPartnerName(partner)).toBe('Acme Corp');
     });
 
-    it('should return "Unnamed Entity" for legal entity with no legal name', () => {
+    it('should return "Unnamed Legal Entity" for legal entity with no legal name', () => {
       const partner: LegalEntity = {
         id: '2',
         partnerNumber: 'P002',
+        partnerType: PartnerDiscriminator.LEGAL_ENTITY,
         active: true,
         legalName: undefined
       };
-      expect(service.getPartnerName(partner)).toBe('Unnamed Entity');
+      expect(service.getPartnerName(partner)).toBe('Unnamed Legal Entity');
     });
 
     it('should return "Unknown type of partner" for partner with no identifying fields', () => {
@@ -111,6 +119,7 @@ describe('PartnerService', () => {
       const partner: NaturalPerson = {
         id: '1',
         partnerNumber: 'P001',
+        partnerType: 'NaturalPerson',
         active: true,
         firstName: 'John',
         lastName: 'Smith'
@@ -122,6 +131,7 @@ describe('PartnerService', () => {
       const partner: NaturalPerson = {
         id: '1',
         partnerNumber: 'P001',
+        partnerType: 'NaturalPerson',
         active: true,
         firstName: 'John'
       };
@@ -132,6 +142,7 @@ describe('PartnerService', () => {
       const partner: NaturalPerson = {
         id: '1',
         partnerNumber: 'P001',
+        partnerType: 'NaturalPerson',
         active: true,
         lastName: 'Smith'
       };
@@ -142,6 +153,7 @@ describe('PartnerService', () => {
       const partner: LegalEntity = {
         id: '2',
         partnerNumber: 'P002',
+        partnerType: PartnerDiscriminator.LEGAL_ENTITY,
         active: true,
         legalName: 'Acme Corporation'
       };
