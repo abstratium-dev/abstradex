@@ -130,6 +130,8 @@ After running the script, review the changes and resolve any conflicts before co
 
 ## Upgrading Dependencies
 
+**THIS SHOULD REALLY BE DONE IN `abstracore` AND NOT IN THE DOWNSTREAM PROJECTS. After that, the sync script will merge the changes into the downstream projects.**
+
 1. Update Quarkus:
 ```bash
 jbang version --update
@@ -149,6 +151,8 @@ ng update @angular/cli @angular/core
 ```
 
 4. Check Github for security problems by signing in and viewing the problems here: https://github.com/abstratium-dev/abstradex/security/dependabot and https://github.com/abstratium-dev/abstradex/security/code-scanning
+
+5. Upgrading `nvm` means searching all places that use `v24.11.1` and updating it to the new version. Use `nvm` itself to install the latest stable version, but check Angular documentation for what a suitable version is.
 
 # Issues with Webkit
 
