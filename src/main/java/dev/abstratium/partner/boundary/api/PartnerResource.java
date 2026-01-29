@@ -81,7 +81,10 @@ public class PartnerResource {
         
         if (isNaturalPerson) {
             NaturalPerson np = new NaturalPerson();
-            np.setId(request.getId());
+            // Only set ID if it's not null and not empty (for updates)
+            if (request.getId() != null && !request.getId().trim().isEmpty()) {
+                np.setId(request.getId());
+            }
             np.setActive(request.getActive() != null ? request.getActive() : true);
             np.setNotes(request.getNotes());
             np.setTitle(request.getTitle());
@@ -94,7 +97,10 @@ public class PartnerResource {
             return np;
         } else if (isLegalEntity) {
             LegalEntity le = new LegalEntity();
-            le.setId(request.getId());
+            // Only set ID if it's not null and not empty (for updates)
+            if (request.getId() != null && !request.getId().trim().isEmpty()) {
+                le.setId(request.getId());
+            }
             le.setActive(request.getActive() != null ? request.getActive() : true);
             le.setNotes(request.getNotes());
             le.setLegalName(request.getLegalName());

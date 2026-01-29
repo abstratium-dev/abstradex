@@ -144,18 +144,11 @@ export class PartnerTagComponent implements OnInit {
     }
 
     try {
-      const createdTag = await this.controller.createTag(this.newTag);
-      this.toastService.success('Tag created successfully');
-      
-      // Add the newly created tag to the partner
-      if (createdTag.id) {
-        await this.controller.addTagToPartner(this.partnerId, createdTag.id);
-        this.toastService.success('Tag added to partner');
-      }
+      await this.controller.createTag(this.newTag);
+      this.toastService.success('Tag created successfully. You can now search and add it to the partner.');
       
       this.showCreateForm = false;
       this.newTag = this.getEmptyTag();
-      await this.loadPartnerTags();
       await this.loadAllTags();
     } catch (err) {
       this.toastService.error('Failed to create tag');

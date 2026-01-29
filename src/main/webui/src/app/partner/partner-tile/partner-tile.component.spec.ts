@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PartnerTileComponent } from './partner-tile.component';
 import { NaturalPerson, LegalEntity } from '../../model.service';
+import { PartnerDiscriminator } from '../../models/partner-discriminator';
 
 describe('PartnerTileComponent', () => {
   let component: PartnerTileComponent;
@@ -23,6 +24,7 @@ describe('PartnerTileComponent', () => {
     const naturalPerson: NaturalPerson = {
       id: '1',
       partnerNumber: 'P00000001',
+      partnerType: PartnerDiscriminator.NATURAL_PERSON,
       firstName: 'John',
       lastName: 'Doe',
       active: true,
@@ -40,6 +42,7 @@ describe('PartnerTileComponent', () => {
     const legalEntity: LegalEntity = {
       id: '2',
       partnerNumber: 'P00000002',
+      partnerType: PartnerDiscriminator.LEGAL_ENTITY,
       legalName: 'Acme Corp',
       tradingName: 'Acme',
       active: true,
@@ -57,6 +60,7 @@ describe('PartnerTileComponent', () => {
     const naturalPerson: NaturalPerson = {
       id: '1',
       partnerNumber: 'P00000001',
+      partnerType: PartnerDiscriminator.NATURAL_PERSON,
       firstName: 'John',
       lastName: 'Doe',
       active: true,
@@ -75,6 +79,7 @@ describe('PartnerTileComponent', () => {
     const naturalPerson: NaturalPerson = {
       id: '1',
       partnerNumber: 'P00000001',
+      partnerType: PartnerDiscriminator.NATURAL_PERSON,
       firstName: 'John',
       lastName: 'Doe',
       active: true,
@@ -93,6 +98,7 @@ describe('PartnerTileComponent', () => {
     const naturalPerson: NaturalPerson = {
       id: '1',
       partnerNumber: 'P00000001',
+      partnerType: PartnerDiscriminator.NATURAL_PERSON,
       firstName: 'John',
       lastName: 'Doe',
       active: true,

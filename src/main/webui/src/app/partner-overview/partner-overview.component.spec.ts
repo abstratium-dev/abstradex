@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { PartnerOverviewComponent } from './partner-overview.component';
@@ -6,6 +8,7 @@ import { Controller } from '../controller';
 import { ModelService } from '../model.service';
 import { PartnerService } from '../partner.service';
 import { Partner, NaturalPerson, LegalEntity } from '../models';
+import { PartnerDiscriminator } from '../models/partner-discriminator';
 
 describe('PartnerOverviewComponent', () => {
   let component: PartnerOverviewComponent;
@@ -15,10 +18,12 @@ describe('PartnerOverviewComponent', () => {
   let mockPartnerService: jasmine.SpyObj<PartnerService>;
   let mockRouter: jasmine.SpyObj<Router>;
   let mockActivatedRoute: any;
+  let httpMock: HttpTestingController;
 
   const mockPartner: NaturalPerson = {
     id: '123',
     partnerNumber: 'P00000001',
+    partnerType: PartnerDiscriminator.NATURAL_PERSON,
     active: true,
     firstName: 'John',
     lastName: 'Doe'
@@ -46,6 +51,8 @@ describe('PartnerOverviewComponent', () => {
     await TestBed.configureTestingModule({
       imports: [PartnerOverviewComponent],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: Controller, useValue: mockController },
         { provide: ModelService, useValue: mockModelService },
         { provide: PartnerService, useValue: mockPartnerService },
@@ -56,27 +63,45 @@ describe('PartnerOverviewComponent', () => {
 
     fixture = TestBed.createComponent(PartnerOverviewComponent);
     component = fixture.componentInstance;
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpMock.verify();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should load partner on init', async () => {
+  it('should load partner on init', fakeAsync(() => {
     component.ngOnInit();
-    await fixture.whenStable();
+    tick();
+    
+    // Mock the HTTP requests for addresses and contacts
+    const addressReq = httpMock.expectOne('/api/partner/123/address');
+    addressReq.flush([]);
+    tick();
+    
+    const contactReq = httpMock.expectOne('/api/partner/123/contact');
+    contactReq.flush([]);
+    tick();
     
     expect(mockController.loadPartners).toHaveBeenCalled();
     expect(component.partner).toEqual(mockPartner);
     expect(component.loading).toBeFalse();
     expect(component.error).toBeNull();
-  });
+  }));
 
   it('should show error when partner not found', async () => {
     (mockModelService.partners$ as any) = jasmine.createSpy('partners$').and.returnValue([]);
     
     component.ngOnInit();
     await fixture.whenStable();
+    
+    // No HTTP requests should be made when partner is not found
+    httpMock.expectNone('/api/partner/123/address');
+    httpMock.expectNone('/api/partner/123/contact');
     
     expect(component.partner).toBeNull();
     expect(component.error).toBe('Partner not found');
@@ -115,6 +140,7 @@ describe('PartnerOverviewComponent', () => {
     const legalEntity: LegalEntity = {
       id: '456',
       partnerNumber: 'P00000002',
+      partnerType: PartnerDiscriminator.LEGAL_ENTITY,
       active: true,
       legalName: 'Acme Corp'
     };

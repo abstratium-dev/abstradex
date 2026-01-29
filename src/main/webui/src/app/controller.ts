@@ -279,6 +279,9 @@ export class Controller {
 
   // Partner Tag Management
   async loadPartnerTags(partnerId: string): Promise<Tag[]> {
+    if (!partnerId || partnerId.trim() === '') {
+      throw new Error('Partner ID is required to load partner tags');
+    }
     try {
       return await firstValueFrom(
         this.http.get<Tag[]>(`/api/partner/${partnerId}/tag`)
@@ -290,6 +293,12 @@ export class Controller {
   }
 
   async addTagToPartner(partnerId: string, tagId: string): Promise<PartnerTag> {
+    if (!partnerId || partnerId.trim() === '') {
+      throw new Error('Partner ID is required to add tag to partner');
+    }
+    if (!tagId || tagId.trim() === '') {
+      throw new Error('Tag ID is required to add tag to partner');
+    }
     try {
       return await firstValueFrom(
         this.http.post<PartnerTag>(`/api/partner/${partnerId}/tag/${tagId}`, {})
@@ -301,6 +310,12 @@ export class Controller {
   }
 
   async removeTagFromPartner(partnerId: string, tagId: string): Promise<void> {
+    if (!partnerId || partnerId.trim() === '') {
+      throw new Error('Partner ID is required to remove tag from partner');
+    }
+    if (!tagId || tagId.trim() === '') {
+      throw new Error('Tag ID is required to remove tag from partner');
+    }
     try {
       await firstValueFrom(
         this.http.delete<void>(`/api/partner/${partnerId}/tag/${tagId}`)

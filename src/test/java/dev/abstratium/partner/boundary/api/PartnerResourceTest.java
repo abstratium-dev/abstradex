@@ -40,7 +40,7 @@ class PartnerResourceTest {
     @Test
     @TestSecurity(user = "testuser", roles = {Roles.USER})
     void testCreatePartner() {
-        given()
+        String id = given()
             .contentType(ContentType.JSON)
             .body("""
                 {
@@ -59,7 +59,110 @@ class PartnerResourceTest {
             .body("active", is(true))
             .body("notes", is("Test partner"))
             .body("createdAt", notNullValue())
-            .body("updatedAt", notNullValue());
+            .body("updatedAt", notNullValue())
+            .extract()
+            .path("id");
+        
+        // Verify ID is not empty
+        assert id != null && !id.trim().isEmpty() : "Partner ID must not be empty";
+    }
+
+    @Test
+    @TestSecurity(user = "testuser", roles = {Roles.USER})
+    void testCreateMultiplePartnersHaveUniqueIds() {
+        // Create first partner
+        String id1 = given()
+            .contentType(ContentType.JSON)
+            .body("""
+                {
+                    "firstName": "Partner",
+                    "lastName": "One"
+                }
+                """)
+            .when()
+            .post("/api/partner")
+            .then()
+            .statusCode(200)
+            .body("id", notNullValue())
+            .extract()
+            .path("id");
+        
+        // Create second partner
+        String id2 = given()
+            .contentType(ContentType.JSON)
+            .body("""
+                {
+                    "legalName": "Partner Two Corp"
+                }
+                """)
+            .when()
+            .post("/api/partner")
+            .then()
+            .statusCode(200)
+            .body("id", notNullValue())
+            .extract()
+            .path("id");
+        
+        // Verify both IDs are not empty and different
+        assert id1 != null && !id1.trim().isEmpty() : "First partner ID must not be empty";
+        assert id2 != null && !id2.trim().isEmpty() : "Second partner ID must not be empty";
+        assert !id1.equals(id2) : "Partner IDs must be unique";
+    }
+
+    @Test
+    @TestSecurity(user = "testuser", roles = {Roles.USER})
+    void testCreatePartnerWithEmptyIdInRequestGeneratesNewId() {
+        // Try to create a partner with empty ID in request - should be ignored
+        String id = given()
+            .contentType(ContentType.JSON)
+            .body("""
+                {
+                    "id": "",
+                    "firstName": "Test",
+                    "lastName": "User"
+                }
+                """)
+            .when()
+            .post("/api/partner")
+            .then()
+            .statusCode(200)
+            .body("id", notNullValue())
+            .extract()
+            .path("id");
+        
+        // Verify ID was generated and is not empty
+        assert id != null && !id.trim().isEmpty() : "Partner ID must be generated when empty ID provided";
+    }
+
+    @Test
+    @TestSecurity(user = "testuser", roles = {Roles.USER})
+    void testCreateLegalEntityPartner() {
+        String id = given()
+            .contentType(ContentType.JSON)
+            .body("""
+                {
+                    "legalName": "Acme Corporation",
+                    "tradingName": "Acme",
+                    "registrationNumber": "REG123456",
+                    "taxId": "TAX789",
+                    "notes": "Test legal entity"
+                }
+                """)
+            .when()
+            .post("/api/partner")
+            .then()
+            .statusCode(200)
+            .body("id", notNullValue())
+            .body("partnerNumber", notNullValue())
+            .body("partnerNumber", startsWith("P"))
+            .body("legalName", is("Acme Corporation"))
+            .body("tradingName", is("Acme"))
+            .body("active", is(true))
+            .extract()
+            .path("id");
+        
+        // Verify ID is not empty
+        assert id != null && !id.trim().isEmpty() : "Legal entity partner ID must not be empty";
     }
 
     @Test

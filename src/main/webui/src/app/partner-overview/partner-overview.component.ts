@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LegalEntity, NaturalPerson, Partner } from '../models';
 import { PartnerDiscriminator } from '../models/partner-discriminator';

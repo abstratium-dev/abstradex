@@ -24,7 +24,7 @@ describe('PartnerService', () => {
       const partner: NaturalPerson = {
         id: '1',
         partnerNumber: 'P001',
-        partnerType: 'NaturalPerson',
+        partnerType: PartnerDiscriminator.NATURAL_PERSON,
         active: true,
         title: 'Dr.',
         firstName: 'John',
@@ -38,7 +38,7 @@ describe('PartnerService', () => {
       const partner: NaturalPerson = {
         id: '1',
         partnerNumber: 'P001',
-        partnerType: 'NaturalPerson',
+        partnerType: PartnerDiscriminator.NATURAL_PERSON,
         active: true,
         firstName: 'Jane',
         lastName: 'Doe'
@@ -50,7 +50,7 @@ describe('PartnerService', () => {
       const partner: NaturalPerson = {
         id: '1',
         partnerNumber: 'P001',
-        partnerType: 'NaturalPerson',
+        partnerType: PartnerDiscriminator.NATURAL_PERSON,
         active: true,
         firstName: 'Alice',
         lastName: 'Johnson'
@@ -62,7 +62,7 @@ describe('PartnerService', () => {
       const partner: NaturalPerson = {
         id: '1',
         partnerNumber: 'P001',
-        partnerType: 'NaturalPerson',
+        partnerType: PartnerDiscriminator.NATURAL_PERSON,
         active: true,
         firstName: undefined,
         lastName: undefined
@@ -119,7 +119,7 @@ describe('PartnerService', () => {
       const partner: NaturalPerson = {
         id: '1',
         partnerNumber: 'P001',
-        partnerType: 'NaturalPerson',
+        partnerType: PartnerDiscriminator.NATURAL_PERSON,
         active: true,
         firstName: 'John',
         lastName: 'Smith'
@@ -131,7 +131,7 @@ describe('PartnerService', () => {
       const partner: NaturalPerson = {
         id: '1',
         partnerNumber: 'P001',
-        partnerType: 'NaturalPerson',
+        partnerType: PartnerDiscriminator.NATURAL_PERSON,
         active: true,
         firstName: 'John'
       };
@@ -142,7 +142,7 @@ describe('PartnerService', () => {
       const partner: NaturalPerson = {
         id: '1',
         partnerNumber: 'P001',
-        partnerType: 'NaturalPerson',
+        partnerType: PartnerDiscriminator.NATURAL_PERSON,
         active: true,
         lastName: 'Smith'
       };

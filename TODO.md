@@ -1,10 +1,10 @@
 # TODO
 
-TODOs to be resolved by the developer, NOT THE LLM.
+These TODOs are to be resolved by the developer, NOT THE LLM.
 
 ## Today
 
-- sync upstream (test port)
+- sync upstream
 - need to be able to edit tags - need a route and link in the header for that
 - 500 when editing legal entity
 - when adding/editing contact details, the type should influence the html5 input field (e.g. phone number should be a phone number input field)
@@ -24,6 +24,8 @@ TODOs to be resolved by the developer, NOT THE LLM.
 
 - search for more todo comments that need to be resolved
 - replace DEMO_ERROR and similar error codes in ErrorCode.java with partner related error codes and actually use them.
+
+- check that abstracore makes the ui generate the demo entity uuid, and that the backend validates that it is a valid uuid. then fix that here that all entities should be created like that.
 
 
 what is this warning?

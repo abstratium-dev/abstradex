@@ -111,4 +111,84 @@ describe('Controller', () => {
       loadReq.flush([newPartner]);
     });
   });
+
+  describe('Partner Tag Management', () => {
+    describe('loadPartnerTags', () => {
+      it('should load partner tags successfully', async () => {
+        const mockTags = [
+          { id: '1', tagName: 'VIP', colorHex: '#FF0000' },
+          { id: '2', tagName: 'Premium', colorHex: '#00FF00' }
+        ];
+
+        const promise = controller.loadPartnerTags('partner123');
+
+        const req = httpMock.expectOne('/api/partner/partner123/tag');
+        expect(req.request.method).toBe('GET');
+        req.flush(mockTags);
+
+        const result = await promise;
+        expect(result).toEqual(mockTags);
+      });
+
+      it('should throw error when partnerId is empty', async () => {
+        await expectAsync(controller.loadPartnerTags('')).toBeRejectedWithError('Partner ID is required to load partner tags');
+      });
+
+      it('should throw error when partnerId is whitespace', async () => {
+        await expectAsync(controller.loadPartnerTags('   ')).toBeRejectedWithError('Partner ID is required to load partner tags');
+      });
+
+      it('should throw error when partnerId is null', async () => {
+        await expectAsync(controller.loadPartnerTags(null as any)).toBeRejectedWithError('Partner ID is required to load partner tags');
+      });
+    });
+
+    describe('addTagToPartner', () => {
+      it('should add tag to partner successfully', async () => {
+        const mockPartnerTag = { id: 'pt1', partnerId: 'partner123', tagId: 'tag456' };
+
+        const promise = controller.addTagToPartner('partner123', 'tag456');
+
+        const req = httpMock.expectOne('/api/partner/partner123/tag/tag456');
+        expect(req.request.method).toBe('POST');
+        req.flush(mockPartnerTag);
+
+        const result = await promise;
+        expect(result).toEqual(mockPartnerTag);
+      });
+
+      it('should throw error when partnerId is empty', async () => {
+        await expectAsync(controller.addTagToPartner('', 'tag123')).toBeRejectedWithError('Partner ID is required to add tag to partner');
+      });
+
+      it('should throw error when tagId is empty', async () => {
+        await expectAsync(controller.addTagToPartner('partner123', '')).toBeRejectedWithError('Tag ID is required to add tag to partner');
+      });
+
+      it('should throw error when both IDs are empty', async () => {
+        await expectAsync(controller.addTagToPartner('', '')).toBeRejectedWithError('Partner ID is required to add tag to partner');
+      });
+    });
+
+    describe('removeTagFromPartner', () => {
+      it('should remove tag from partner successfully', async () => {
+        const promise = controller.removeTagFromPartner('partner123', 'tag456');
+
+        const req = httpMock.expectOne('/api/partner/partner123/tag/tag456');
+        expect(req.request.method).toBe('DELETE');
+        req.flush(null);
+
+        await promise;
+        // Should complete without error
+      });
+
+      it('should throw error when partnerId is empty', async () => {
+        await expectAsync(controller.removeTagFromPartner('', 'tag123')).toBeRejectedWithError('Partner ID is required to remove tag from partner');
+      });
+
+      it('should throw error when tagId is empty', async () => {
+        await expectAsync(controller.removeTagFromPartner('partner123', '')).toBeRejectedWithError('Tag ID is required to remove tag from partner');
+      });
+    });
+  });
 });
