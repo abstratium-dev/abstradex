@@ -164,7 +164,6 @@ This project provides several endpoints for monitoring:
 7. **Backup database regularly**
 8. **Limit network access** to database and management interface
 9. **Rotate JWT keys periodically** (requires user re-authentication)
-10. **Keep `ALLOW_SIGNUP=false`** unless you need public registration
 
 ### Additional Resources
 

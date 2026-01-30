@@ -306,7 +306,7 @@
                         <artifactId>exec-maven-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>run-playwright-tests-nosignup</id>
+                                <id>run-playwright-tests</id>
                                 <phase>integration-test</phase>
                                 <goals>
                                     <goal>exec</goal>
