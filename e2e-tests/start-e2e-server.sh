@@ -4,7 +4,6 @@
 set -x  # Enable debug output
 echo "Starting Quarkus for e2e tests..."
 echo "Working directory: $(pwd)"
-echo "ALLOW_SIGNUP: ${ALLOW_SIGNUP:-false}"
 
 # Start the example OAuth client in the background
 echo "Starting example OAuth client on port 3333..."
@@ -35,4 +34,4 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 # Start Quarkus (this will run in foreground)
-exec java -Dquarkus.profile=e2e -DALLOW_SIGNUP="${ALLOW_SIGNUP:-false}" -jar target/quarkus-app/quarkus-run.jar 2>&1
+exec java -Dquarkus.profile=e2e -jar target/quarkus-app/quarkus-run.jar 2>&1

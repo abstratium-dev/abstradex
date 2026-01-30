@@ -77,7 +77,6 @@ The `e2e` profile runs both test suites sequentially to ensure complete coverage
 
 ### `playwright.config.ts`
 Main Playwright configuration file. Key settings:
-- `testDir`: Dynamically set based on `ALLOW_SIGNUP` env var
 - `baseURL`: Defaults to `http://localhost:8082`
 - `webServer`: Conditionally starts server when `BASE_URL` is set
 - `workers: 1`: Tests run sequentially (not in parallel) to avoid database conflicts
@@ -144,7 +143,7 @@ npx playwright test --headed
 
 ### Run specific test file:
 ```bash
-npx playwright test tests-nosignup/happy.spec.ts
+npx playwright test tests/happy.spec.ts
 ```
 
 ### Run with debug mode:
