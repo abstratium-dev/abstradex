@@ -146,20 +146,19 @@ export class PartnerPage {
    * Creates a new natural person partner
    * @param firstName - First name (required)
    * @param lastName - Last name (required)
-   * @param partnerNumber - The partner number (required)
    * @param middleName - Optional middle name
    * @param notes - Optional notes
    * @param active - Whether the partner is active (default: true)
+   * @returns The created partner's number (extracted from the tile after creation)
    */
   async createNaturalPerson(
     firstName: string,
     lastName: string,
-    partnerNumber: string,
     middleName?: string,
     notes?: string,
     active: boolean = true
-  ) {
-    console.log(`Creating natural person partner: ${firstName} ${lastName} (${partnerNumber})...`);
+  ): Promise<string> {
+    console.log(`Creating natural person partner: ${firstName} ${lastName}...`);
     
     await this.openAddPartnerForm();
     
@@ -169,7 +168,6 @@ export class PartnerPage {
     
     // Wait for natural person form to appear
     await expect(this.firstNameInput).toBeVisible({ timeout: 5000 });
-    await expect(this.partnerNumberInput).toBeVisible({ timeout: 5000 });
     
     // Fill in natural person fields
     await this.firstNameInput.fill(firstName);
@@ -179,20 +177,11 @@ export class PartnerPage {
       await this.middleNameInput.fill(middleName);
     }
     
-    // Fill in common partner fields
-    await this.partnerNumberInput.fill(partnerNumber);
-    
     if (notes) {
       await this.notesInput.fill(notes);
     }
     
-    // Handle active checkbox
-    const isChecked = await this.activeCheckbox.isChecked();
-    if (active && !isChecked) {
-      await this.activeCheckbox.check();
-    } else if (!active && isChecked) {
-      await this.activeCheckbox.uncheck();
-    }
+    // Note: Active status defaults to true in the backend, no checkbox in form
     
     // Submit the form
     await this.createButton.click();
@@ -200,10 +189,17 @@ export class PartnerPage {
     // Wait for form to close (indicates success)
     await expect(this.firstNameInput).not.toBeVisible({ timeout: 5000 });
     
-    // Wait for the partner to appear in the list
-    await expect(this.getPartnerTile(partnerNumber)).toBeVisible({ timeout: 5000 });
+    // Wait for network to settle
+    await this.page.waitForLoadState('networkidle');
     
-    console.log(`Natural person partner created successfully`);
+    // Get the partner number from the newly created tile (should be the first one with the name)
+    const partnerTile = this.page.locator('.tile', { hasText: `${firstName} ${lastName}` }).first();
+    await expect(partnerTile).toBeVisible({ timeout: 5000 });
+    const partnerNumberElement = partnerTile.locator('.partner-number');
+    const partnerNumber = await partnerNumberElement.textContent() || '';
+    
+    console.log(`Natural person partner created successfully with number: ${partnerNumber.trim()}`);
+    return partnerNumber.trim();
   }
 
   /**
@@ -350,8 +346,8 @@ export class PartnerPage {
   async manageAddresses(partnerNumber: string) {
     console.log(`Managing addresses for partner '${partnerNumber}'...`);
     await this.clickContextMenuItem(partnerNumber, 'Manage Addresses');
-    // Wait for navigation to partner-address page
-    await this.page.waitForURL('**/partner-address/**', { timeout: 5000 });
+    // Wait for navigation to partner addresses page
+    await this.page.waitForURL('**/partners/*/addresses', { timeout: 5000 });
     await this.page.waitForLoadState('networkidle');
   }
 

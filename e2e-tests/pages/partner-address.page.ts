@@ -26,7 +26,7 @@ export class PartnerAddressPage {
     this.backButton = page.locator('button.back-button');
     this.addressAutocomplete = page.locator('#addressAutocomplete');
     this.addressTypeSelect = page.locator('#addressType');
-    this.isPrimaryCheckbox = page.locator('input[type="checkbox"]').filter({ hasText: /Primary Address/i });
+    this.isPrimaryCheckbox = page.locator('label:has-text("Primary Address") input[type="checkbox"]');
     this.addAddressSubmitButton = page.locator('.form-actions button.btn-primary');
     this.cancelButton = page.locator('.form-actions button.btn-secondary');
     this.loadingIndicator = page.locator('.loading');

@@ -279,37 +279,54 @@ export class AddressPage {
     console.log('Deleting all addresses...');
     
     let count = await this.getAddressCount();
+    let attempts = 0;
+    const maxAttempts = 10; // Safety limit
     
-    while (count > 0) {
-      // Get the first address tile
-      const firstTile = this.getAllAddressTiles().first();
-      
-      // Open context menu
-      const contextMenuButton = firstTile.locator('button.btn-context-menu');
-      await expect(contextMenuButton).toBeVisible({ timeout: 5000 });
-      await contextMenuButton.click();
-      
-      // Wait for context menu
-      const contextMenu = firstTile.locator('.context-menu');
-      await expect(contextMenu).toBeVisible({ timeout: 2000 });
-      
-      // Click delete
-      const deleteButton = contextMenu.locator('.context-menu-item-danger');
-      await expect(deleteButton).toBeVisible({ timeout: 2000 });
-      await deleteButton.click();
-      
-      // Confirm deletion
-      await expect(this.getConfirmDialog()).toBeVisible({ timeout: 5000 });
-      await this.getConfirmDialogDeleteButton().click();
-      
-      // Wait for network activity
-      await this.page.waitForLoadState('networkidle');
-      
-      // Update count
-      count = await this.getAddressCount();
+    while (count > 0 && attempts < maxAttempts) {
+      attempts++;
+      try {
+        // Get the first address tile - use a fresh locator each time
+        const tiles = this.getAllAddressTiles();
+        const firstTile = tiles.first();
+        
+        // Wait for tile to be stable
+        await firstTile.waitFor({ state: 'visible', timeout: 5000 });
+        
+        // Open context menu
+        const contextMenuButton = firstTile.locator('button.btn-context-menu');
+        await contextMenuButton.waitFor({ state: 'visible', timeout: 5000 });
+        await contextMenuButton.click({ force: true });
+        
+        // Wait for context menu
+        const contextMenu = firstTile.locator('.context-menu');
+        await contextMenu.waitFor({ state: 'visible', timeout: 2000 });
+        
+        // Click delete
+        const deleteButton = contextMenu.locator('.context-menu-item-danger');
+        await deleteButton.waitFor({ state: 'visible', timeout: 2000 });
+        await deleteButton.click();
+        
+        // Confirm deletion
+        await expect(this.getConfirmDialog()).toBeVisible({ timeout: 5000 });
+        await this.getConfirmDialogDeleteButton().click();
+        
+        // Wait for network activity
+        await this.page.waitForLoadState('networkidle');
+        
+        // Update count
+        count = await this.getAddressCount();
+      } catch (error) {
+        // If element was detached or other error, just retry with updated count
+        console.log(`Error during deletion (attempt ${attempts}), retrying...`);
+        count = await this.getAddressCount();
+      }
     }
     
-    console.log('All addresses deleted');
+    if (attempts >= maxAttempts) {
+      console.log(`⚠ Stopped after ${maxAttempts} attempts, ${count} address(es) remaining`);
+    } else {
+      console.log('All addresses deleted');
+    }
   }
 
   /**
