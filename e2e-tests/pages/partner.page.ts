@@ -169,6 +169,7 @@ export class PartnerPage {
     
     // Wait for natural person form to appear
     await expect(this.firstNameInput).toBeVisible({ timeout: 5000 });
+    await expect(this.partnerNumberInput).toBeVisible({ timeout: 5000 });
     
     // Fill in natural person fields
     await this.firstNameInput.fill(firstName);

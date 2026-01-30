@@ -58,7 +58,7 @@ export class AddressPage {
 
   // Low-level element getters
   getAddressTile(streetLine1: string): Locator {
-    return this.page.locator('.address-tile, address-tile', { hasText: streetLine1 });
+    return this.page.locator('address-tile .tile', { hasText: streetLine1 });
   }
 
   getAddressContextMenuButton(streetLine1: string): Locator {
@@ -74,7 +74,7 @@ export class AddressPage {
   }
 
   getAllAddressTiles(): Locator {
-    return this.page.locator('.address-tile, address-tile');
+    return this.page.locator('address-tile .tile');
   }
 
   getConfirmDialog(): Locator {
