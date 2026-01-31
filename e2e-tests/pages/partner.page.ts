@@ -28,6 +28,14 @@ export class PartnerPage {
   readonly firstNameInput: Locator;
   readonly lastNameInput: Locator;
   readonly middleNameInput: Locator;
+  
+  // Legal entity fields
+  readonly legalNameInput: Locator;
+  readonly tradingNameInput: Locator;
+  readonly registrationNumberInput: Locator;
+  readonly taxIdInput: Locator;
+  readonly legalFormInput: Locator;
+  readonly jurisdictionInput: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -53,11 +61,20 @@ export class PartnerPage {
     this.firstNameInput = page.locator('#firstName');
     this.lastNameInput = page.locator('#lastName');
     this.middleNameInput = page.locator('#middleName');
+    
+    // Legal entity fields
+    this.legalNameInput = page.locator('#legalName');
+    this.tradingNameInput = page.locator('#tradingName');
+    this.registrationNumberInput = page.locator('#registrationNumber');
+    this.taxIdInput = page.locator('#legalTaxId');
+    this.legalFormInput = page.locator('#legalForm');
+    this.jurisdictionInput = page.locator('#jurisdiction');
   }
 
   // Low-level navigation
   async goto() {
-    await this.page.goto('/partners');
+    // Use header link instead of direct navigation
+    await this.page.locator('#partners-link').click();
     await this.waitForPageLoad();
   }
 
@@ -199,6 +216,87 @@ export class PartnerPage {
     const partnerNumber = await partnerNumberElement.textContent() || '';
     
     console.log(`Natural person partner created successfully with number: ${partnerNumber.trim()}`);
+    return partnerNumber.trim();
+  }
+
+  /**
+   * Creates a new legal entity partner
+   * @param legalName - Legal name (required)
+   * @param tradingName - Optional trading name
+   * @param registrationNumber - Optional registration number
+   * @param taxId - Optional tax ID
+   * @param legalForm - Optional legal form
+   * @param jurisdictionInput - Optional jurisdiction
+   * @param notes - Optional notes
+   * @returns The created partner's number (extracted from the tile after creation)
+   */
+  async createLegalEntity(
+    legalName: string,
+    tradingName?: string,
+    registrationNumber?: string,
+    taxId?: string,
+    legalForm?: string,
+    jurisdiction?: string,
+    notes?: string
+  ): Promise<string> {
+    console.log(`Creating legal entity partner: ${legalName}...`);
+    
+    await this.openAddPartnerForm();
+    
+    // Select legal entity type
+    await expect(this.legalEntityButton).toBeVisible({ timeout: 5000 });
+    await this.legalEntityButton.click();
+    
+    // Wait for legal entity form to appear
+    await expect(this.legalNameInput).toBeVisible({ timeout: 5000 });
+    
+    // Fill in legal entity fields
+    await this.legalNameInput.fill(legalName);
+    
+    if (tradingName) {
+      await this.tradingNameInput.fill(tradingName);
+    }
+    
+    if (registrationNumber) {
+      await this.registrationNumberInput.fill(registrationNumber);
+    }
+    
+    if (taxId) {
+      await this.taxIdInput.fill(taxId);
+    }
+    
+    if (legalForm) {
+      await this.legalFormInput.fill(legalForm);
+    }
+    
+    if (jurisdiction) {
+      await this.jurisdictionInput.fill(jurisdiction);
+    }
+    
+    if (notes) {
+      // Scroll to notes field
+      await this.notesInput.scrollIntoViewIfNeeded();
+      await this.notesInput.fill(notes);
+    }
+    
+    // Note: Active status defaults to true in the backend, no checkbox in form
+    
+    // Submit the form
+    await this.createButton.click();
+    
+    // Wait for form to close (indicates success)
+    await expect(this.legalNameInput).not.toBeVisible({ timeout: 5000 });
+    
+    // Wait for network to settle
+    await this.page.waitForLoadState('networkidle');
+    
+    // Get the partner number from the newly created tile (should be the first one with the name)
+    const partnerTile = this.page.locator('.tile', { hasText: legalName }).first();
+    await expect(partnerTile).toBeVisible({ timeout: 5000 });
+    const partnerNumberElement = partnerTile.locator('.partner-number');
+    const partnerNumber = await partnerNumberElement.textContent() || '';
+    
+    console.log(`Legal entity partner created successfully with number: ${partnerNumber.trim()}`);
     return partnerNumber.trim();
   }
 

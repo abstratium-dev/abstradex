@@ -34,10 +34,28 @@ export class AuthPage {
   async signIn(email: string, password: string, approve: boolean = true) {
     console.log(`Signing in as ${email}...`);
     
-    // Navigate to login endpoint which will redirect to OAuth flow
-    await this.page.goto('/api/auth/login');
+    // Navigate to root URL (only allowed page.goto for starting test)
+    await this.page.goto('/');
     
-    // Wait for OAuth login page to load (on port 3333)
+    // Wait for page to load
+    await this.page.waitForLoadState('networkidle');
+    
+    // Check if already signed in
+    const alreadySignedIn = await this.isSignedIn();
+    if (alreadySignedIn) {
+      console.log('Already signed in, skipping authentication');
+      return;
+    }
+    
+    // Angular should redirect to /signed-out page
+    await this.page.waitForURL('**/signed-out', { timeout: 5000 });
+    
+    // Click the "Sign In" button on the signed-out page
+    const signInButton = this.page.getByRole('button', { name: /Sign In/i });
+    await expect(signInButton).toBeVisible({ timeout: 5000 });
+    await signInButton.click();
+    
+    // Now we're redirected to OAuth login page
     await expect(this.emailInput).toBeVisible({ timeout: 10000 });
     
     // Fill in credentials
@@ -91,10 +109,10 @@ export class AuthPage {
   }
 
   /**
-   * Navigate to home page
+   * Navigate to home page using header link
    */
   async goToHome() {
-    await this.page.goto('/');
+    await this.page.locator('#home-link').click();
     await this.page.waitForLoadState('networkidle');
   }
 }

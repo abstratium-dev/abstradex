@@ -40,7 +40,6 @@ test.describe('Comprehensive Workflow', () => {
 
   /**
    * Helper: Clean up all existing partners
-   * Note: Skip cleanup if deletion fails (e.g., due to foreign key constraints)
    */
   async function cleanupPartners() {
     console.log('\n=== STEP 2: Clean up existing partners ===');
@@ -49,13 +48,13 @@ test.describe('Comprehensive Workflow', () => {
     await partnerPage.searchPartners('%%%');
     
     const partnerCount = await partnerPage.getPartnerCount();
-    console.log(`Found ${partnerCount} partner(s)`);
+    console.log(`Found ${partnerCount} partner(s) to delete`);
     
     if (partnerCount > 0) {
-      console.log('⚠ Skipping partner cleanup - will create unique test data');
-    } else {
-      console.log('✓ No existing partners to clean up');
+      await partnerPage.deleteAllPartners();
     }
+    
+    console.log('✓ All partners deleted');
   }
 
   /**

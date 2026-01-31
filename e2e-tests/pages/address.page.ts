@@ -47,7 +47,8 @@ export class AddressPage {
 
   // Low-level navigation
   async goto() {
-    await this.page.goto('/addresses');
+    // Use header link instead of direct navigation
+    await this.page.locator('#addresses-link').click();
     await this.waitForPageLoad();
   }
 

@@ -5,6 +5,10 @@ These TODOs are to be resolved by the developer, NOT THE LLM.
 ## Today
 
 - sync upstream
+- add more e2e tests based on the features
+- use the features to test the api in a quarkus test???
+  - if not, remove those feature files
+  - is cucumber compatible with playwright?
 - need to be able to edit tags - need a route and link in the header for that
 - 500 when editing legal entity
 - when adding/editing contact details, the type should influence the html5 input field (e.g. phone number should be a phone number input field)
