@@ -204,7 +204,13 @@ describe('PartnerComponent', () => {
         lastName: 'Smith',
         partnerType: PartnerDiscriminator.NATURAL_PERSON
       }));
-      expect(mockToastService.success).toHaveBeenCalledWith('Partner created successfully');
+      expect(mockToastService.success).toHaveBeenCalledWith(
+        'Partner created successfully',
+        7000,
+        jasmine.objectContaining({
+          label: 'P00001'
+        })
+      );
       expect(component.showAddForm).toBeFalse();
     });
 
@@ -221,7 +227,13 @@ describe('PartnerComponent', () => {
         legalName: 'Test Corp',
         partnerType: PartnerDiscriminator.LEGAL_ENTITY
       }));
-      expect(mockToastService.success).toHaveBeenCalledWith('Partner created successfully');
+      expect(mockToastService.success).toHaveBeenCalledWith(
+        'Partner created successfully',
+        7000,
+        jasmine.objectContaining({
+          label: 'P00001'
+        })
+      );
     });
 
     it('should show error when partner type not selected', async () => {

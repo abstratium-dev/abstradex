@@ -113,10 +113,23 @@ public class PartnerService {
         
         String searchPattern = "%" + searchTerm.toLowerCase() + "%";
         
+        // Check if searching for a partner number (e.g., P00000077)
+        Long partnerNumberSeq = null;
+        if (searchTerm.toUpperCase().startsWith("P")) {
+            try {
+                // Extract numeric part after 'P'
+                String numericPart = searchTerm.substring(1);
+                partnerNumberSeq = Long.parseLong(numericPart);
+            } catch (NumberFormatException e) {
+                // Not a valid partner number format, continue with text search
+            }
+        }
+        
         // Search across partner fields and subclass fields (NaturalPerson and LegalEntity)
         String jpql = """
             SELECT DISTINCT p FROM Partner p
-            WHERE CAST(p.partnerNumberSeq AS string) LIKE :search
+            WHERE (:partnerSeq IS NOT NULL AND p.partnerNumberSeq = :partnerSeq)
+               OR CAST(p.partnerNumberSeq AS string) LIKE :search
                OR LOWER(p.notes) LIKE :search
                OR (TYPE(p) = NaturalPerson AND (
                    LOWER(TREAT(p AS NaturalPerson).firstName) LIKE :search
@@ -132,6 +145,7 @@ public class PartnerService {
         
         return em.createQuery(jpql, Partner.class)
                 .setParameter("search", searchPattern)
+                .setParameter("partnerSeq", partnerNumberSeq)
                 .getResultList();
     }
     

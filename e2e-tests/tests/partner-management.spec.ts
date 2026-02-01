@@ -23,6 +23,8 @@ test.describe.serial('Partner Management', () => {
   let addressPage: AddressPage;
 
   test.beforeAll(async ({ browser }) => {
+    test.setTimeout(120000); // Increase timeout to 2 minutes for cleanup
+    
     // One-time cleanup before all tests
     const context = await browser.newContext();
     const page = await context.newPage();
@@ -31,30 +33,36 @@ test.describe.serial('Partner Management', () => {
     partnerPage = new PartnerPage(page);
     addressPage = new AddressPage(page);
     
-    // Background: Authenticate
-    await authPage.signIn('admin@abstratium.dev', 'secretLong', true);
-    expect(await authPage.isSignedIn()).toBe(true);
-    await authPage.goToHome();
-    
-    // Background: Delete all partners first (cascade deletes address_detail, contact_detail, partner_tag)
-    await partnerPage.navigateFromHeader();
-    await partnerPage.searchPartners('%%%');
-    const partnerCount = await partnerPage.getPartnerCount();
-    if (partnerCount > 0) {
-      console.log(`Cleaning up ${partnerCount} partner(s)...`);
-      await partnerPage.deleteAllPartners();
+    try {
+      // Background: Authenticate
+      await authPage.signIn('admin@abstratium.dev', 'secretLong', true);
+      expect(await authPage.isSignedIn()).toBe(true);
+      await authPage.goToHome();
+      
+      // Background: Delete all partners first (cascade deletes address_detail, contact_detail, partner_tag)
+      await partnerPage.navigateFromHeader();
+      await partnerPage.searchPartners('%%%');
+      const partnerCount = await partnerPage.getPartnerCount();
+      console.log(`Found ${partnerCount} partner(s)...`);
+      if (partnerCount > 0) {
+        console.log(`Cleaning up ${partnerCount} partner(s)...`);
+        await partnerPage.deleteAllPartners();
+      }
+      
+      // Background: Delete all addresses (now safe since address_detail links are gone)
+      await addressPage.navigateFromHeader();
+      await addressPage.searchAddresses('%%%');
+      const addressCount = await addressPage.getAddressCount();
+      if (addressCount > 0) {
+        console.log(`Cleaning up ${addressCount} address(es)...`);
+        await addressPage.deleteAllAddresses();
+      }
+    } catch (error) {
+      console.error('Error during beforeAll cleanup:', error);
+      throw error;
+    } finally {
+      await context.close();
     }
-    
-    // Background: Delete all addresses (now safe since address_detail links are gone)
-    await addressPage.navigateFromHeader();
-    await addressPage.searchAddresses('%%%');
-    const addressCount = await addressPage.getAddressCount();
-    if (addressCount > 0) {
-      console.log(`Cleaning up ${addressCount} address(es)...`);
-      await addressPage.deleteAllAddresses();
-    }
-    
-    await context.close();
   });
 
   test.beforeEach(async ({ page }) => {

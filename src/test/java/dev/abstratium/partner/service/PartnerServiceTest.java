@@ -171,6 +171,98 @@ public class PartnerServiceTest {
 
     @Test
     @Transactional
+    public void testSearchByPartnerNumber() {
+        // Create a partner
+        NaturalPerson person = new NaturalPerson();
+        person.setFirstName("SearchTest");
+        person.setLastName("ByNumber");
+        person.setActive(true);
+        Partner created = partnerService.create(person);
+        String partnerNumber = created.getPartnerNumber();
+        
+        assertNotNull(partnerNumber);
+        assertTrue(partnerNumber.startsWith("P"));
+        
+        // Search by exact partner number
+        List<Partner> results = partnerService.search(partnerNumber);
+        
+        assertFalse(results.isEmpty(), "Should find partner by exact partner number");
+        assertEquals(1, results.size(), "Should find exactly one partner");
+        assertEquals(partnerNumber, results.get(0).getPartnerNumber());
+        assertEquals("SearchTest", ((NaturalPerson) results.get(0)).getFirstName());
+    }
+
+    @Test
+    @Transactional
+    public void testSearchByPartnerNumberLowercase() {
+        // Create a partner
+        LegalEntity entity = new LegalEntity();
+        entity.setLegalName("SearchTest Corp");
+        entity.setJurisdiction("US");
+        entity.setActive(true);
+        Partner created = partnerService.create(entity);
+        String partnerNumber = created.getPartnerNumber();
+        
+        // Search by lowercase partner number
+        List<Partner> results = partnerService.search(partnerNumber.toLowerCase());
+        
+        assertFalse(results.isEmpty(), "Should find partner by lowercase partner number");
+        assertTrue(results.stream().anyMatch(p -> 
+            partnerNumber.equals(p.getPartnerNumber())
+        ));
+    }
+
+    @Test
+    @Transactional
+    public void testSearchByPartnerNumberPartialMatch() {
+        // Create multiple partners
+        NaturalPerson person1 = new NaturalPerson();
+        person1.setFirstName("First");
+        person1.setLastName("Partner");
+        person1.setActive(true);
+        Partner created1 = partnerService.create(person1);
+        
+        NaturalPerson person2 = new NaturalPerson();
+        person2.setFirstName("Second");
+        person2.setLastName("Partner");
+        person2.setActive(true);
+        Partner created2 = partnerService.create(person2);
+        
+        // Get the numeric sequence from the first partner number (e.g., "77" from "P00000077")
+        String partnerNumber1 = created1.getPartnerNumber();
+        Long seq = created1.getPartnerNumberSeq();
+        
+        // Search by just the sequence number (without leading zeros)
+        List<Partner> results = partnerService.search(String.valueOf(seq));
+        
+        assertFalse(results.isEmpty(), "Should find partner by sequence number");
+        assertTrue(results.stream().anyMatch(p -> 
+            partnerNumber1.equals(p.getPartnerNumber())
+        ), "Should include the partner with matching sequence");
+    }
+
+    @Test
+    @Transactional
+    public void testSearchByWildcard() {
+        // Create a partner
+        NaturalPerson person = new NaturalPerson();
+        person.setFirstName("Wildcard");
+        person.setLastName("Test");
+        person.setActive(true);
+        partnerService.create(person);
+        
+        // Search with wildcard
+        List<Partner> results = partnerService.search("%%%");
+        
+        assertFalse(results.isEmpty(), "Wildcard search should return results");
+        assertTrue(results.stream().anyMatch(p -> 
+            p instanceof NaturalPerson && 
+            "Wildcard".equals(((NaturalPerson) p).getFirstName())
+        ));
+    }
+
+    @Test
+    @Transactional
     public void testSearchWithAddressNoPrimaryAddress() {
         // Create partner
         NaturalPerson person = new NaturalPerson();

@@ -133,6 +133,14 @@ export class PartnerPage {
     return this.page.locator('.toast');
   }
 
+  getToastAction(): Locator {
+    return this.page.locator('.toast-action');
+  }
+
+  getToastActionByPartnerNumber(partnerNumber: string): Locator {
+    return this.page.locator(`.toast-action[data-partner-number="${partnerNumber}"]`);
+  }
+
   getFilterInfo(): Locator {
     return this.page.locator('.filter-info');
   }
@@ -206,17 +214,11 @@ export class PartnerPage {
     // Wait for form to close (indicates success)
     await expect(this.firstNameInput).not.toBeVisible({ timeout: 5000 });
     
-    // Wait for network to settle
-    await this.page.waitForLoadState('networkidle');
+    // Wait for success toast and click the partner number link to filter
+    const partnerNumber = await this.waitForSuccessToastAndClickPartnerNumber();
     
-    // Get the partner number from the newly created tile (should be the first one with the name)
-    const partnerTile = this.page.locator('.tile', { hasText: `${firstName} ${lastName}` }).first();
-    await expect(partnerTile).toBeVisible({ timeout: 5000 });
-    const partnerNumberElement = partnerTile.locator('.partner-number');
-    const partnerNumber = await partnerNumberElement.textContent() || '';
-    
-    console.log(`Natural person partner created successfully with number: ${partnerNumber.trim()}`);
-    return partnerNumber.trim();
+    console.log(`Natural person partner created successfully with number: ${partnerNumber}`);
+    return partnerNumber;
   }
 
   /**
@@ -287,17 +289,11 @@ export class PartnerPage {
     // Wait for form to close (indicates success)
     await expect(this.legalNameInput).not.toBeVisible({ timeout: 5000 });
     
-    // Wait for network to settle
-    await this.page.waitForLoadState('networkidle');
+    // Wait for success toast and click the partner number link to filter
+    const partnerNumber = await this.waitForSuccessToastAndClickPartnerNumber();
     
-    // Get the partner number from the newly created tile (should be the first one with the name)
-    const partnerTile = this.page.locator('.tile', { hasText: legalName }).first();
-    await expect(partnerTile).toBeVisible({ timeout: 5000 });
-    const partnerNumberElement = partnerTile.locator('.partner-number');
-    const partnerNumber = await partnerNumberElement.textContent() || '';
-    
-    console.log(`Legal entity partner created successfully with number: ${partnerNumber.trim()}`);
-    return partnerNumber.trim();
+    console.log(`Legal entity partner created successfully with number: ${partnerNumber}`);
+    return partnerNumber;
   }
 
   /**
@@ -486,6 +482,18 @@ export class PartnerPage {
    * Gets the count of visible partner tiles
    */
   async getPartnerCount(): Promise<number> {
+    // Wait for either tiles to appear or the "no partners" message
+    // This ensures the page has finished rendering after a search
+    try {
+      await Promise.race([
+        this.getAllPartnerTiles().first().waitFor({ state: 'visible', timeout: 3000 }),
+        this.page.locator('.info-message').waitFor({ state: 'visible', timeout: 3000 })
+      ]);
+    } catch (e) {
+      // If neither appears within timeout, continue anyway
+      // This handles edge cases where the page might be in an unexpected state
+    }
+    
     const tiles = this.getAllPartnerTiles();
     return await tiles.count();
   }
@@ -541,6 +549,41 @@ export class PartnerPage {
     if (message) {
       await expect(toast).toContainText(message);
     }
+  }
+
+  /**
+   * Waits for success toast with partner number action and clicks it to filter
+   * @returns The partner number from the toast action
+   */
+  async waitForSuccessToastAndClickPartnerNumber(): Promise<string> {
+    // Wait for the toast to appear
+    const toast = this.getToast();
+    await expect(toast).toBeVisible({ timeout: 5000 });
+    
+    // Wait for the action button to appear
+    const actionButton = this.getToastAction();
+    await expect(actionButton).toBeVisible({ timeout: 5000 });
+    
+    // Get the partner number from the button text
+    const partnerNumber = await actionButton.textContent() || '';
+    const trimmedPartnerNumber = partnerNumber.trim();
+    
+    // Click the action button to filter by partner number
+    console.log(`Clicking toast action to filter by partner number: ${trimmedPartnerNumber}`);
+    await actionButton.click();
+    
+    // Wait for the toast to close
+    await expect(toast).not.toBeVisible({ timeout: 3000 });
+    
+    // Wait for the search to complete
+    await this.page.waitForLoadState('networkidle');
+    
+    // Wait for the partner tile to appear with the filtered partner number
+    console.log(`Waiting for partner tile with number: ${trimmedPartnerNumber}`);
+    const partnerTile = this.getPartnerTile(trimmedPartnerNumber);
+    await expect(partnerTile).toBeVisible({ timeout: 10000 });
+    
+    return trimmedPartnerNumber;
   }
 
   /**

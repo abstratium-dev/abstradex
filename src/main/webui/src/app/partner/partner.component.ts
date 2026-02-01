@@ -180,8 +180,15 @@ export class PartnerComponent implements OnInit {
         this.toastService.success('Partner updated successfully');
       } else {
         // Create new partner
-        await this.controller.createPartner(partnerData as Partner);
-        this.toastService.success('Partner created successfully');
+        const createdPartner = await this.controller.createPartner(partnerData as Partner);
+        this.toastService.success('Partner created successfully', 7000, {
+          label: createdPartner.partnerNumber,
+          callback: () => {
+            // Filter by the partner number when clicked
+            this.searchTerm = createdPartner.partnerNumber;
+            this.onSearch();
+          }
+        });
       }
       this.showAddForm = false;
       this.editingPartner = null;

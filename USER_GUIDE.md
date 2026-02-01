@@ -50,7 +50,7 @@ Generate the required secrets for the application.
 
 2. **Generate CSRF Token Signature Key** (64+ characters recommended):
    ```bash
-   openssl rand -base64 64
+   openssl rand -base64 64 | tr -d '\n'
    ```
    Use this output for `CSRF_TOKEN_SIGNATURE_KEY`.
 
@@ -81,8 +81,8 @@ Generate the required secrets for the application.
    - `QUARKUS_DATASOURCE_JDBC_URL`: Database connection URL (format: `jdbc:mysql://<host>:<port>/<database>`)
    - `QUARKUS_DATASOURCE_USERNAME`: Database username
    - `QUARKUS_DATASOURCE_PASSWORD`: Database password (use strong, unique password)
-   - `COOKIE_ENCRYPTION_SECRET`: Cookie encryption secret (min 32 chars, generate with `openssl rand -base64 32`)
-   - `CSRF_TOKEN_SIGNATURE_KEY`: CSRF token signature key (min 32 chars, generate with `openssl rand -base64 64`)
+   - `COOKIE_ENCRYPTION_SECRET`: Cookie encryption secret (min 32 chars, generate with `openssl rand -base64 64 | tr -d '\n'`)
+   - `CSRF_TOKEN_SIGNATURE_KEY`: CSRF token signature key (min 32 chars, generate with `openssl rand -base64 64 | tr -d '\n'`)
    
    **Optional Environment Variables:**
    - `QUARKUS_OIDC_AUTH_SERVER_URL`: OIDC server URL (default: http://abstratium-abstrauth:8082/realms/abstratium)
