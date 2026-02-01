@@ -81,7 +81,7 @@ Generate the required secrets for the application.
    - `QUARKUS_DATASOURCE_JDBC_URL`: Database connection URL (format: `jdbc:mysql://<host>:<port>/<database>`)
    - `QUARKUS_DATASOURCE_USERNAME`: Database username
    - `QUARKUS_DATASOURCE_PASSWORD`: Database password (use strong, unique password)
-   - `COOKIE_ENCRYPTION_SECRET`: Cookie encryption secret (min 32 chars, generate with `openssl rand -base64 64 | tr -d '\n'`)
+   - `COOKIE_ENCRYPTION_SECRET`: Cookie encryption secret (min 32 chars, generate with `openssl rand -base64 32`)
    - `CSRF_TOKEN_SIGNATURE_KEY`: CSRF token signature key (min 32 chars, generate with `openssl rand -base64 64 | tr -d '\n'`)
    
    **Optional Environment Variables:**
