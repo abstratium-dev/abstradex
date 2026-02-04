@@ -100,7 +100,15 @@ test.describe.serial('Partner Management', () => {
     // And I should see the partner in the partners list
     expect(await partnerPage.partnerExists(partnerNumber)).toBe(true);
     
-    console.log(`✓ Natural person partner created: ${partnerNumber}`);
+    // And the partner should have the correct attributes
+    await partnerPage.verifyPartnerAttributes(partnerNumber, {
+      firstName: 'John',
+      lastName: 'Smith',
+      notes: 'Preferred client',
+      active: true
+    });
+    
+    console.log('✓ Natural person partner created successfully');
   });
 
   test('Scenario: Create a legal entity partner', async () => {
@@ -128,6 +136,12 @@ test.describe.serial('Partner Management', () => {
     // And I should see the partner in the partners list
     expect(await partnerPage.partnerExists(partnerNumber)).toBe(true);
     
+    // And the partner should have the correct attributes
+    await partnerPage.verifyPartnerAttributes(partnerNumber, {
+      legalName: 'Acme Corporation',
+      active: true
+    });
+    
     console.log(`✓ Legal entity partner created: ${partnerNumber}`);
   });
 
@@ -135,7 +149,7 @@ test.describe.serial('Partner Management', () => {
     console.log('\n=== Scenario: Search for partners ===');
     
     // Given the following partners exist
-    const john = await partnerPage.createNaturalPerson('Zebediah', 'Quixote');
+    const zebediah = await partnerPage.createNaturalPerson('Zebediah', 'Quixote');
     const acme = await partnerPage.createLegalEntity('Acme Corp');
     const jane = await partnerPage.createNaturalPerson('Jane', 'Doe');
     
@@ -149,7 +163,7 @@ test.describe.serial('Partner Management', () => {
     expect(count).toBeGreaterThanOrEqual(1);
     
     // And the partner should be visible
-    expect(await partnerPage.partnerExists(john)).toBe(true);
+    expect(await partnerPage.partnerExists(zebediah)).toBe(true);
     
     console.log('✓ Search found correct partner');
   });
@@ -179,6 +193,49 @@ test.describe.serial('Partner Management', () => {
     expect(await partnerPage.partnerExists(partner3)).toBe(true);
     
     console.log('✓ Wildcard search returned all partners');
+  });
+
+  test('Scenario: Search for partners by partner number', async () => {
+    console.log('\n=== Scenario: Search for partners by partner number ===');
+    
+    // Given a partner exists
+    const partnerNumber = await partnerPage.createNaturalPerson('David', 'Davis');
+    console.log(`Created partner: ${partnerNumber}`);
+    
+    // When I search for the partner number
+    await partnerPage.searchPartners(partnerNumber);
+    
+    // Then I should see 1 partner in the results
+    const count = await partnerPage.getPartnerCount();
+    console.log(`Found ${count} partner(s) matching '${partnerNumber}'`);
+    expect(count).toBe(1);
+    
+    // And the partner should be visible
+    expect(await partnerPage.partnerExists(partnerNumber)).toBe(true);
+    
+    console.log('✓ Search by partner number successful');
+  });
+
+  test('Scenario: Search for partners by notes', async () => {
+    console.log('\n=== Scenario: Search for partners by notes ===');
+    
+    // Given a partner exists with specific notes
+    const uniqueNote = `VIP customer ${Date.now()}`;
+    const partnerNumber = await partnerPage.createNaturalPerson('Emily', 'Evans', undefined, uniqueNote);
+    console.log(`Created partner: ${partnerNumber} with notes: ${uniqueNote}`);
+    
+    // When I search for the notes
+    await partnerPage.searchPartners('VIP');
+    
+    // Then I should see at least 1 partner in the results
+    const count = await partnerPage.getPartnerCount();
+    console.log(`Found ${count} partner(s) matching 'VIP'`);
+    expect(count).toBeGreaterThanOrEqual(1);
+    
+    // And the partner should be visible
+    expect(await partnerPage.partnerExists(partnerNumber)).toBe(true);
+    
+    console.log('✓ Search by notes successful');
   });
 
   test('Scenario: Delete a partner', async () => {

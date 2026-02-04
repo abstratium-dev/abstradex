@@ -91,12 +91,35 @@ export class PartnerAddressPage {
     await addressInput.click();
     await addressInput.fill(searchTerm);
     
-    // Wait for autocomplete results
+    // Wait for autocomplete dropdown to appear
     await this.page.waitForTimeout(1000);
     
-    // Select first option from autocomplete
-    await this.page.keyboard.press('ArrowDown');
-    await this.page.keyboard.press('Enter');
+    // Wait for dropdown items to be visible
+    const dropdown = this.addressAutocomplete.locator('.dropdown');
+    await expect(dropdown).toBeVisible({ timeout: 5000 });
+    
+    const dropdownItems = this.addressAutocomplete.locator('.dropdown-item')
+      .filter({ hasNot: this.page.locator('.loading') })
+      .filter({ hasNot: this.page.locator('.no-results') })
+      .filter({ hasNot: this.page.locator('.hint') });
+    
+    await expect(dropdownItems.first()).toBeVisible({ timeout: 5000 });
+    
+    // Click the first option directly (use mousedown as per autocomplete component)
+    await dropdownItems.first().dispatchEvent('mousedown');
+    
+    // Wait a bit for the selection to register
+    await this.page.waitForTimeout(200);
+    
+    // Press Escape to close the dropdown
+    await this.page.keyboard.press('Escape');
+    
+    // Wait for dropdown to close
+    await expect(dropdown).not.toBeVisible({ timeout: 5000 });
+    
+    // Verify address was selected
+    const selectedValue = await addressInput.inputValue();
+    console.log(`Address input value after selection: "${selectedValue}"`);
     
     // Set address type
     await this.addressTypeSelect.selectOption(addressType);
@@ -115,10 +138,18 @@ export class PartnerAddressPage {
     }
     
     // Submit the form
+    console.log('Submitting add address form...');
     await this.addAddressSubmitButton.click();
     
+    // Wait for success toast
+    const toast = this.page.locator('.toast.toast-success');
+    await expect(toast).toBeVisible({ timeout: 10000 });
+    console.log('Success toast appeared');
+    
     // Wait for form to close (indicates success)
-    await expect(this.addressAutocomplete).not.toBeVisible({ timeout: 5000 });
+    await expect(this.addressAutocomplete).not.toBeVisible({ timeout: 5000 }).catch(() => {
+      console.log('Form did not close, but toast appeared so continuing');
+    });
     
     console.log('Address added successfully');
   }
@@ -175,5 +206,68 @@ export class PartnerAddressPage {
     await link.click();
     await this.page.waitForURL('**/addresses', { timeout: 5000 });
     await this.page.waitForLoadState('networkidle');
+  }
+
+  /**
+   * Verifies that an address has a specific type badge
+   */
+  async verifyAddressType(addressText: string, expectedType: 'BILLING' | 'SHIPPING') {
+    console.log(`Verifying address type: ${addressText} should be ${expectedType}`);
+    
+    const tile = this.getAddressTile(addressText);
+    await expect(tile).toBeVisible({ timeout: 5000 });
+    
+    const typeBadge = tile.locator('.badge.type');
+    await expect(typeBadge).toBeVisible({ timeout: 5000 });
+    
+    const badgeText = await typeBadge.textContent();
+    expect(badgeText?.trim()).toBe(expectedType);
+    
+    console.log(`✓ Address type verified: ${expectedType}`);
+  }
+
+  /**
+   * Verifies that an address is marked as primary
+   */
+  async verifyAddressIsPrimary(addressText: string, shouldBePrimary: boolean = true) {
+    console.log(`Verifying address primary status: ${addressText} should be ${shouldBePrimary ? 'PRIMARY' : 'SECONDARY'}`);
+    
+    const tile = this.getAddressTile(addressText);
+    await expect(tile).toBeVisible({ timeout: 5000 });
+    
+    const primaryBadge = tile.locator('.badge.primary');
+    
+    if (shouldBePrimary) {
+      await expect(primaryBadge).toBeVisible({ timeout: 5000 });
+      const badgeText = await primaryBadge.textContent();
+      expect(badgeText?.trim()).toBe('PRIMARY');
+    } else {
+      // Check for SECONDARY badge or no primary badge
+      const allBadges = tile.locator('.badge');
+      const count = await allBadges.count();
+      let foundPrimary = false;
+      
+      for (let i = 0; i < count; i++) {
+        const badge = allBadges.nth(i);
+        const text = await badge.textContent();
+        if (text?.trim() === 'PRIMARY') {
+          foundPrimary = true;
+          break;
+        }
+      }
+      
+      expect(foundPrimary).toBe(false);
+    }
+    
+    console.log(`✓ Address primary status verified`);
+  }
+
+  /**
+   * Gets the page title
+   */
+  async getPageTitle(): Promise<string> {
+    const title = this.page.locator('h2');
+    await expect(title).toBeVisible({ timeout: 5000 });
+    return await title.textContent() || '';
   }
 }

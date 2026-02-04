@@ -32,6 +32,13 @@ Feature: Partner Management
     Then a new partner should be created with an auto-generated partner number
     And the partner should be marked as active by default
     And I should see the partner in the partners list
+    And the partner should have the following attributes:
+      | Field      | Value           |
+      | First Name | John            |
+      | Last Name  | Smith           |
+      | Title      | Mr.             |
+      | Notes      | Preferred client|
+      | Active     | true            |
     
   Scenario: Create a legal entity partner
     Given I click the "Add Partner" button
@@ -48,8 +55,17 @@ Feature: Partner Management
     Then a new partner should be created with an auto-generated partner number
     And the partner should be marked as active by default
     And I should see the partner in the partners list
+    And the partner should have the following attributes:
+      | Field               | Value                    |
+      | Legal Name          | Acme Corporation         |
+      | Trading Name        | Acme                     |
+      | Registration Number | 123456789                |
+      | Tax ID              | TAX-123                  |
+      | Legal Form          | Limited Liability Company|
+      | Jurisdiction        | Delaware, USA            |
+      | Active              | true                     |
     
-  Scenario: Search for partners
+  Scenario: Search for partners by name
     Given the following partners exist:
       | Partner Number | Name          | Type           |
       | P00000001      | John Smith    | Natural Person |
@@ -58,6 +74,18 @@ Feature: Partner Management
     When I search for "John"
     Then I should see 1 partner in the results
     And the partner "P00000001" should be visible
+    
+  Scenario: Search for partners by partner number
+    Given a partner with number "P00000042" exists
+    When I search for "P00000042"
+    Then I should see 1 partner in the results
+    And the partner "P00000042" should be visible
+    
+  Scenario: Search for partners by notes
+    Given a natural person partner exists with notes "VIP customer"
+    When I search for "VIP"
+    Then I should see at least 1 partner in the results
+    And the partner with notes "VIP customer" should be visible
     
   Scenario: Search partners by wildcard
     Given multiple partners exist in the system

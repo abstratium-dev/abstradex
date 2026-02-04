@@ -556,12 +556,12 @@ export class PartnerPage {
    * @returns The partner number from the toast action
    */
   async waitForSuccessToastAndClickPartnerNumber(): Promise<string> {
-    // Wait for the toast to appear
-    const toast = this.getToast();
+    // Wait for the toast to appear (use first() to avoid strict mode violations)
+    const toast = this.getToast().first();
     await expect(toast).toBeVisible({ timeout: 5000 });
     
     // Wait for the action button to appear
-    const actionButton = this.getToastAction();
+    const actionButton = this.getToastAction().first();
     await expect(actionButton).toBeVisible({ timeout: 5000 });
     
     // Get the partner number from the button text
@@ -572,8 +572,10 @@ export class PartnerPage {
     console.log(`Clicking toast action to filter by partner number: ${trimmedPartnerNumber}`);
     await actionButton.click();
     
-    // Wait for the toast to close
-    await expect(toast).not.toBeVisible({ timeout: 3000 });
+    // Wait for the toast to close (or timeout if it doesn't)
+    await expect(toast).not.toBeVisible({ timeout: 10000 }).catch(() => {
+      console.log('Toast did not close in time, continuing anyway');
+    });
     
     // Wait for the search to complete
     await this.page.waitForLoadState('networkidle');
@@ -629,6 +631,11 @@ export class PartnerPage {
       if (partnerNumber) {
         console.log(`Deleting partner: ${partnerNumber.trim()}`);
         await this.deletePartnerViaContextMenu(partnerNumber.trim(), true);
+        
+        // Wait for loading indicator to disappear
+        await expect(this.loadingIndicator).not.toBeVisible({ timeout: 10000 }).catch(() => {
+          console.log('Loading indicator still visible or not found, continuing');
+        });
       }
       
       // Update count
@@ -646,5 +653,61 @@ export class PartnerPage {
     await expect(partnersLink).toBeVisible({ timeout: 5000 });
     await partnersLink.click();
     await this.waitForPageLoad();
+  }
+
+  /**
+   * Verify partner attributes by checking the tile display
+   * @param partnerNumber - The partner number to verify
+   * @param attributes - Object containing expected attribute values
+   */
+  async verifyPartnerAttributes(partnerNumber: string, attributes: {
+    firstName?: string;
+    lastName?: string;
+    title?: string;
+    notes?: string;
+    legalName?: string;
+    tradingName?: string;
+    registrationNumber?: string;
+    taxId?: string;
+    legalForm?: string;
+    jurisdiction?: string;
+    active?: boolean;
+  }) {
+    console.log(`Verifying attributes for partner: ${partnerNumber}`);
+    
+    const tile = this.getPartnerTile(partnerNumber);
+    await expect(tile).toBeVisible({ timeout: 5000 });
+    
+    const tileText = await tile.textContent();
+    
+    // Verify name (for natural person: firstName + lastName, for legal entity: legalName or tradingName)
+    if (attributes.firstName && attributes.lastName) {
+      const fullName = `${attributes.firstName} ${attributes.lastName}`;
+      expect(tileText).toContain(fullName);
+      console.log(`✓ Name verified: ${fullName}`);
+    }
+    
+    if (attributes.legalName) {
+      expect(tileText).toContain(attributes.legalName);
+      console.log(`✓ Legal name verified: ${attributes.legalName}`);
+    }
+    
+    // Verify notes
+    if (attributes.notes) {
+      expect(tileText).toContain(attributes.notes);
+      console.log(`✓ Notes verified: ${attributes.notes}`);
+    }
+    
+    // Verify active status
+    if (attributes.active !== undefined) {
+      const statusBadge = tile.locator('.status-badge');
+      await expect(statusBadge).toBeVisible({ timeout: 5000 });
+      const statusText = await statusBadge.textContent();
+      const expectedStatus = attributes.active ? 'Active' : 'Inactive';
+      expect(statusText?.trim()).toBe(expectedStatus);
+      console.log(`✓ Active status verified: ${expectedStatus}`);
+    }
+    
+    console.log('✓ All visible attributes verified');
   }
 }

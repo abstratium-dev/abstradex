@@ -33,6 +33,14 @@ Feature: Address Management
     Then a new address should be created
     And I should see the address in the addresses list
     And the address should show as "Verified"
+    And the address should have the following attributes:
+      | Field          | Value           |
+      | Street Line 1  | 123 Main Street |
+      | Street Line 2  | Suite 100       |
+      | City           | New York        |
+      | State/Province | NY              |
+      | Postal Code    | 10001           |
+      | Verified       | true            |
     
   Scenario: Create an unverified address
     Given I click the "Add Address" button
@@ -45,8 +53,13 @@ Feature: Address Management
     And I submit the form
     Then a new address should be created
     And the address should show as "Unverified"
+    And the address should have the following attributes:
+      | Field         | Value          |
+      | Street Line 1 | 456 Oak Avenue |
+      | City          | Boston         |
+      | Verified      | false          |
     
-  Scenario: Search for addresses
+  Scenario: Search for addresses by street
     Given the following addresses exist:
       | Street Line 1   | City      | Country |
       | 123 Main Street | New York  | US      |
@@ -55,6 +68,18 @@ Feature: Address Management
     When I search for "Main"
     Then I should see 1 address in the results
     And the address "123 Main Street" should be visible
+    
+  Scenario: Search for addresses by city
+    Given an address exists in "Boston"
+    When I search for "Boston"
+    Then I should see at least 1 address in the results
+    And the address in "Boston" should be visible
+    
+  Scenario: Search for addresses by postal code
+    Given an address exists with postal code "10001"
+    When I search for "10001"
+    Then I should see at least 1 address in the results
+    And the address with postal code "10001" should be visible
     
   Scenario: View address details
     Given an address "123 Main Street, New York" exists
