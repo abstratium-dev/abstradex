@@ -2,6 +2,7 @@ import { Component, inject, OnInit, Signal } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../core/toast/toast.service';
 import { ConfirmDialogService } from '../core/confirm-dialog/confirm-dialog.service';
 import { AutocompleteComponent, AutocompleteOption } from '../core/autocomplete/autocomplete.component';
@@ -24,6 +25,7 @@ export class PartnerAddressComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private location = inject(Location);
+  private http = inject(HttpClient);
   private toastService = inject(ToastService);
   private confirmService = inject(ConfirmDialogService);
   private partnerService = inject(PartnerService);
@@ -49,7 +51,7 @@ export class PartnerAddressComponent implements OnInit {
 
   // Autocomplete fetch function
   fetchAddresses = async (searchTerm: string): Promise<AutocompleteOption[]> => {
-    await this.controller.loadAddresses(searchTerm || undefined);
+    await this.controller.loadAddresses(searchTerm);
     const addresses = this.modelService.addresses$();
     return addresses.map(addr => ({
       value: addr.id || '',
@@ -67,10 +69,8 @@ export class PartnerAddressComponent implements OnInit {
 
   async loadPartnerData(): Promise<void> {
     try {
-      // Load all partners to find the one we need
-      await this.controller.loadPartners();
-      const partners = this.modelService.partners$();
-      this.partner = partners.find(p => p.id === this.partnerId) || null;
+      // Load partner directly by ID without overwriting the search term
+      this.partner = await this.http.get<Partner>(`/api/partner/${this.partnerId}`).toPromise() || null;
 
       if (!this.partner) {
         this.error = 'Partner not found';
@@ -78,6 +78,8 @@ export class PartnerAddressComponent implements OnInit {
       }
     } catch (err) {
       console.error('Failed to load partner data:', err);
+      this.error = 'Partner not found';
+      this.toastService.error(this.error);
     }
   }
 

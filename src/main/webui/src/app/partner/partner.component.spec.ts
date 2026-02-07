@@ -43,13 +43,17 @@ describe('PartnerComponent', () => {
       'loadPartners',
       'createPartner',
       'updatePartner',
-      'deletePartner'
+      'deletePartner',
+      'getPartnerById',
+      'clearPartners'
     ]);
     
-    mockModelService = jasmine.createSpyObj('ModelService', ['setPartners'], {
+    mockModelService = jasmine.createSpyObj('ModelService', ['setPartners', 'setLastPartnerSearchTerm'], {
       partners$: signal([mockNaturalPerson, mockLegalEntity]),
       partnersLoading$: signal(false),
-      partnersError$: signal(null)
+      partnersError$: signal(null),
+      partnersLoadTime$: signal(null),
+      lastPartnerSearchTerm$: signal('')
     });
 
     mockPartnerService = jasmine.createSpyObj('PartnerService', ['getPartnerName']);
@@ -58,9 +62,11 @@ describe('PartnerComponent', () => {
     mockRouter = jasmine.createSpyObj('Router', ['navigate', 'getCurrentNavigation']);
 
     mockController.loadPartners.and.resolveTo();
-    mockController.createPartner.and.resolveTo();
+    mockController.createPartner.and.resolveTo({ id: '1', partnerNumber: 'P00001', active: true });
     mockController.updatePartner.and.resolveTo();
     mockController.deletePartner.and.resolveTo();
+    mockController.getPartnerById.and.resolveTo(null);
+    mockController.clearPartners.and.stub();
     mockPartnerService.getPartnerName.and.callFake((p: Partner) => {
       const np = p as NaturalPerson;
       const le = p as LegalEntity;
@@ -119,7 +125,7 @@ describe('PartnerComponent', () => {
       component.onSearch();
       tick(300);
 
-      expect(mockModelService.setPartners).toHaveBeenCalledWith([]);
+      expect(mockController.clearPartners).toHaveBeenCalled();
     }));
 
     it('should debounce search calls', fakeAsync(() => {
@@ -139,7 +145,7 @@ describe('PartnerComponent', () => {
       component.clearSearch();
 
       expect(component.searchTerm).toBe('');
-      expect(mockModelService.setPartners).toHaveBeenCalledWith([]);
+      expect(mockController.clearPartners).toHaveBeenCalled();
     });
   });
 
@@ -290,6 +296,7 @@ describe('PartnerComponent', () => {
     it('should update partner successfully', async () => {
       component.editingPartner = mockNaturalPerson;
       component.partnerType = 'natural';
+      component.searchTerm = 'John';
       component.newNaturalPerson = {
         firstName: 'John',
         lastName: 'Updated',
@@ -299,6 +306,7 @@ describe('PartnerComponent', () => {
       await component.onSubmitAdd();
 
       expect(mockController.updatePartner).toHaveBeenCalled();
+      expect(mockController.loadPartners).toHaveBeenCalledWith('John');
       expect(mockToastService.success).toHaveBeenCalledWith('Partner updated successfully');
       expect(component.editingPartner).toBeNull();
     });
@@ -316,8 +324,9 @@ describe('PartnerComponent', () => {
   });
 
   describe('partner deletion', () => {
-    it('should delete partner when confirmed', async () => {
+    it('should delete partner when confirmed and retrigger search', async () => {
       mockConfirmService.confirm.and.resolveTo(true);
+      component.searchTerm = 'test search';
 
       await component.deletePartner(mockNaturalPerson);
 
@@ -330,6 +339,7 @@ describe('PartnerComponent', () => {
       });
       expect(mockController.deletePartner).toHaveBeenCalledWith('1');
       expect(mockToastService.success).toHaveBeenCalledWith('Partner deleted successfully');
+      expect(mockController.loadPartners).toHaveBeenCalledWith('test search');
     });
 
     it('should not delete partner when cancelled', async () => {
@@ -376,18 +386,70 @@ describe('PartnerComponent', () => {
     });
   });
 
-  it('should retry loading partners', () => {
-    component.onRetry();
-    expect(mockController.loadPartners).toHaveBeenCalled();
-  });
-
   it('should load partner for editing from navigation state', async () => {
+    mockController.getPartnerById.and.resolveTo(mockNaturalPerson);
     mockRouter.getCurrentNavigation.and.returnValue({
       extras: { state: { editPartnerId: '1' } }
     } as any);
 
     await component.ngOnInit();
 
-    expect(mockController.loadPartners).toHaveBeenCalled();
+    expect(mockController.getPartnerById).toHaveBeenCalledWith('1');
+    expect(component.showAddForm).toBeTrue();
+    expect(component.editingPartner).toEqual(mockNaturalPerson);
+  });
+
+  describe('result count and load time display', () => {
+    it('should display result count when search term is present', () => {
+      component.searchTerm = 'test';
+      fixture.detectChanges();
+
+      const compiled = fixture.nativeElement as HTMLElement;
+      const filterInfo = compiled.querySelector('.filter-info');
+      
+      expect(filterInfo).toBeTruthy();
+      expect(filterInfo?.textContent).toContain('Showing 2 result(s) for "test"');
+    });
+
+    it('should display load time when available', () => {
+      // Create a new mock with load time
+      const mockServiceWithTime = jasmine.createSpyObj('ModelService', ['setPartners'], {
+        partners$: signal([mockNaturalPerson, mockLegalEntity]),
+        partnersLoading$: signal(false),
+        partnersError$: signal(null),
+        partnersLoadTime$: signal(123)
+      });
+      
+      TestBed.overrideProvider(ModelService, { useValue: mockServiceWithTime });
+      const newFixture = TestBed.createComponent(PartnerComponent);
+      const newComponent = newFixture.componentInstance;
+      newComponent.searchTerm = 'test';
+      newFixture.detectChanges();
+
+      const compiled = newFixture.nativeElement as HTMLElement;
+      const filterInfo = compiled.querySelector('.filter-info');
+      
+      expect(filterInfo?.textContent).toContain('(123ms)');
+    });
+
+    it('should not display load time when null', () => {
+      component.searchTerm = 'test';
+      fixture.detectChanges();
+
+      const compiled = fixture.nativeElement as HTMLElement;
+      const filterInfo = compiled.querySelector('.filter-info');
+      
+      expect(filterInfo?.textContent).not.toContain('ms)');
+    });
+
+    it('should not display filter info when search term is empty', () => {
+      component.searchTerm = '';
+      fixture.detectChanges();
+
+      const compiled = fixture.nativeElement as HTMLElement;
+      const filterInfo = compiled.querySelector('.filter-info');
+      
+      expect(filterInfo).toBeFalsy();
+    });
   });
 });

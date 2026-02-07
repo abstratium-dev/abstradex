@@ -1,10 +1,11 @@
-import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ToastService } from '../core/toast/toast.service';
-import { ConfirmDialogService } from '../core/confirm-dialog/confirm-dialog.service';
 import { Controller } from '../controller';
+import { ConfirmDialogService } from '../core/confirm-dialog/confirm-dialog.service';
+import { ToastService } from '../core/toast/toast.service';
 import { ModelService } from '../model.service';
 import { ContactDetail } from '../models/contact-detail.model';
 import { Partner } from '../models/partner.model';
@@ -22,6 +23,7 @@ export class PartnerContactComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private location = inject(Location);
+  private http = inject(HttpClient);
   private toastService = inject(ToastService);
   private confirmService = inject(ConfirmDialogService);
   private partnerService = inject(PartnerService);
@@ -62,9 +64,8 @@ export class PartnerContactComponent implements OnInit {
 
   async loadPartnerData(): Promise<void> {
     try {
-      await this.controller.loadPartners();
-      const partners = this.modelService.partners$();
-      this.partner = partners.find(p => p.id === this.partnerId) || null;
+      // Load partner directly by ID without overwriting the search term
+      this.partner = await this.http.get<Partner>(`/api/partner/${this.partnerId}`).toPromise() || null;
 
       if (!this.partner) {
         this.error = 'Partner not found';
@@ -72,6 +73,8 @@ export class PartnerContactComponent implements OnInit {
       }
     } catch (err) {
       console.error('Failed to load partner data:', err);
+      this.error = 'Partner not found';
+      this.toastService.error(this.error);
     }
   }
 
@@ -164,7 +167,88 @@ export class PartnerContactComponent implements OnInit {
       case 'FAX': return '📠';
       case 'WEBSITE': return '🌐';
       case 'LINKEDIN': return '💼';
+      case 'OTHER': return '📋';
       default: return '📋';
     }
+  }
+
+  getInputType(): string {
+    const type = this.contactForm.contactType?.toUpperCase();
+    switch (type) {
+      case 'EMAIL':
+        return 'email';
+      case 'PHONE':
+      case 'MOBILE':
+      case 'FAX':
+        return 'tel';
+      case 'WEBSITE':
+      case 'LINKEDIN':
+        return 'url';
+      default:
+        return 'text';
+    }
+  }
+
+  getValidationPattern(): string {
+    const type = this.contactForm.contactType?.toUpperCase();
+    switch (type) {
+      case 'EMAIL':
+        return '[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}';
+      case 'PHONE':
+      case 'MOBILE':
+      case 'FAX':
+        return '[0-9+\\-\\s()]+';
+      case 'WEBSITE':
+      case 'LINKEDIN':
+        return 'https?://.*';
+      default:
+        return '';
+    }
+  }
+
+  getPlaceholder(): string {
+    switch (this.contactForm.contactType?.toUpperCase()) {
+      case 'EMAIL':
+        return 'e.g., john@example.com';
+      case 'PHONE':
+      case 'MOBILE':
+        return 'e.g., +1-555-0123';
+      case 'FAX':
+        return 'e.g., +1-555-0124';
+      case 'WEBSITE':
+        return 'e.g., https://example.com';
+      case 'LINKEDIN':
+        return 'e.g., https://linkedin.com/in/username';
+      default:
+        return 'Enter contact value';
+    }
+  }
+
+  /**
+   * Get the appropriate href for a contact based on its type
+   */
+  getContactHref(contact: ContactDetail): string {
+    const type = contact.contactType?.toUpperCase();
+    switch (type) {
+      case 'EMAIL':
+        return `mailto:${contact.contactValue || ''}`;
+      case 'PHONE':
+      case 'MOBILE':
+      case 'FAX':
+        return `tel:${contact.contactValue || ''}`;
+      case 'WEBSITE':
+      case 'LINKEDIN':
+        return contact.contactValue || '';
+      default:
+        return '';
+    }
+  }
+
+  /**
+   * Check if contact type should be a clickable link
+   */
+  isContactClickable(contact: ContactDetail): boolean {
+    const type = contact.contactType?.toUpperCase() || '';
+    return ['EMAIL', 'PHONE', 'MOBILE', 'FAX', 'WEBSITE', 'LINKEDIN'].includes(type);
   }
 }

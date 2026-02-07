@@ -36,6 +36,7 @@ export class PartnerComponent implements OnInit {
   });
   loading: Signal<boolean> = this.modelService.partnersLoading$;
   error: Signal<string | null> = this.modelService.partnersError$;
+  loadTime: Signal<number | null> = this.modelService.partnersLoadTime$;
 
   // Add/Edit Partner Form state
   showAddForm = false;
@@ -58,19 +59,23 @@ export class PartnerComponent implements OnInit {
   @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
 
   async ngOnInit(): Promise<void> {
-    // Don't load partners automatically - wait for user to search
-    
     // Check if we're navigating from partner overview to edit
     const navigation = this.router.getCurrentNavigation();
     const state = navigation?.extras?.state || history.state;
     if (state?.editPartnerId) {
       // Load the partner and open edit form
       const partnerId = state.editPartnerId;
-      // Search for the partner to load it
-      await this.controller.loadPartners();
-      const partner = this.partners().find(p => p.id === partnerId);
+      // Fetch the specific partner by ID
+      const partner = await this.controller.getPartnerById(partnerId);
       if (partner) {
         this.editPartner(partner);
+      }
+    } else {
+      // Restore last search term if available (e.g., when navigating back from partner overview)
+      const lastSearchTerm = this.modelService.lastPartnerSearchTerm$();
+      if (lastSearchTerm) {
+        this.searchTerm = lastSearchTerm;
+        // Partners are already loaded in the model, no need to search again
       }
     }
   }
@@ -95,14 +100,14 @@ export class PartnerComponent implements OnInit {
       }, 300);
     } else if (trimmedSearch.length === 0) {
       // Clear results when search is empty
-      this.modelService.setPartners([]);
+      this.controller.clearPartners();
     }
   }
 
   clearSearch(): void {
     this.searchTerm = '';
     // Clear partners list when search is cleared
-    this.modelService.setPartners([]);
+    this.controller.clearPartners();
   }
 
   toggleAddForm(): void {
@@ -136,10 +141,6 @@ export class PartnerComponent implements OnInit {
       active: true,
       notes: ''
     };
-  }
-
-  onRetry(): void {
-    this.controller.loadPartners();
   }
 
   async onSubmitAdd(): Promise<void> {
@@ -176,17 +177,29 @@ export class PartnerComponent implements OnInit {
     try {
       if (this.editingPartner) {
         // Update existing partner
-        await this.controller.updatePartner(partnerData as Partner);
-        this.toastService.success('Partner updated successfully');
+        const updatedPartner = await this.controller.updatePartner(partnerData as Partner);
+        this.toastService.success('Partner updated successfully', 7000, {
+          label: updatedPartner.partnerNumber,
+          callback: () => {
+            // Filter by the partner number when clicked
+            this.searchTerm = updatedPartner.partnerNumber;
+            this.controller.loadPartners(updatedPartner.partnerNumber);
+          }
+        });
+        // Retrigger search to refresh the list
+        if (this.searchTerm && this.searchTerm.trim().length >= 3) {
+          this.controller.loadPartners(this.searchTerm);
+        }
       } else {
         // Create new partner
         const createdPartner = await this.controller.createPartner(partnerData as Partner);
+        // Set search term to the new partner number and search
         this.toastService.success('Partner created successfully', 7000, {
           label: createdPartner.partnerNumber,
           callback: () => {
             // Filter by the partner number when clicked
             this.searchTerm = createdPartner.partnerNumber;
-            this.onSearch();
+            this.controller.loadPartners(createdPartner.partnerNumber);
           }
         });
       }
@@ -217,6 +230,10 @@ export class PartnerComponent implements OnInit {
     try {
       await this.controller.deletePartner(partner.id);
       this.toastService.success('Partner deleted successfully');
+      //retrigger the search to refresh the list
+      if (this.searchTerm && this.searchTerm.trim().length >= 3) {
+        this.controller.loadPartners(this.searchTerm);
+      }
     } catch (err: any) {
       this.toastService.error('Failed to delete partner. Please try again.');
     }

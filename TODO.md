@@ -8,17 +8,24 @@ These TODOs are to be resolved by the developer, NOT THE LLM.
 
 - add more e2e tests based on the features
 
-- use the features to test the api in a quarkus test???
+- X when adding a partner or address, the toast is used to show a link to the partner/address. the same is not true when editing a partner/address, so please fix that, taking inspiration from the existing code where partners/addresses are added in the angular code
+
+- X when adding/editing contact details, the type should influence the html5 input field (e.g. phone number should be a phone number input field)
+
+- X the contact details displayed in partner-tile and partner-overview should be links, e.g. email->mailto, phone->tel, website->anchor, etc.
+
+- use the feature files to test the api in a quarkus test???
   - if not, remove those feature files
   - is cucumber compatible with playwright?
+
 - need to be able to edit tags - need a route and link in the header for that
-- 500 when editing legal entity
-- when adding/editing contact details, the type should influence the html5 input field (e.g. phone number should be a phone number input field)
-- the contact details displayed in partner-tile and partner-overview should be links, e.g. email->mailto, phone->tel, website->anchor, etc.
+
+
+- dont allow deleting an address if it is in use
+
+- dont allow deleting a tag if it is in use
 
 - in the controller we need to remove the two methods loadPartners and loadAddresses - as they won't perform well when we have a lot of partners.  in some places, like where we are editing a partner, it should load exactly that partner! ditto address.
-
-- in the "Scenario: Delete a Partner", it looks like it finds 8 partners for the unique partner ID that was deleted. i have debugged it. deleting results in status code 204 and there is a second request GET http://localhost:8082/api/partner which returns ALL the partners. that won't perform well at all, once we have a few hundred partners. change the code so that all modifications to partners AND addresses (create, update, delete) do NOT reload *all* of the entities. instead it should a) simply delete the search text when a entity was deleted, b) leave the search text if the entity was an edited, and c) if the entity was a created, remove the search text and replace it with the entity number and use the result of the create to add that entity to the model so that that entity is displayed. all relevant angular tests will need to be updated! delete the REST method which loads all partners and addresses. run all tests and keep testing until they all pass. see @testing.md 
 
 - in order to integrate with other microservices, we need to export data in a shareable way. apache arrow format? csv?
 
@@ -45,7 +52,9 @@ what is this warning?
 
 ## Tomorrow
 
-- e2e tests
+- deduping of partners (type/name/dob/phone|email|ssn)
+- deduping of addresses (street incl. number, city, state, zip, country)
+- address search should show count, like with partners, including time to execute, which partner search needs
 - ability to search by tag
 - double click partner tile to open a view that shows all of their info on one screen
 - ability to search by contact detail

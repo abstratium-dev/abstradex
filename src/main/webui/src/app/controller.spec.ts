@@ -52,9 +52,9 @@ describe('Controller', () => {
         { id: '2', partnerNumber: 'P002', active: true }
       ];
 
-      controller.loadPartners();
+      controller.loadPartners('test');
 
-      const req = httpMock.expectOne('/api/partner');
+      const req = httpMock.expectOne('/api/partner?search=test');
       expect(req.request.method).toBe('GET');
       req.flush(mockPartners);
 
@@ -63,9 +63,9 @@ describe('Controller', () => {
     });
 
     it('should handle error response', () => {
-      controller.loadPartners();
+      controller.loadPartners('test');
 
-      const req = httpMock.expectOne('/api/partner');
+      const req = httpMock.expectOne('/api/partner?search=test');
       req.error(new ProgressEvent('error'), { status: 500, statusText: 'Server Error' });
 
       expect(modelService.partners$()).toEqual([]);
@@ -81,9 +81,9 @@ describe('Controller', () => {
         { id: '2', streetLine1: '456 Oak Ave', city: 'Zurich', countryCode: 'CH', isVerified: false }
       ];
 
-      controller.loadAddresses();
+      controller.loadAddresses('test');
 
-      const req = httpMock.expectOne('/api/address');
+      const req = httpMock.expectOne('/api/address?search=test');
       expect(req.request.method).toBe('GET');
       req.flush(mockAddresses);
 
@@ -93,7 +93,7 @@ describe('Controller', () => {
   });
 
   describe('createPartner', () => {
-    it('should create partner and reload list', async () => {
+    it('should create partner successfully', async () => {
       const newPartner: Partner = { id: '123', partnerNumber: 'P003', active: true };
 
       const createPromise = controller.createPartner(newPartner);
@@ -104,11 +104,6 @@ describe('Controller', () => {
 
       const result = await createPromise;
       expect(result).toEqual(newPartner);
-
-      // Verify reload was triggered
-      const loadReq = httpMock.expectOne('/api/partner');
-      expect(loadReq.request.method).toBe('GET');
-      loadReq.flush([newPartner]);
     });
   });
 

@@ -112,6 +112,17 @@ public class Partner {
         return String.format("P%08d", partnerNumberSeq);
     }
 
+    /**
+     * Returns the partner type discriminator value.
+     * This method should be overridden in subclasses to return the specific type.
+     * @return the partner type (NATURAL_PERSON or LEGAL_ENTITY)
+     */
+    @Transient
+    public String getPartnerType() {
+        // Default implementation - should be overridden in subclasses
+        return null;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }

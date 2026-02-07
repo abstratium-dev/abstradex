@@ -35,9 +35,16 @@ public class PartnerResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({Roles.USER})
-    public List<PartnerSearchResult> getAll(@QueryParam("search") String searchTerm) {
+    public Response search(@QueryParam("search") String searchTerm) {
+        // Require search term to prevent loading all partners
+        if (searchTerm == null || searchTerm.trim().length() < 3) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity("Search term is required and must be at least 3 characters")
+                .build();
+        }
         // Always use searchWithAddressContactDetailsAndTags to include address lines, contact details, and tags
-        return partnerService.searchWithAddressContactDetailsAndTags(searchTerm);
+        List<PartnerSearchResult> results = partnerService.searchWithAddressContactDetailsAndTags(searchTerm);
+        return Response.ok(results).build();
     }
 
     @GET

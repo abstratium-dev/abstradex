@@ -29,7 +29,7 @@
       </button>
     </div>
     <div class="filter-info" *ngIf="searchTerm">
-      Showing {{ partners().length }} result(s) for "{{ searchTerm }}"
+      Showing {{ partners().length }} result(s) for "{{ searchTerm }}"<span *ngIf="loadTime()"> ({{ loadTime() }}ms)</span>
     </div>
   </div>
   
@@ -39,7 +39,6 @@
 
   <div *ngIf="error()" class="error-box">
     <p>{{ error() }}</p>
-    <button (click)="onRetry()">Retry</button>
   </div>
 
   <!-- Add/Edit Partner Form -->

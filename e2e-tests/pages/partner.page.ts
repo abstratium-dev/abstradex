@@ -1,10 +1,13 @@
 import { expect, Page, Locator } from '@playwright/test';
+import { ToastWidget } from './toast.widget';
 
 /**
  * Page Object for Partner Management
  * Encapsulates all interactions with the Partners page
  */
 export class PartnerPage {
+  private toast: ToastWidget;
+
   readonly page: Page;
 
   // Low-level element locators
@@ -39,6 +42,7 @@ export class PartnerPage {
 
   constructor(page: Page) {
     this.page = page;
+    this.toast = new ToastWidget(page);
     
     // Initialize locators
     this.addPartnerButton = page.getByRole('button', { name: /Add Partner/i });
@@ -129,16 +133,17 @@ export class PartnerPage {
     return this.getConfirmDialog().getByRole('button', { name: /Cancel/i });
   }
 
+  // Toast methods delegated to ToastWidget
   getToast(): Locator {
-    return this.page.locator('.toast');
+    return this.toast.getToast();
   }
 
   getToastAction(): Locator {
-    return this.page.locator('.toast-action');
+    return this.toast.getToastAction();
   }
 
   getToastActionByPartnerNumber(partnerNumber: string): Locator {
-    return this.page.locator(`.toast-action[data-partner-number="${partnerNumber}"]`);
+    return this.toast.getToastActionByPartnerNumber(partnerNumber);
   }
 
   getFilterInfo(): Locator {
@@ -544,11 +549,7 @@ export class PartnerPage {
    * Waits for a success toast message
    */
   async waitForSuccessToast(message?: string) {
-    const toast = this.getToast();
-    await expect(toast).toBeVisible({ timeout: 5000 });
-    if (message) {
-      await expect(toast).toContainText(message);
-    }
+    await this.toast.waitForSuccessToast(message);
   }
 
   /**
@@ -556,34 +557,13 @@ export class PartnerPage {
    * @returns The partner number from the toast action
    */
   async waitForSuccessToastAndClickPartnerNumber(): Promise<string> {
-    // Wait for the toast to appear (use first() to avoid strict mode violations)
-    const toast = this.getToast().first();
-    await expect(toast).toBeVisible({ timeout: 5000 });
-    
-    // Wait for the action button to appear
-    const actionButton = this.getToastAction().first();
-    await expect(actionButton).toBeVisible({ timeout: 5000 });
-    
-    // Get the partner number from the button text
-    const partnerNumber = await actionButton.textContent() || '';
-    const trimmedPartnerNumber = partnerNumber.trim();
-    
-    // Click the action button to filter by partner number
-    console.log(`Clicking toast action to filter by partner number: ${trimmedPartnerNumber}`);
-    await actionButton.click();
-    
-    // Wait for the toast to close (or timeout if it doesn't)
-    await expect(toast).not.toBeVisible({ timeout: 10000 }).catch(() => {
-      console.log('Toast did not close in time, continuing anyway');
-    });
+    const trimmedPartnerNumber = await this.toast.waitForSuccessToastAndClickPartnerNumber();
     
     // Wait for the search to complete
-    await this.page.waitForLoadState('networkidle');
+    await this.waitForPageLoad();
     
-    // Wait for the partner tile to appear with the filtered partner number
-    console.log(`Waiting for partner tile with number: ${trimmedPartnerNumber}`);
-    const partnerTile = this.getPartnerTile(trimmedPartnerNumber);
-    await expect(partnerTile).toBeVisible({ timeout: 10000 });
+    // Verify the partner appears in the results
+    await expect(this.getPartnerTile(trimmedPartnerNumber)).toBeVisible({ timeout: 5000 });
     
     return trimmedPartnerNumber;
   }
@@ -592,11 +572,7 @@ export class PartnerPage {
    * Waits for an error toast message
    */
   async waitForErrorToast(message?: string) {
-    const toast = this.getToast();
-    await expect(toast).toBeVisible({ timeout: 5000 });
-    if (message) {
-      await expect(toast).toContainText(message);
-    }
+    await this.toast.waitForErrorToast(message);
   }
 
   /**
@@ -616,6 +592,9 @@ export class PartnerPage {
     let count = await this.getPartnerCount();
     
     while (count > 0) {
+      // Dismiss any toasts that might be blocking the header
+      await this.toast.dismissAll();
+      
       // Get all partner tiles
       const tiles = this.getAllPartnerTiles();
       
@@ -631,6 +610,11 @@ export class PartnerPage {
       if (partnerNumber) {
         console.log(`Deleting partner: ${partnerNumber.trim()}`);
         await this.deletePartnerViaContextMenu(partnerNumber.trim(), true);
+        
+        // Wait longer for network activity to settle
+        await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
+          console.log('Network not idle, continuing');
+        });
         
         // Wait for loading indicator to disappear
         await expect(this.loadingIndicator).not.toBeVisible({ timeout: 10000 }).catch(() => {

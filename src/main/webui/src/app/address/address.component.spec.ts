@@ -46,13 +46,16 @@ describe('AddressComponent', () => {
       'loadAddresses',
       'loadCountries',
       'createAddress',
-      'deleteAddress'
+      'deleteAddress',
+      'clearAddresses'
     ]);
     
-    mockModelService = jasmine.createSpyObj('ModelService', ['setAddresses', 'getCountryName'], {
+    mockModelService = jasmine.createSpyObj('ModelService', ['setAddresses', 'getCountryName', 'setLastAddressSearchTerm'], {
       addresses$: signal(mockAddresses),
       addressesLoading$: signal(false),
       addressesError$: signal(null),
+      addressesLoadTime$: signal(null),
+      lastAddressSearchTerm$: signal(''),
       countries$: signal(mockCountries),
       config$: signal({ defaultCountry: 'DE', logLevel: 'INFO' })
     });
@@ -64,6 +67,7 @@ describe('AddressComponent', () => {
     mockController.loadAddresses.and.resolveTo();
     mockController.createAddress.and.resolveTo();
     mockController.deleteAddress.and.resolveTo();
+    mockController.clearAddresses.and.stub();
 
     await TestBed.configureTestingModule({
       imports: [AddressComponent],
@@ -190,7 +194,13 @@ describe('AddressComponent', () => {
         countryCode: 'DE',
         isVerified: false
       }));
-      expect(mockToastService.success).toHaveBeenCalledWith('Address created successfully');
+      expect(mockToastService.success).toHaveBeenCalledWith(
+        'Address created successfully',
+        7000,
+        jasmine.objectContaining({
+          label: '789 New St Hamburg'
+        })
+      );
       expect(component.showAddForm).toBeFalse();
     });
 
@@ -267,9 +277,10 @@ describe('AddressComponent', () => {
   });
 
   describe('address deletion', () => {
-    it('should delete address when confirmed', async () => {
+    it('should delete address when confirmed and retrigger search', async () => {
       const address = mockAddresses[0];
       mockConfirmService.confirm.and.resolveTo(true);
+      component.searchTerm = 'test search';
 
       await component.deleteAddress(address);
 
@@ -282,6 +293,7 @@ describe('AddressComponent', () => {
       });
       expect(mockController.deleteAddress).toHaveBeenCalledWith('1');
       expect(mockToastService.success).toHaveBeenCalledWith('Address deleted successfully');
+      expect(mockController.loadAddresses).toHaveBeenCalledWith('test search');
     });
 
     it('should not delete address when cancelled', async () => {
@@ -335,8 +347,59 @@ describe('AddressComponent', () => {
     });
   });
 
-  it('should retry loading addresses', () => {
-    component.onRetry();
-    expect(mockController.loadAddresses).toHaveBeenCalled();
+  describe('result count and load time display', () => {
+    it('should display result count when search term is present', () => {
+      component.searchTerm = 'test';
+      fixture.detectChanges();
+
+      const compiled = fixture.nativeElement as HTMLElement;
+      const filterInfo = compiled.querySelector('.filter-info');
+      
+      expect(filterInfo).toBeTruthy();
+      expect(filterInfo?.textContent).toContain('Showing 2 result(s) for "test"');
+    });
+
+    it('should display load time when available', () => {
+      // Create a new mock with load time
+      const mockServiceWithTime = jasmine.createSpyObj('ModelService', ['setAddresses', 'getCountryName'], {
+        addresses$: signal(mockAddresses),
+        addressesLoading$: signal(false),
+        addressesError$: signal(null),
+        addressesLoadTime$: signal(456),
+        countries$: signal(mockCountries),
+        config$: signal({ defaultCountry: 'DE', logLevel: 'INFO' })
+      });
+      
+      TestBed.overrideProvider(ModelService, { useValue: mockServiceWithTime });
+      const newFixture = TestBed.createComponent(AddressComponent);
+      const newComponent = newFixture.componentInstance;
+      newComponent.searchTerm = 'test';
+      newFixture.detectChanges();
+
+      const compiled = newFixture.nativeElement as HTMLElement;
+      const filterInfo = compiled.querySelector('.filter-info');
+      
+      expect(filterInfo?.textContent).toContain('(456ms)');
+    });
+
+    it('should not display load time when null', () => {
+      component.searchTerm = 'test';
+      fixture.detectChanges();
+
+      const compiled = fixture.nativeElement as HTMLElement;
+      const filterInfo = compiled.querySelector('.filter-info');
+      
+      expect(filterInfo?.textContent).not.toContain('ms)');
+    });
+
+    it('should not display filter info when search term is empty', () => {
+      component.searchTerm = '';
+      fixture.detectChanges();
+
+      const compiled = fixture.nativeElement as HTMLElement;
+      const filterInfo = compiled.querySelector('.filter-info');
+      
+      expect(filterInfo).toBeFalsy();
+    });
   });
 });

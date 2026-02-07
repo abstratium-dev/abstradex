@@ -31,11 +31,15 @@ public class AddressResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({Roles.USER})
-    public List<Address> getAll(@QueryParam("search") String searchTerm) {
-        if (searchTerm != null && !searchTerm.trim().isEmpty()) {
-            return addressService.search(searchTerm);
+    public Response search(@QueryParam("search") String searchTerm) {
+        // Require search term to prevent loading all addresses
+        if (searchTerm == null || searchTerm.trim().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity("Search term is required")
+                .build();
         }
-        return addressService.findAll();
+        List<Address> results = addressService.search(searchTerm);
+        return Response.ok(results).build();
     }
 
     @GET

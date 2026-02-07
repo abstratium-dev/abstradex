@@ -10,9 +10,15 @@
         📍 {{ getPartnerAddress() }}
       </p>
       <div class="partner-contacts" *ngIf="partner.email || partner.phone || partner.website">
-        <p *ngIf="partner.email" class="contact-item">📧 {{ partner.email }}</p>
-        <p *ngIf="partner.phone" class="contact-item">📞 {{ partner.phone }}</p>
-        <p *ngIf="partner.website" class="contact-item">🌐 {{ partner.website }}</p>
+        <p *ngIf="partner.email" class="contact-item">
+          📧 <a [href]="'mailto:' + partner.email" (click)="$event.stopPropagation()">{{ partner.email }}</a>
+        </p>
+        <p *ngIf="partner.phone" class="contact-item">
+          📞 <a [href]="'tel:' + partner.phone" (click)="$event.stopPropagation()">{{ partner.phone }}</a>
+        </p>
+        <p *ngIf="partner.website" class="contact-item">
+          🌐 <a [href]="partner.website" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()">{{ partner.website }}</a>
+        </p>
       </div>
       <div class="partner-tags" *ngIf="partner.tags && partner.tags.length > 0">
         <span *ngFor="let tag of partner.tags" 

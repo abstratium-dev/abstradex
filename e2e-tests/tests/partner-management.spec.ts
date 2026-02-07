@@ -6,15 +6,19 @@ import { AddressPage } from '../pages/address.page';
 /**
  * Partner Management Feature Tests
  * 
- * Implements all scenarios from the partner-management.feature file:
- * - Create natural person partner
- * - Create legal entity partner
- * - Search for partners
- * - Search partners by wildcard
- * - View partner details
- * - Update partner information
- * - Delete a partner
- * - Mark partner as inactive
+ * Derived from: src/test/resources/features/partner-management.feature
+ * 
+ * This test suite consolidates scenarios from the feature file to reduce duplication
+ * and improve test execution speed. The main "happy path" test covers the core workflow:
+ * - Create natural person and legal entity partners
+ * - Search for partners (by name, wildcard, partner number, notes)
+ * - Verify partner attributes
+ * - Delete partners
+ * 
+ * Additional tests cover edge cases and specific scenarios:
+ * - Minimal information partner creation
+ * - Partner number uniqueness
+ * - Multiple partner type verification
  */
 
 test.describe.serial('Partner Management', () => {
@@ -77,220 +81,97 @@ test.describe.serial('Partner Management', () => {
     await partnerPage.navigateFromHeader();
   });
 
-  test('Scenario: Create a natural person partner', async () => {
-    console.log('\n=== Scenario: Create a natural person partner ===');
+  test('Happy Path: Complete partner management workflow', async () => {
+    console.log('\n=== Happy Path: Complete partner management workflow ===');
     
-    // Given I click the "Add Partner" button
-    // And I select "Natural Person" as the partner type
-    // When I fill in the following details
-    const partnerNumber = await partnerPage.createNaturalPerson(
-      'John',      // First Name
-      'Smith',     // Last Name
-      undefined,   // Middle Name
-      'Preferred client' // Notes
+    // Step 1: Create natural person partner with full details
+    console.log('Step 1: Creating natural person partner...');
+    const npPartner = await partnerPage.createNaturalPerson(
+      'John',
+      'Smith',
+      undefined,
+      'Preferred client'
     );
-    
-    // Then a new partner should be created with an auto-generated partner number
-    expect(partnerNumber).toBeTruthy();
-    expect(partnerNumber).toMatch(/^P\d+$/);
-    
-    // And the partner should be marked as active by default
-    await partnerPage.verifyPartnerStatus(partnerNumber, 'Active');
-    
-    // And I should see the partner in the partners list
-    expect(await partnerPage.partnerExists(partnerNumber)).toBe(true);
-    
-    // And the partner should have the correct attributes
-    await partnerPage.verifyPartnerAttributes(partnerNumber, {
+    expect(npPartner).toBeTruthy();
+    expect(npPartner).toMatch(/^P\d+$/);
+    await partnerPage.verifyPartnerStatus(npPartner, 'Active');
+    await partnerPage.verifyPartnerAttributes(npPartner, {
       firstName: 'John',
       lastName: 'Smith',
       notes: 'Preferred client',
       active: true
     });
+    console.log(`✓ Natural person created: ${npPartner}`);
     
-    console.log('✓ Natural person partner created successfully');
-  });
-
-  test('Scenario: Create a legal entity partner', async () => {
-    console.log('\n=== Scenario: Create a legal entity partner ===');
-    
-    // Given I click the "Add Partner" button
-    // And I select "Legal Entity" as the partner type
-    // When I fill in the following details
-    const partnerNumber = await partnerPage.createLegalEntity(
-      'Acme Corporation',           // Legal Name
-      'Acme',                       // Trading Name
-      '123456789',                  // Registration Number
-      'TAX-123',                    // Tax ID
-      'Limited Liability Company',  // Legal Form
-      'Delaware, USA'               // Jurisdiction
+    // Step 2: Create legal entity partner with full details
+    console.log('Step 2: Creating legal entity partner...');
+    const lePartner = await partnerPage.createLegalEntity(
+      'Acme Corporation',
+      'Acme',
+      '123456789',
+      'TAX-123',
+      'Limited Liability Company',
+      'Delaware, USA'
     );
-    
-    // Then a new partner should be created with an auto-generated partner number
-    expect(partnerNumber).toBeTruthy();
-    expect(partnerNumber).toMatch(/^P\d+$/);
-    
-    // And the partner should be marked as active by default
-    await partnerPage.verifyPartnerStatus(partnerNumber, 'Active');
-    
-    // And I should see the partner in the partners list
-    expect(await partnerPage.partnerExists(partnerNumber)).toBe(true);
-    
-    // And the partner should have the correct attributes
-    await partnerPage.verifyPartnerAttributes(partnerNumber, {
+    expect(lePartner).toBeTruthy();
+    expect(lePartner).toMatch(/^P\d+$/);
+    await partnerPage.verifyPartnerStatus(lePartner, 'Active');
+    await partnerPage.verifyPartnerAttributes(lePartner, {
       legalName: 'Acme Corporation',
       active: true
     });
+    // Verify partner numbers are unique
+    expect(npPartner).not.toBe(lePartner);
+    console.log(`✓ Legal entity created: ${lePartner} (partner numbers are auto-generated and unique)`);
     
-    console.log(`✓ Legal entity partner created: ${partnerNumber}`);
-  });
-
-  test('Scenario: Search for partners', async () => {
-    console.log('\n=== Scenario: Search for partners ===');
+    // Step 3: Create additional partners for search testing
+    console.log('Step 3: Creating additional partners for search tests...');
+    const searchPartner = await partnerPage.createNaturalPerson('Zebediah', 'Quixote', undefined, 'VIP customer');
+    console.log(`✓ Search test partner created: ${searchPartner}`);
     
-    // Given the following partners exist
-    const zebediah = await partnerPage.createNaturalPerson('Zebediah', 'Quixote');
-    const acme = await partnerPage.createLegalEntity('Acme Corp');
-    const jane = await partnerPage.createNaturalPerson('Jane', 'Doe');
-    
-    // When I search for "Zebediah"
+    // Step 4: Search by name
+    console.log('Step 4: Testing search by name...');
     await partnerPage.searchPartners('Zebediah');
-    
-    // Then I should see 1 partner in the results (the one we just created)
-    const count = await partnerPage.getPartnerCount();
-    console.log(`Found ${count} partner(s) matching 'Zebediah'`);
-    // Note: May find more than 1 if cleanup didn't run or previous tests failed
+    let count = await partnerPage.getPartnerCount();
     expect(count).toBeGreaterThanOrEqual(1);
+    expect(await partnerPage.partnerExists(searchPartner)).toBe(true);
+    console.log(`✓ Found ${count} partner(s) matching 'Zebediah'`);
     
-    // And the partner should be visible
-    expect(await partnerPage.partnerExists(zebediah)).toBe(true);
-    
-    console.log('✓ Search found correct partner');
-  });
-
-  test('Scenario: Search partners by wildcard', async () => {
-    console.log('\n=== Scenario: Search partners by wildcard ===');
-    
-    // Given multiple partners exist in the system
-    const partner1 = await partnerPage.createNaturalPerson('Alice', 'Anderson');
-    console.log(`Created partner1: ${partner1}`);
-    const partner2 = await partnerPage.createNaturalPerson('Bob', 'Brown');
-    console.log(`Created partner2: ${partner2}`);
-    const partner3 = await partnerPage.createLegalEntity('Charlie Corp');
-    console.log(`Created partner3: ${partner3}`);
-    
-    // When I search for "%%%"
-    await partnerPage.searchPartners('%%%');
-    
-    // Then I should see all partners in the results (at least the 3 we just created)
-    const count = await partnerPage.getPartnerCount();
-    console.log(`Found ${count} partners after wildcard search '%%%'`);
-    
-    expect(count).toBeGreaterThanOrEqual(3);
-    
-    expect(await partnerPage.partnerExists(partner1)).toBe(true);
-    expect(await partnerPage.partnerExists(partner2)).toBe(true);
-    expect(await partnerPage.partnerExists(partner3)).toBe(true);
-    
-    console.log('✓ Wildcard search returned all partners');
-  });
-
-  test('Scenario: Search for partners by partner number', async () => {
-    console.log('\n=== Scenario: Search for partners by partner number ===');
-    
-    // Given a partner exists
-    const partnerNumber = await partnerPage.createNaturalPerson('David', 'Davis');
-    console.log(`Created partner: ${partnerNumber}`);
-    
-    // When I search for the partner number
-    await partnerPage.searchPartners(partnerNumber);
-    
-    // Then I should see 1 partner in the results
-    const count = await partnerPage.getPartnerCount();
-    console.log(`Found ${count} partner(s) matching '${partnerNumber}'`);
+    // Step 5: Search by partner number
+    console.log('Step 5: Testing search by partner number...');
+    await partnerPage.searchPartners(npPartner);
+    count = await partnerPage.getPartnerCount();
     expect(count).toBe(1);
+    expect(await partnerPage.partnerExists(npPartner)).toBe(true);
+    console.log(`✓ Found exact match for partner number ${npPartner}`);
     
-    // And the partner should be visible
-    expect(await partnerPage.partnerExists(partnerNumber)).toBe(true);
-    
-    console.log('✓ Search by partner number successful');
-  });
-
-  test('Scenario: Search for partners by notes', async () => {
-    console.log('\n=== Scenario: Search for partners by notes ===');
-    
-    // Given a partner exists with specific notes
-    const uniqueNote = `VIP customer ${Date.now()}`;
-    const partnerNumber = await partnerPage.createNaturalPerson('Emily', 'Evans', undefined, uniqueNote);
-    console.log(`Created partner: ${partnerNumber} with notes: ${uniqueNote}`);
-    
-    // When I search for the notes
+    // Step 6: Search by notes
+    console.log('Step 6: Testing search by notes...');
     await partnerPage.searchPartners('VIP');
-    
-    // Then I should see at least 1 partner in the results
-    const count = await partnerPage.getPartnerCount();
-    console.log(`Found ${count} partner(s) matching 'VIP'`);
+    count = await partnerPage.getPartnerCount();
     expect(count).toBeGreaterThanOrEqual(1);
+    expect(await partnerPage.partnerExists(searchPartner)).toBe(true);
+    console.log(`✓ Found ${count} partner(s) with 'VIP' in notes`);
     
-    // And the partner should be visible
-    expect(await partnerPage.partnerExists(partnerNumber)).toBe(true);
-    
-    console.log('✓ Search by notes successful');
-  });
-
-  test('Scenario: Delete a partner', async () => {
-    console.log('\n=== Scenario: Delete a partner ===');
-    
-    // Given a partner exists
-    const partnerNumber = await partnerPage.createNaturalPerson('Delete', 'Me');
-    expect(await partnerPage.partnerExists(partnerNumber)).toBe(true);
-    
-    // When I open the context menu for the partner
-    // And I click "Delete Partner"
-    // And I confirm the deletion
-    await partnerPage.deletePartnerViaContextMenu(partnerNumber);
-    
-    // Then the partner should be removed from the system
-    // And I should not see the partner in the partners list
-    expect(await partnerPage.partnerExists(partnerNumber)).toBe(false);
-    
-    console.log('✓ Partner deleted successfully');
-  });
-
-  test('Scenario: Search and verify multiple partner types', async () => {
-    console.log('\n=== Scenario: Search and verify multiple partner types ===');
-    
-    // Create a mix of natural persons and legal entities
-    const np1 = await partnerPage.createNaturalPerson('Emma', 'Wilson', undefined, 'VIP client');
-    const le1 = await partnerPage.createLegalEntity('Tech Solutions Inc', 'TechSol', '987654321');
-    const np2 = await partnerPage.createNaturalPerson('Frank', 'Miller');
-    
-    // Search for all partners using wildcard
+    // Step 7: Wildcard search to see all partners
+    console.log('Step 7: Testing wildcard search...');
     await partnerPage.searchPartners('%%%');
-    const totalCount = await partnerPage.getPartnerCount();
-    console.log(`Found ${totalCount} partners after wildcard search '%%%'`);
-    expect(totalCount).toBeGreaterThanOrEqual(3);
+    count = await partnerPage.getPartnerCount();
+    expect(count).toBeGreaterThanOrEqual(3);
+    expect(await partnerPage.partnerExists(npPartner)).toBe(true);
+    expect(await partnerPage.partnerExists(lePartner)).toBe(true);
+    expect(await partnerPage.partnerExists(searchPartner)).toBe(true);
+    console.log(`✓ Wildcard search returned ${count} partners`);
     
-    // Verify each partner exists
-    expect(await partnerPage.partnerExists(np1)).toBe(true);
-    expect(await partnerPage.partnerExists(le1)).toBe(true);
-    expect(await partnerPage.partnerExists(np2)).toBe(true);
+    // Step 8: Delete a partner
+    console.log('Step 8: Testing partner deletion...');
+    const deletePartner = await partnerPage.createNaturalPerson('Delete', 'Me');
+    expect(await partnerPage.partnerExists(deletePartner)).toBe(true);
+    await partnerPage.deletePartnerViaContextMenu(deletePartner);
+    expect(await partnerPage.partnerExists(deletePartner)).toBe(false);
+    console.log(`✓ Partner ${deletePartner} deleted successfully`);
     
-    // Search by specific name
-    await partnerPage.searchPartners('Emma');
-    const emmaCount = await partnerPage.getPartnerCount();
-    console.log(`Found ${emmaCount} partner(s) matching 'Emma'`);
-    expect(emmaCount).toBeGreaterThanOrEqual(1);
-    expect(await partnerPage.partnerExists(np1)).toBe(true);
-    
-    // Search by legal entity name
-    await partnerPage.searchPartners('Tech Solutions Inc');
-    const techCount = await partnerPage.getPartnerCount();
-    console.log(`Found ${techCount} partner(s) matching 'Tech Solutions Inc'`);
-    expect(techCount).toBeGreaterThanOrEqual(1);
-    expect(await partnerPage.partnerExists(le1)).toBe(true);
-    
-    console.log('✓ Multiple partner types created and searched successfully');
+    console.log('\n✓ Happy path completed successfully');
   });
 
   test('Scenario: Create partners with minimal information', async () => {
@@ -307,30 +188,5 @@ test.describe.serial('Partner Management', () => {
     expect(await partnerPage.partnerExists(leMinimal)).toBe(true);
     
     console.log('✓ Partners created with minimal information');
-  });
-
-  test('Scenario: Verify partner numbers are auto-generated and unique', async () => {
-    console.log('\n=== Scenario: Verify partner numbers are auto-generated and unique ===');
-    
-    const partner1 = await partnerPage.createNaturalPerson('First', 'Partner');
-    const partner2 = await partnerPage.createNaturalPerson('Second', 'Partner');
-    const partner3 = await partnerPage.createLegalEntity('Third Partner Inc');
-    
-    // All should have partner numbers
-    expect(partner1).toBeTruthy();
-    expect(partner2).toBeTruthy();
-    expect(partner3).toBeTruthy();
-    
-    // All should be unique
-    expect(partner1).not.toBe(partner2);
-    expect(partner2).not.toBe(partner3);
-    expect(partner1).not.toBe(partner3);
-    
-    // All should follow the pattern
-    expect(partner1).toMatch(/^P\d+$/);
-    expect(partner2).toMatch(/^P\d+$/);
-    expect(partner3).toMatch(/^P\d+$/);
-    
-    console.log('✓ Partner numbers are auto-generated and unique');
   });
 });

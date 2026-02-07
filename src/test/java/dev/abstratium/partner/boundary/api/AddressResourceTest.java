@@ -56,8 +56,19 @@ public class AddressResourceTest {
 
     @Test
     @TestSecurity(user = "testuser", roles = {Roles.USER})
-    public void testGetAllAddresses() {
+    public void testSearchAddressesRequiresSearchTerm() {
         given()
+        .when()
+            .get("/api/address")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test
+    @TestSecurity(user = "testuser", roles = {Roles.USER})
+    public void testSearchAddresses() {
+        given()
+            .queryParam("search", "test")
         .when()
             .get("/api/address")
         .then()

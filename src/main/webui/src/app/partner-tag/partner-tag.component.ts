@@ -65,7 +65,7 @@ export class PartnerTagComponent implements OnInit {
 
   async loadPartnerData(): Promise<void> {
     try {
-      await this.controller.loadPartners();
+      await this.controller.loadPartners(this.partnerId);
       const partners = this.modelService.partners$();
       this.partner = partners.find(p => p.id === this.partnerId) || null;
 

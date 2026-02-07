@@ -27,11 +27,6 @@ public class PartnerService {
     PartnerExportService exportService;
 
     @Transactional
-    public List<Partner> findAll() {
-        return em.createQuery("SELECT p FROM Partner p", Partner.class).getResultList();
-    }
-
-    @Transactional
     public Partner findById(String id) {
         Partner partner = em.createQuery(
             "SELECT p FROM Partner p WHERE p.id = :id", 
@@ -107,10 +102,6 @@ public class PartnerService {
 
     @Transactional
     public List<Partner> search(String searchTerm) {
-        if (searchTerm == null || searchTerm.trim().isEmpty()) {
-            return findAll();
-        }
-        
         String searchPattern = "%" + searchTerm.toLowerCase() + "%";
         
         // Check if searching for a partner number (e.g., P00000077)

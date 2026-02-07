@@ -1,10 +1,13 @@
 import { expect, Page, Locator } from '@playwright/test';
+import { ToastWidget } from './toast.widget';
 
 /**
  * Page Object for Partner Address Management
  * Encapsulates all interactions with the Partner Addresses page
  */
 export class PartnerAddressPage {
+  private toast: ToastWidget;
+
   readonly page: Page;
 
   // Low-level element locators
@@ -20,6 +23,7 @@ export class PartnerAddressPage {
 
   constructor(page: Page) {
     this.page = page;
+    this.toast = new ToastWidget(page);
     
     // Initialize locators
     this.addAddressButton = page.getByRole('button', { name: /Add Address/i });
@@ -142,7 +146,7 @@ export class PartnerAddressPage {
     await this.addAddressSubmitButton.click();
     
     // Wait for success toast
-    const toast = this.page.locator('.toast.toast-success');
+    const toast = this.toast.getSuccessToast();
     await expect(toast).toBeVisible({ timeout: 10000 });
     console.log('Success toast appeared');
     

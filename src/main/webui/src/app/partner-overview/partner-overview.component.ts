@@ -63,9 +63,9 @@ export class PartnerOverviewComponent implements OnInit {
     this.loading = true;
     this.error = null;
     try {
-      await this.controller.loadPartners();
-      const partners = this.modelService.partners$();
-      this.partner = partners.find((p: Partner) => p.id === partnerId) || null;
+      // Load partner directly by ID without overwriting the search term
+      const partner = await this.http.get<Partner>(`/api/partner/${partnerId}`).toPromise();
+      this.partner = partner || null;
       if (!this.partner) {
         this.error = 'Partner not found';
       } else {
@@ -202,5 +202,33 @@ export class PartnerOverviewComponent implements OnInit {
   formatDate(date: string | undefined): string {
     if (!date) return 'N/A';
     return new Date(date).toLocaleDateString();
+  }
+
+  /**
+   * Get the appropriate href for a contact based on its type
+   */
+  getContactHref(contact: ContactDetail): string {
+    const type = contact.contactType?.toUpperCase();
+    switch (type) {
+      case 'EMAIL':
+        return `mailto:${contact.contactValue}`;
+      case 'PHONE':
+      case 'MOBILE':
+      case 'FAX':
+        return `tel:${contact.contactValue}`;
+      case 'WEBSITE':
+      case 'LINKEDIN':
+        return contact.contactValue;
+      default:
+        return '';
+    }
+  }
+
+  /**
+   * Check if contact type should be a clickable link
+   */
+  isContactClickable(contact: ContactDetail): boolean {
+    const type = contact.contactType?.toUpperCase();
+    return ['EMAIL', 'PHONE', 'MOBILE', 'FAX', 'WEBSITE', 'LINKEDIN'].includes(type);
   }
 }

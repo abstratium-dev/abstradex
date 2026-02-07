@@ -24,12 +24,23 @@
     <div class="form-group">
       <label for="contactValue">Contact Value *</label>
       <input 
-        type="text" 
+        [type]="getInputType()" 
         id="contactValue" 
+        name="contactValue"
+        #contactValueInput="ngModel"
         [(ngModel)]="contactForm.contactValue" 
-        placeholder="Enter contact value"
+        [placeholder]="getPlaceholder()"
+        [pattern]="getValidationPattern()"
         required
       />
+      <div class="validation-error" *ngIf="contactValueInput.invalid && (contactValueInput.dirty || contactValueInput.touched)">
+        <small *ngIf="contactValueInput.errors?.['required']">Contact value is required</small>
+        <small *ngIf="contactValueInput.errors?.['pattern']">
+          <span *ngIf="contactForm.contactType === 'EMAIL'">Please enter a valid email address</span>
+          <span *ngIf="contactForm.contactType === 'PHONE' || contactForm.contactType === 'MOBILE' || contactForm.contactType === 'FAX'">Please enter a valid phone number (digits, +, -, spaces, parentheses)</span>
+          <span *ngIf="contactForm.contactType === 'WEBSITE' || contactForm.contactType === 'LINKEDIN'">Please enter a valid URL starting with http:// or https://</span>
+        </small>
+      </div>
     </div>
 
     <div class="form-group">
@@ -87,7 +98,15 @@
         <div class="contact-info">
           <div class="contact-icon">{{ getContactTypeIcon(contact.contactType || '') }}</div>
           <div class="contact-text">
-            <div class="contact-value">{{ contact.contactValue }}</div>
+            <div class="contact-value">
+              <a *ngIf="isContactClickable(contact)" 
+                 [href]="getContactHref(contact)" 
+                 [target]="contact.contactType === 'WEBSITE' || contact.contactType === 'LINKEDIN' ? '_blank' : ''"
+                 [rel]="contact.contactType === 'WEBSITE' || contact.contactType === 'LINKEDIN' ? 'noopener noreferrer' : ''">
+                {{ contact.contactValue }}
+              </a>
+              <span *ngIf="!isContactClickable(contact)">{{ contact.contactValue }}</span>
+            </div>
             <div class="contact-meta">
               <span class="contact-type">{{ contact.contactType }}</span>
               <span *ngIf="contact.label" class="contact-label">{{ contact.label }}</span>

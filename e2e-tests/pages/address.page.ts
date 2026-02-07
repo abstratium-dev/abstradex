@@ -1,10 +1,12 @@
 import { expect, Page, Locator } from '@playwright/test';
+import { ToastWidget } from './toast.widget';
 
 /**
  * Page Object for Address Management
  * Encapsulates all interactions with the Addresses page
  */
 export class AddressPage {
+  private toast: ToastWidget;
   readonly page: Page;
 
   // Low-level element locators
@@ -26,6 +28,7 @@ export class AddressPage {
 
   constructor(page: Page) {
     this.page = page;
+    this.toast = new ToastWidget(page);
     
     // Initialize locators
     this.addAddressButton = page.getByRole('button', { name: /Add Address/i });
@@ -94,8 +97,9 @@ export class AddressPage {
     return this.getConfirmDialog().getByRole('button', { name: /Cancel/i });
   }
 
-  getToast(): Locator {
-    return this.page.locator('.toast');
+  // Toast methods delegated to ToastWidget
+  async dismissToasts() {
+    await this.toast.dismissAll();
   }
 
   // High-level actions
@@ -280,6 +284,11 @@ export class AddressPage {
    * Gets the count of visible address tiles
    */
   async getAddressCount(): Promise<number> {
+    // Wait for loading to complete before counting
+    await expect(this.loadingIndicator).not.toBeVisible({ timeout: 10000 }).catch(() => {
+      console.log('Loading indicator still visible or not found when counting addresses');
+    });
+    
     const tiles = this.getAllAddressTiles();
     return await tiles.count();
   }
@@ -299,20 +308,13 @@ export class AddressPage {
     console.log('Deleting all addresses...');
     
     let count = await this.getAddressCount();
-    let attempts = 0;
-    const maxAttempts = 20; // Safety limit
     const startTime = Date.now();
-    const maxDuration = 60000; // 60 seconds max
     
-    while (count > 0 && attempts < maxAttempts) {
-      // Check if we've exceeded the maximum duration
-      if (Date.now() - startTime > maxDuration) {
-        console.log(`⚠ Stopped after ${(Date.now() - startTime) / 1000}s, ${count} address(es) remaining`);
-        break;
-      }
-      
-      attempts++;
+    while (count > 0) {
       try {
+        // Dismiss any toasts that might be blocking the header
+        await this.dismissToasts();
+        
         // Get the first address tile - use a fresh locator each time
         const tiles = this.getAllAddressTiles();
         const firstTile = tiles.first();
@@ -341,15 +343,15 @@ export class AddressPage {
         await confirmButton.waitFor({ state: 'visible', timeout: 2000 });
         await confirmButton.click();
         
-        // Wait for network activity with shorter timeout
-        await this.page.waitForLoadState('networkidle', { timeout: 5000 });
+        // Wait longer for network activity to settle
+        await this.page.waitForLoadState('networkidle', { timeout: 10000 });
         
         // Wait for loading indicator to disappear
         await expect(this.loadingIndicator).not.toBeVisible({ timeout: 10000 }).catch(() => {
           console.log('Loading indicator still visible or not found, continuing');
         });
         
-        // Update count
+        // Update count (getAddressCount will wait for loading to complete)
         const newCount = await this.getAddressCount();
         
         // If count didn't decrease, something went wrong
@@ -362,7 +364,7 @@ export class AddressPage {
         console.log(`Deleted address, ${count} remaining`);
       } catch (error) {
         // If element was detached or other error, check if count changed
-        console.log(`Error during deletion (attempt ${attempts}): ${error}`);
+        console.log(`Error during deletion (attempt ${count}): ${error}`);
         const newCount = await this.getAddressCount().catch(() => count);
         
         if (newCount >= count) {
@@ -374,12 +376,7 @@ export class AddressPage {
         count = newCount;
       }
     }
-    
-    if (attempts >= maxAttempts) {
-      console.log(`⚠ Stopped after ${maxAttempts} attempts, ${count} address(es) remaining`);
-    } else if (count === 0) {
-      console.log('All addresses deleted');
-    }
+    console.log('All addresses deleted');
   }
 
   /**

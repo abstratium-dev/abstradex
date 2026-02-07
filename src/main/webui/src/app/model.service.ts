@@ -16,10 +16,14 @@ export class ModelService {
   private partners = signal<Partner[]>([]);
   private partnersLoading = signal<boolean>(false);
   private partnersError = signal<string | null>(null);
+  private partnersLoadTime = signal<number | null>(null);
+  private lastPartnerSearchTerm = signal<string>('');
 
   private addresses = signal<Address[]>([]);
   private addressesLoading = signal<boolean>(false);
   private addressesError = signal<string | null>(null);
+  private addressesLoadTime = signal<number | null>(null);
+  private lastAddressSearchTerm = signal<string>('');
 
   private countries = signal<Country[]>([]);
 
@@ -28,10 +32,14 @@ export class ModelService {
   partners$: Signal<Partner[]> = this.partners.asReadonly();
   partnersLoading$: Signal<boolean> = this.partnersLoading.asReadonly();
   partnersError$: Signal<string | null> = this.partnersError.asReadonly();
+  partnersLoadTime$: Signal<number | null> = this.partnersLoadTime.asReadonly();
+  lastPartnerSearchTerm$: Signal<string> = this.lastPartnerSearchTerm.asReadonly();
 
   addresses$: Signal<Address[]> = this.addresses.asReadonly();
   addressesLoading$: Signal<boolean> = this.addressesLoading.asReadonly();
   addressesError$: Signal<string | null> = this.addressesError.asReadonly();
+  addressesLoadTime$: Signal<number | null> = this.addressesLoadTime.asReadonly();
+  lastAddressSearchTerm$: Signal<string> = this.lastAddressSearchTerm.asReadonly();
 
   countries$: Signal<Country[]> = this.countries.asReadonly();
 
@@ -51,6 +59,10 @@ export class ModelService {
     this.partnersError.set(error);
   }
 
+  setPartnersLoadTime(loadTime: number | null) {
+    this.partnersLoadTime.set(loadTime);
+  }
+
   setAddresses(addresses: Address[]) {
     this.addresses.set(addresses);
   }
@@ -63,8 +75,20 @@ export class ModelService {
     this.addressesError.set(error);
   }
 
+  setAddressesLoadTime(loadTime: number | null) {
+    this.addressesLoadTime.set(loadTime);
+  }
+
   setCountries(countries: Country[]): void {
     this.countries.set(countries);
+  }
+
+  setLastPartnerSearchTerm(searchTerm: string): void {
+    this.lastPartnerSearchTerm.set(searchTerm);
+  }
+
+  setLastAddressSearchTerm(searchTerm: string): void {
+    this.lastAddressSearchTerm.set(searchTerm);
   }
 
   /**

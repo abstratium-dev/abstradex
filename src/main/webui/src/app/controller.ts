@@ -28,17 +28,19 @@ export class Controller {
     }
   }
 
-  loadPartners(searchTerm?: string) {
+  loadPartners(searchTerm: string) {
     this.modelService.setPartnersLoading(true);
     this.modelService.setPartnersError(null);
+    this.modelService.setLastPartnerSearchTerm(searchTerm);
     
-    const url = searchTerm && searchTerm.trim() 
-      ? `/api/partner?search=${encodeURIComponent(searchTerm)}`
-      : '/api/partner';
+    const startTime = performance.now();
+    const url = `/api/partner?search=${encodeURIComponent(searchTerm)}`;
     
     this.http.get<Partner[]>(url).subscribe({
       next: (partners) => {
+        const loadTime = Math.round(performance.now() - startTime);
         this.modelService.setPartners(partners);
+        this.modelService.setPartnersLoadTime(loadTime);
         this.modelService.setPartnersLoading(false);
       },
       error: (err) => {
@@ -55,8 +57,6 @@ export class Controller {
       const response = await firstValueFrom(
         this.http.post<Partner>('/api/partner', partner)
       );
-      // Reload partners list after successful creation
-      this.loadPartners();
       return response;
     } catch (error) {
       console.error('Error creating partner:', error);
@@ -69,8 +69,6 @@ export class Controller {
       const response = await firstValueFrom(
         this.http.put<Partner>('/api/partner', partner)
       );
-      // Reload partners list after successful update
-      this.loadPartners();
       return response;
     } catch (error) {
       console.error('Error updating partner:', error);
@@ -83,25 +81,40 @@ export class Controller {
       await firstValueFrom(
         this.http.delete<void>(`/api/partner/${id}`)
       );
-      // Reload partners list after successful deletion
-      this.loadPartners();
     } catch (error) {
       console.error('Error deleting partner:', error);
       throw error;
     }
   }
 
-  loadAddresses(searchTerm?: string) {
+  clearPartners() {
+    this.modelService.setPartners([]);
+  }
+
+  async getPartnerById(id: string): Promise<Partner | null> {
+    try {
+      const partner = await firstValueFrom(
+        this.http.get<Partner>(`/api/partner/${id}`)
+      );
+      return partner;
+    } catch (error) {
+      console.error('Error fetching partner by ID:', error);
+      return null;
+    }
+  }
+
+  loadAddresses(searchTerm: string) {
     this.modelService.setAddressesLoading(true);
     this.modelService.setAddressesError(null);
     
-    const url = searchTerm && searchTerm.trim() 
-      ? `/api/address?search=${encodeURIComponent(searchTerm)}`
-      : '/api/address';
-    
+    const startTime = performance.now();
+    const url = `/api/address?search=${encodeURIComponent(searchTerm)}`;
+
     this.http.get<Address[]>(url).subscribe({
       next: (addresses) => {
+        const loadTime = Math.round(performance.now() - startTime);
         this.modelService.setAddresses(addresses);
+        this.modelService.setAddressesLoadTime(loadTime);
         this.modelService.setAddressesLoading(false);
       },
       error: (err) => {
@@ -118,8 +131,6 @@ export class Controller {
       const response = await firstValueFrom(
         this.http.post<Address>('/api/address', address)
       );
-      // Reload addresses list after successful creation
-      this.loadAddresses();
       return response;
     } catch (error) {
       console.error('Error creating address:', error);
@@ -132,12 +143,14 @@ export class Controller {
       await firstValueFrom(
         this.http.delete<void>(`/api/address/${id}`)
       );
-      // Reload addresses list after successful deletion
-      this.loadAddresses();
     } catch (error) {
       console.error('Error deleting address:', error);
       throw error;
     }
+  }
+
+  clearAddresses() {
+    this.modelService.setAddresses([]);
   }
 
   async loadCountries(): Promise<void> {

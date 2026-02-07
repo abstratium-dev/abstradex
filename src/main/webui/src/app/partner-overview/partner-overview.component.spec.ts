@@ -30,8 +30,8 @@ describe('PartnerOverviewComponent', () => {
   };
 
   beforeEach(async () => {
-    mockController = jasmine.createSpyObj('Controller', ['loadPartners']);
-    mockModelService = jasmine.createSpyObj('ModelService', ['partners$']);
+    mockController = jasmine.createSpyObj('Controller', ['loadPartners', 'setLastPartnerSearchTerm']);
+    mockModelService = jasmine.createSpyObj('ModelService', ['partners$', 'lastPartnerSearchTerm$']);
     mockPartnerService = jasmine.createSpyObj('PartnerService', ['getPartnerIcon', 'getPartnerName']);
     mockRouter = jasmine.createSpyObj('Router', ['navigate']);
     mockActivatedRoute = {
@@ -45,6 +45,7 @@ describe('PartnerOverviewComponent', () => {
     // Setup default return values
     mockController.loadPartners.and.resolveTo(undefined);
     (mockModelService.partners$ as any) = jasmine.createSpy('partners$').and.returnValue([mockPartner]);
+    (mockModelService.lastPartnerSearchTerm$ as any) = jasmine.createSpy('lastPartnerSearchTerm$').and.returnValue('test search');
     mockPartnerService.getPartnerIcon.and.returnValue('👤');
     mockPartnerService.getPartnerName.and.returnValue('John Doe');
 
@@ -78,6 +79,11 @@ describe('PartnerOverviewComponent', () => {
     component.ngOnInit();
     tick();
     
+    // Mock the HTTP request for partner
+    const partnerReq = httpMock.expectOne('/api/partner/123');
+    partnerReq.flush(mockPartner);
+    tick();
+    
     // Mock the HTTP requests for addresses and contacts
     const addressReq = httpMock.expectOne('/api/partner/123/address');
     addressReq.flush([]);
@@ -87,25 +93,52 @@ describe('PartnerOverviewComponent', () => {
     contactReq.flush([]);
     tick();
     
-    expect(mockController.loadPartners).toHaveBeenCalled();
     expect(component.partner).toEqual(mockPartner);
     expect(component.loading).toBeFalse();
     expect(component.error).toBeNull();
   }));
 
-  it('should show error when partner not found', async () => {
-    (mockModelService.partners$ as any) = jasmine.createSpy('partners$').and.returnValue([]);
-    
+  it('should show error when partner not found', fakeAsync(() => {
     component.ngOnInit();
-    await fixture.whenStable();
+    tick();
     
-    // No HTTP requests should be made when partner is not found
+    // Mock HTTP 404 error
+    const partnerReq = httpMock.expectOne('/api/partner/123');
+    partnerReq.flush(null, { status: 404, statusText: 'Not Found' });
+    tick();
+    
+    // No HTTP requests should be made for addresses/contacts when partner is not found
     httpMock.expectNone('/api/partner/123/address');
     httpMock.expectNone('/api/partner/123/contact');
     
     expect(component.partner).toBeNull();
-    expect(component.error).toBe('Partner not found');
-  });
+    expect(component.error).toBe('Failed to load partner details');
+  }));
+
+  it('should not overwrite search term when loading partner', fakeAsync(() => {
+    // This test ensures that loading a partner by ID doesn't overwrite the search term
+    component.ngOnInit();
+    tick();
+    
+    // Mock the HTTP request for partner
+    const partnerReq = httpMock.expectOne('/api/partner/123');
+    partnerReq.flush(mockPartner);
+    tick();
+    
+    // Mock the HTTP requests for addresses and contacts
+    const addressReq = httpMock.expectOne('/api/partner/123/address');
+    addressReq.flush([]);
+    const contactReq = httpMock.expectOne('/api/partner/123/contact');
+    contactReq.flush([]);
+    tick();
+    
+    // Verify that loadPartners was NOT called (which would overwrite the search term)
+    expect(mockController.loadPartners).not.toHaveBeenCalled();
+    
+    // Verify partner was loaded successfully
+    expect(component.partner).toEqual(mockPartner);
+    expect(component.error).toBeNull();
+  }));
 
   it('should navigate back to partners list', () => {
     component.goBack();
@@ -147,5 +180,103 @@ describe('PartnerOverviewComponent', () => {
     component.partner = legalEntity;
     expect(component.isLegalEntity()).toBeTrue();
     expect(component.isNaturalPerson()).toBeFalse();
+  });
+
+  describe('Contact link functionality', () => {
+    it('should generate mailto link for email contacts', () => {
+      const emailContact = {
+        id: '1',
+        contactType: 'EMAIL',
+        contactValue: 'test@example.com',
+        isPrimary: false,
+        isVerified: false
+      };
+      expect(component.getContactHref(emailContact)).toBe('mailto:test@example.com');
+      expect(component.isContactClickable(emailContact)).toBeTrue();
+    });
+
+    it('should generate tel link for phone contacts', () => {
+      const phoneContact = {
+        id: '2',
+        contactType: 'PHONE',
+        contactValue: '+1-555-0123',
+        isPrimary: false,
+        isVerified: false
+      };
+      expect(component.getContactHref(phoneContact)).toBe('tel:+1-555-0123');
+      expect(component.isContactClickable(phoneContact)).toBeTrue();
+    });
+
+    it('should generate tel link for mobile contacts', () => {
+      const mobileContact = {
+        id: '3',
+        contactType: 'MOBILE',
+        contactValue: '+1-555-0456',
+        isPrimary: false,
+        isVerified: false
+      };
+      expect(component.getContactHref(mobileContact)).toBe('tel:+1-555-0456');
+      expect(component.isContactClickable(mobileContact)).toBeTrue();
+    });
+
+    it('should generate tel link for fax contacts', () => {
+      const faxContact = {
+        id: '4',
+        contactType: 'FAX',
+        contactValue: '+1-555-0789',
+        isPrimary: false,
+        isVerified: false
+      };
+      expect(component.getContactHref(faxContact)).toBe('tel:+1-555-0789');
+      expect(component.isContactClickable(faxContact)).toBeTrue();
+    });
+
+    it('should return direct URL for website contacts', () => {
+      const websiteContact = {
+        id: '5',
+        contactType: 'WEBSITE',
+        contactValue: 'https://example.com',
+        isPrimary: false,
+        isVerified: false
+      };
+      expect(component.getContactHref(websiteContact)).toBe('https://example.com');
+      expect(component.isContactClickable(websiteContact)).toBeTrue();
+    });
+
+    it('should return direct URL for LinkedIn contacts', () => {
+      const linkedinContact = {
+        id: '6',
+        contactType: 'LINKEDIN',
+        contactValue: 'https://linkedin.com/in/johndoe',
+        isPrimary: false,
+        isVerified: false
+      };
+      expect(component.getContactHref(linkedinContact)).toBe('https://linkedin.com/in/johndoe');
+      expect(component.isContactClickable(linkedinContact)).toBeTrue();
+    });
+
+    it('should return empty string for other contact types', () => {
+      const otherContact = {
+        id: '7',
+        contactType: 'OTHER',
+        contactValue: 'Some value',
+        isPrimary: false,
+        isVerified: false
+      };
+      expect(component.getContactHref(otherContact)).toBe('');
+      expect(component.isContactClickable(otherContact)).toBeFalse();
+    });
+
+    it('should handle case-insensitive contact types', () => {
+      const emailContact = {
+        id: '8',
+        contactType: 'email',
+        contactValue: 'test@example.com',
+        isPrimary: false,
+        isVerified: false
+      };
+      expect(component.getContactHref(emailContact)).toBe('mailto:test@example.com');
+      expect(component.isContactClickable(emailContact)).toBeTrue();
+    });
   });
 });

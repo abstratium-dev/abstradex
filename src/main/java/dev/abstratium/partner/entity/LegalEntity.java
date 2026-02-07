@@ -10,6 +10,11 @@ import jakarta.persistence.Entity;
 @DiscriminatorValue(PartnerDiscriminator.LEGAL_ENTITY)
 public class LegalEntity extends Partner {
 
+    @Override
+    public String getPartnerType() {
+        return PartnerDiscriminator.LEGAL_ENTITY;
+    }
+
     @Column(name = "legal_name", length = 255)
     private String legalName;
 

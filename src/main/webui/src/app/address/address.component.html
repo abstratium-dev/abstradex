@@ -27,6 +27,9 @@
         ✕
       </button>
     </div>
+    <div class="filter-info" *ngIf="searchTerm">
+      Showing {{ addresses().length }} result(s) for "{{ searchTerm }}"<span *ngIf="loadTime()"> ({{ loadTime() }}ms)</span>
+    </div>
   </div>
   
   <div *ngIf="loading()" class="loading">
@@ -35,7 +38,6 @@
 
   <div *ngIf="error()" class="error-box">
     <p>{{ error() }}</p>
-    <button (click)="onRetry()">Retry</button>
   </div>
 
   <div *ngIf="showAddForm" class="form-container">

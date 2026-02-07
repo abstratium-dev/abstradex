@@ -167,10 +167,20 @@ class PartnerResourceTest {
 
     @Test
     @TestSecurity(user = "testuser", roles = {Roles.USER})
-    void testGetAllPartners() {
+    void testSearchPartnersRequiresSearchTerm() {
         given()
             .when()
             .get("/api/partner")
+            .then()
+            .statusCode(400);
+    }
+
+    @Test
+    @TestSecurity(user = "testuser", roles = {Roles.USER})
+    void testSearchPartners() {
+        given()
+            .when()
+            .get("/api/partner?search=test")
             .then()
             .statusCode(200)
             .contentType(ContentType.JSON)

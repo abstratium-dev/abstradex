@@ -10,6 +10,11 @@ import jakarta.persistence.Entity;
 @DiscriminatorValue(PartnerDiscriminator.NATURAL_PERSON)
 public class NaturalPerson extends Partner {
 
+    @Override
+    public String getPartnerType() {
+        return PartnerDiscriminator.NATURAL_PERSON;
+    }
+
     @Column(name = "first_name", length = 100)
     private String firstName;
 

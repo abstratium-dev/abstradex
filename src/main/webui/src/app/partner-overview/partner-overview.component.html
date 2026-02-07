@@ -134,31 +134,40 @@
     </div>
 
     <!-- Contact Information -->
-    <div class="info-section" *ngIf="contacts.length > 0">
+    <div class="info-section">
       <div class="section-header">
         <h3>Contact Details</h3>
         <button class="btn-icon" (click)="manageContacts()" title="Manage Contacts">✏️</button>
       </div>
-      <div class="contact-list">
+      <div class="contact-list" *ngIf="contacts.length > 0">
         <div *ngFor="let contact of contacts" class="contact-item">
           <div class="contact-header">
             <span class="contact-type">{{ contact.contactType }}</span>
             <span class="badge" *ngIf="contact.isPrimary">Primary</span>
             <span class="badge badge-verified" *ngIf="contact.isVerified">✓ Verified</span>
           </div>
-          <div class="contact-value">{{ contact.contactValue }}</div>
+          <div class="contact-value">
+            <a *ngIf="isContactClickable(contact)" 
+               [href]="getContactHref(contact)" 
+               [target]="contact.contactType === 'WEBSITE' || contact.contactType === 'LINKEDIN' ? '_blank' : ''"
+               [rel]="contact.contactType === 'WEBSITE' || contact.contactType === 'LINKEDIN' ? 'noopener noreferrer' : ''">
+              {{ contact.contactValue }}
+            </a>
+            <span *ngIf="!isContactClickable(contact)">{{ contact.contactValue }}</span>
+          </div>
           <div class="contact-label" *ngIf="contact.label">{{ contact.label }}</div>
         </div>
       </div>
+      <p *ngIf="contacts.length === 0" class="empty-message">No contact details added yet. Click the edit button to add contacts.</p>
     </div>
 
     <!-- Address Information -->
-    <div class="info-section" *ngIf="addresses.length > 0">
+    <div class="info-section">
       <div class="section-header">
         <h3>Addresses</h3>
         <button class="btn-icon" (click)="manageAddresses()" title="Manage Addresses">✏️</button>
       </div>
-      <div class="address-list">
+      <div class="address-list" *ngIf="addresses.length > 0">
         <div *ngFor="let addressDetail of addresses" class="address-item">
           <div class="address-header">
             <span class="address-type">{{ addressDetail.addressType }}</span>
@@ -167,6 +176,7 @@
           <div class="address-value">{{ formatAddress(addressDetail) }}</div>
         </div>
       </div>
+      <p *ngIf="addresses.length === 0" class="empty-message">No addresses added yet. Click the edit button to add addresses.</p>
     </div>
 
     <!-- Tags -->
