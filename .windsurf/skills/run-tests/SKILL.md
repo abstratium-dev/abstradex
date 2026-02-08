@@ -11,4 +11,4 @@ Use this skill when the user needs to run tests.
 ## How to run tests
 1. Use `mvn test -DskipTests -DskipITs` to run just the Angular frontend tests.
 2. Use `mvn test` to run unit and integration tests of the Quarkus backend, as well as the Angular frontend tests.
-3. Use `mvn verify -DskipTests -DskipITs -Pe2e` to run the E2E tests (which also run the Angular tests, but that is OK).
+3. Use `PLAYWRIGHT_HTML_OPEN=never npx playwright test` in the `e2e-tests` directory to run the e2e tests.

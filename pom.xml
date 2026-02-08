@@ -13,13 +13,15 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-        <quarkus.platform.version>3.30.8</quarkus.platform.version>
+        <quarkus.platform.version>3.31.2</quarkus.platform.version>
         <skipITs>true</skipITs>
         <surefire-plugin.version>3.5.4</surefire-plugin.version>
-        <quarkus.quinoa.version>2.7.1</quarkus.quinoa.version>
-        <quarkus.playwright.version>2.2.1</quarkus.playwright.version>
         <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
         <build.version>${maven.build.timestamp}</build.version>
+        <!-- quarkiverse versions - compare to https://quarkus.io/extensions/ -->
+        <quarkus.quinoa.version>2.7.1</quarkus.quinoa.version>
+        <quarkus.playwright.version>2.3.2</quarkus.playwright.version>
+        <quarkus.resteasy.problem.version>3.21.0</quarkus.resteasy.problem.version>
     </properties>
 
     <dependencyManagement>
@@ -94,7 +96,7 @@
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-junit5</artifactId>
+            <artifactId>quarkus-junit</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -140,7 +142,7 @@
         <dependency>
             <groupId>io.quarkiverse.resteasy-problem</groupId>
             <artifactId>quarkus-resteasy-problem</artifactId>
-            <version>3.21.0</version>
+            <version>${quarkus.resteasy.problem.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wiremock</groupId>
@@ -199,7 +201,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire-plugin.version}</version>
                 <configuration>
-                    <argLine>--add-opens java.base/java.lang=ALL-UNNAMED</argLine>
+                    <argLine>@{argLine} --add-opens java.base/java.lang=ALL-UNNAMED</argLine>
                     <systemPropertyVariables>
                         <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
                         <maven.home>${maven.home}</maven.home>
@@ -279,7 +281,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <argLine>--add-opens java.base/java.lang=ALL-UNNAMED</argLine>
+                    <argLine>@{argLine} --add-opens java.base/java.lang=ALL-UNNAMED</argLine>
                     <systemPropertyVariables>
                         <native.image.path>${project.build.directory}/${project.build.finalName}-runner</native.image.path>
                         <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
