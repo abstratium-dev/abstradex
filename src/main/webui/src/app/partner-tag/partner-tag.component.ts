@@ -1,7 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { ToastService } from '../core/toast/toast.service';
 import { ConfirmDialogService } from '../core/confirm-dialog/confirm-dialog.service';
 import { Controller } from '../controller';
@@ -20,7 +22,7 @@ export class PartnerTagComponent implements OnInit {
   private controller = inject(Controller);
   private modelService = inject(ModelService);
   private route = inject(ActivatedRoute);
-  private router = inject(Router);
+  private http = inject(HttpClient);
   private location = inject(Location);
   private toastService = inject(ToastService);
   private confirmService = inject(ConfirmDialogService);
@@ -65,9 +67,9 @@ export class PartnerTagComponent implements OnInit {
 
   async loadPartnerData(): Promise<void> {
     try {
-      await this.controller.loadPartners(this.partnerId);
-      const partners = this.modelService.partners$();
-      this.partner = partners.find(p => p.id === this.partnerId) || null;
+      this.partner = await firstValueFrom(
+        this.http.get<Partner>(`/api/partner/${this.partnerId}`)
+      );
 
       if (!this.partner) {
         this.error = 'Partner not found';
@@ -75,6 +77,8 @@ export class PartnerTagComponent implements OnInit {
       }
     } catch (err) {
       console.error('Failed to load partner data:', err);
+      this.error = 'Partner not found';
+      this.toastService.error(this.error);
     }
   }
 

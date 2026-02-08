@@ -166,11 +166,11 @@
   --color-badge-unverified: #ff6b6b;
   
   /* Link colors */
-  --color-link: #6ba5ff;
-  --color-link-primary: #5a9aff;
-  --color-link-hover: #74c0fc;
-  --color-link-active: #91d7ff;
-  --color-link-light: #4285f4;
+  --color-link: #4da3ff;
+  --color-link-primary: #4da3ff;
+  --color-link-hover: #6bb5ff;
+  --color-link-active: #8ac7ff;
+  --color-link-light: #3b8eea;
   
   /* Google button colors */
   --color-google-bg: #2a2a2a;
@@ -434,6 +434,14 @@ h2 {
   border-radius: 4px;
 }
 
+.empty-message {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-style: italic;
+  font-size: 0.9375rem;
+}
+
 /* ===== CARDS & TILES ===== */
 .card {
   background: var(--color-bg-secondary);
@@ -600,6 +608,22 @@ h2 {
 }
 
 /* ===== LINKS ===== */
+a {
+  color: var(--color-link-primary);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--color-link-hover);
+    text-decoration: underline;
+  }
+
+  &:active {
+    color: var(--color-link-active);
+  }
+}
+
 .alink {
   color: var(--color-link);
   text-decoration: underline;

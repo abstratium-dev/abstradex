@@ -1,0 +1,113 @@
+<div class="container">
+  <div class="page-header">
+    <h2>Tag Management</h2>
+  </div>
+
+  <!-- Search and Actions -->
+  <div class="filter-actions">
+    <div class="search-box">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onSearchChange()"
+        placeholder="Search tags..."
+        class="search-input"
+      />
+      <button *ngIf="searchTerm" class="btn-clear" (click)="clearSearch()">✕</button>
+    </div>
+    <button class="btn-primary" (click)="toggleAddForm()">
+      {{ showForm ? 'Cancel' : (editingTag ? 'Cancel Edit' : '+ Add Tag') }}
+    </button>
+  </div>
+
+  <!-- Add/Edit Tag Form -->
+  <div class="form-container" *ngIf="showForm">
+    <h3>{{ editingTag ? 'Edit Tag' : 'Add New Tag' }}</h3>
+    
+    <div class="form-group">
+      <label for="tagName">Tag Name *</label>
+      <input 
+        type="text" 
+        id="tagName" 
+        [(ngModel)]="tagForm.tagName" 
+        placeholder="e.g., VIP, Premium, Corporate"
+        required
+        appAutofocus
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="colorHex">Color</label>
+      <div class="color-picker-group">
+        <input 
+          type="color" 
+          id="colorHex" 
+          [(ngModel)]="tagForm.colorHex"
+          class="color-input"
+        />
+        <input 
+          type="text" 
+          [(ngModel)]="tagForm.colorHex" 
+          placeholder="#4285f4"
+          class="color-text-input"
+          pattern="^#[0-9A-Fa-f]{6}$"
+        />
+        <div class="color-preview" [style.background-color]="tagForm.colorHex"></div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea 
+        id="description" 
+        [(ngModel)]="tagForm.description" 
+        placeholder="Optional description of this tag"
+        rows="3"
+      ></textarea>
+    </div>
+
+    <div *ngIf="formError" class="error-message">{{ formError }}</div>
+
+    <div class="form-actions">
+      <button class="btn-primary" (click)="onSubmit()" [disabled]="formSubmitting">
+        {{ editingTag ? 'Update Tag' : 'Add Tag' }}
+      </button>
+      <button class="btn-secondary" (click)="cancelForm()" [disabled]="formSubmitting">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading"><p>Loading tags...</p></div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="error-box">
+    <p>{{ error }}</p>
+    <button class="btn-primary" (click)="loadTags()">Retry</button>
+  </div>
+
+  <!-- Tags List -->
+  <div *ngIf="!loading && !error">
+    <h3>Tags ({{ tags.length }})</h3>
+    
+    <div *ngIf="tags.length === 0" class="info-message">
+      <p>No tags found.</p>
+      <p>Click "Add Tag" to create a new tag.</p>
+    </div>
+
+    <div class="tag-grid">
+      <div *ngFor="let tag of tags" class="tag-card">
+        <div class="tag-header">
+          <span class="tag-badge" [ngStyle]="getTagStyle(tag)">{{ tag.tagName }}</span>
+          <span class="tag-color">{{ tag.colorHex }}</span>
+        </div>
+        <div class="tag-description" *ngIf="tag.description">
+          {{ tag.description }}
+        </div>
+        <div class="tag-actions">
+          <button class="btn-secondary" (click)="onEdit(tag)">Edit</button>
+          <button class="btn-danger" (click)="onDelete(tag)">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

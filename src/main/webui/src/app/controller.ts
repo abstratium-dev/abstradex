@@ -279,6 +279,17 @@ export class Controller {
     }
   }
 
+  async updateTag(tagId: string, tag: Tag): Promise<Tag> {
+    try {
+      return await firstValueFrom(
+        this.http.put<Tag>(`/api/tag/${tagId}`, tag)
+      );
+    } catch (error) {
+      console.error('Failed to update tag:', error);
+      throw error;
+    }
+  }
+
   async deleteTag(tagId: string): Promise<void> {
     try {
       await firstValueFrom(

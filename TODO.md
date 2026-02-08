@@ -21,12 +21,6 @@ These TODOs are to be resolved by the developer, NOT THE LLM.
 
 - X when adding/editing contact details, the type should influence the html5 input field (e.g. phone number should be a phone number input field)
 
-----
-1) in dark mode (@DARK_MODE_IMPLEMENTATION.md ) it is hard to read the links for email and phone numbers, etc, as the blue is too close to the background collor. @styles.md 
-
-2) check if any of the styles in @partner-overview.component.scss  can be replaced with styles in @styles.scss . only overview specific styles that cannot be shared should be in the components style file.
-----
-
 
 
 - use the feature files to test the api in a quarkus test???

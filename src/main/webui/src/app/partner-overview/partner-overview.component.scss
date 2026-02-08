@@ -155,19 +155,7 @@
   text-transform: capitalize;
 }
 
-.badge {
-  display: inline-block;
-  padding: 0.125rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  background: var(--color-primary);
-  color: white;
-}
-
-.badge-verified {
-  background: var(--color-success);
-}
+// .badge and .badge-verified are in global styles.scss
 
 .contact-value,
 .address-value {
