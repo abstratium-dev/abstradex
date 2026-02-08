@@ -143,6 +143,7 @@ quarkus update
 2. Update the quarkus extensions too, if the above doesn't do it - this is done by using the internet to find the latest version of the extension and updating the version in `pom.xml`.
 
 3. Update node/npm using nvm.
+Do this if Angular needs a new version.
 Search for nvm in all the docs in this project and update which version is used, e.g. v24.11.1
 
 4. Update Angular:
