@@ -1,34 +1,13 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LegalEntity, NaturalPerson, Partner } from '../models';
 import { PartnerDiscriminator } from '../models/partner-discriminator';
 import { Controller } from '../controller';
 import { ModelService } from '../model.service';
 import { PartnerService } from '../partner.service';
-
-interface AddressDetail {
-  id: string;
-  addressType: string;
-  isPrimary: boolean;
-  address: {
-    streetLine1?: string;
-    streetLine2?: string;
-    city?: string;
-    postalCode?: string;
-    countryCode?: string;
-  };
-}
-
-interface ContactDetail {
-  id: string;
-  contactType: string;
-  contactValue: string;
-  label?: string;
-  isPrimary: boolean;
-  isVerified: boolean;
-}
+import { AddressDetail } from '../models/address-detail.model';
+import { ContactDetail } from '../models/contact-detail.model';
 
 @Component({
   selector: 'app-partner-overview',
@@ -42,7 +21,6 @@ export class PartnerOverviewComponent implements OnInit {
   private controller = inject(Controller);
   private modelService = inject(ModelService);
   private partnerService = inject(PartnerService);
-  private http = inject(HttpClient);
 
   partner: Partner | null = null;
   addresses: AddressDetail[] = [];
@@ -63,9 +41,8 @@ export class PartnerOverviewComponent implements OnInit {
     this.loading = true;
     this.error = null;
     try {
-      // Load partner directly by ID without overwriting the search term
-      const partner = await this.http.get<Partner>(`/api/partner/${partnerId}`).toPromise();
-      this.partner = partner || null;
+      // Load partner using controller
+      this.partner = await this.controller.getPartnerById(partnerId);
       if (!this.partner) {
         this.error = 'Partner not found';
       } else {
@@ -83,7 +60,7 @@ export class PartnerOverviewComponent implements OnInit {
 
   async loadAddresses(partnerId: string): Promise<void> {
     try {
-      const addresses = await this.http.get<AddressDetail[]>(`/api/partner/${partnerId}/address`).toPromise();
+      const addresses = await this.controller.loadPartnerAddresses(partnerId);
       this.addresses = this.sortAddresses(addresses || []);
     } catch (err) {
       console.error('Error loading addresses:', err);
@@ -92,7 +69,7 @@ export class PartnerOverviewComponent implements OnInit {
 
   async loadContacts(partnerId: string): Promise<void> {
     try {
-      const contacts = await this.http.get<ContactDetail[]>(`/api/partner/${partnerId}/contact`).toPromise();
+      const contacts = await this.controller.loadPartnerContacts(partnerId);
       this.contacts = this.sortContacts(contacts || []);
     } catch (err) {
       console.error('Error loading contacts:', err);
@@ -134,6 +111,7 @@ export class PartnerOverviewComponent implements OnInit {
 
   formatAddress(addressDetail: AddressDetail): string {
     const addr = addressDetail.address;
+    if (!addr) return '';
     const parts = [
       addr.streetLine1,
       addr.streetLine2,
@@ -218,7 +196,7 @@ export class PartnerOverviewComponent implements OnInit {
         return `tel:${contact.contactValue}`;
       case 'WEBSITE':
       case 'LINKEDIN':
-        return contact.contactValue;
+        return contact.contactValue || '';
       default:
         return '';
     }
@@ -229,6 +207,6 @@ export class PartnerOverviewComponent implements OnInit {
    */
   isContactClickable(contact: ContactDetail): boolean {
     const type = contact.contactType?.toUpperCase();
-    return ['EMAIL', 'PHONE', 'MOBILE', 'FAX', 'WEBSITE', 'LINKEDIN'].includes(type);
+    return type ? ['EMAIL', 'PHONE', 'MOBILE', 'FAX', 'WEBSITE', 'LINKEDIN'].includes(type) : false;
   }
 }

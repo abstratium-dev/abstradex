@@ -1,15 +1,35 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PartnerTileComponent } from './partner-tile.component';
-import { NaturalPerson, LegalEntity } from '../../model.service';
+import { NaturalPerson, LegalEntity, Partner } from '../../model.service';
 import { PartnerDiscriminator } from '../../models/partner-discriminator';
+import { PartnerService } from '../../partner.service';
 
 describe('PartnerTileComponent', () => {
   let component: PartnerTileComponent;
   let fixture: ComponentFixture<PartnerTileComponent>;
+  let mockPartnerService: jasmine.SpyObj<PartnerService>;
 
   beforeEach(async () => {
+    mockPartnerService = jasmine.createSpyObj('PartnerService', ['getPartnerIcon', 'getPartnerName']);
+    
+    mockPartnerService.getPartnerIcon.and.callFake((p: Partner) => {
+      return p.partnerType === PartnerDiscriminator.NATURAL_PERSON ? '👤' : '🏢';
+    });
+    
+    mockPartnerService.getPartnerName.and.callFake((p: Partner) => {
+      const np = p as NaturalPerson;
+      const le = p as LegalEntity;
+      if (np.firstName) {
+        return `${np.firstName} ${np.lastName}`;
+      }
+      return le.tradingName || le.legalName || '';
+    });
+
     await TestBed.configureTestingModule({
-      imports: [PartnerTileComponent]
+      imports: [PartnerTileComponent],
+      providers: [
+        { provide: PartnerService, useValue: mockPartnerService }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(PartnerTileComponent);

@@ -2,8 +2,6 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
 import { ToastService } from '../core/toast/toast.service';
 import { ConfirmDialogService } from '../core/confirm-dialog/confirm-dialog.service';
 import { Controller } from '../controller';
@@ -22,7 +20,6 @@ export class PartnerTagComponent implements OnInit {
   private controller = inject(Controller);
   private modelService = inject(ModelService);
   private route = inject(ActivatedRoute);
-  private http = inject(HttpClient);
   private location = inject(Location);
   private toastService = inject(ToastService);
   private confirmService = inject(ConfirmDialogService);
@@ -67,9 +64,8 @@ export class PartnerTagComponent implements OnInit {
 
   async loadPartnerData(): Promise<void> {
     try {
-      this.partner = await firstValueFrom(
-        this.http.get<Partner>(`/api/partner/${this.partnerId}`)
-      );
+      // Load partner using controller
+      this.partner = await this.controller.getPartnerById(this.partnerId);
 
       if (!this.partner) {
         this.error = 'Partner not found';

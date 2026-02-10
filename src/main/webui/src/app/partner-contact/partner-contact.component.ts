@@ -1,5 +1,4 @@
 import { CommonModule, Location } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -23,7 +22,6 @@ export class PartnerContactComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private location = inject(Location);
-  private http = inject(HttpClient);
   private toastService = inject(ToastService);
   private confirmService = inject(ConfirmDialogService);
   private partnerService = inject(PartnerService);
@@ -64,8 +62,8 @@ export class PartnerContactComponent implements OnInit {
 
   async loadPartnerData(): Promise<void> {
     try {
-      // Load partner directly by ID without overwriting the search term
-      this.partner = await this.http.get<Partner>(`/api/partner/${this.partnerId}`).toPromise() || null;
+      // Load partner using controller
+      this.partner = await this.controller.getPartnerById(this.partnerId);
 
       if (!this.partner) {
         this.error = 'Partner not found';

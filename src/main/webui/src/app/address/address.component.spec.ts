@@ -65,7 +65,9 @@ describe('AddressComponent', () => {
 
     mockController.loadCountries.and.resolveTo();
     mockController.loadAddresses.and.resolveTo();
-    mockController.createAddress.and.resolveTo();
+    mockController.createAddress.and.callFake(async (addr: Address) => {
+      return { ...addr, id: 'new-id' };
+    });
     mockController.deleteAddress.and.resolveTo();
     mockController.clearAddresses.and.stub();
 
@@ -121,7 +123,7 @@ describe('AddressComponent', () => {
       component.onSearch();
       tick(300);
 
-      expect(mockModelService.setAddresses).toHaveBeenCalledWith([]);
+      expect(mockController.clearAddresses).toHaveBeenCalled();
     }));
 
     it('should debounce search calls', fakeAsync(() => {
@@ -141,7 +143,7 @@ describe('AddressComponent', () => {
       component.clearSearch();
 
       expect(component.searchTerm).toBe('');
-      expect(mockModelService.setAddresses).toHaveBeenCalledWith([]);
+      expect(mockController.clearAddresses).toHaveBeenCalled();
     });
   });
 
@@ -359,8 +361,10 @@ describe('AddressComponent', () => {
       expect(filterInfo?.textContent).toContain('Showing 2 result(s) for "test"');
     });
 
-    it('should display load time when available', () => {
-      // Create a new mock with load time
+    it('should display load time when available', async () => {
+      // Reset and reconfigure TestBed with load time
+      TestBed.resetTestingModule();
+      
       const mockServiceWithTime = jasmine.createSpyObj('ModelService', ['setAddresses', 'getCountryName'], {
         addresses$: signal(mockAddresses),
         addressesLoading$: signal(false),
@@ -370,7 +374,18 @@ describe('AddressComponent', () => {
         config$: signal({ defaultCountry: 'DE', logLevel: 'INFO' })
       });
       
-      TestBed.overrideProvider(ModelService, { useValue: mockServiceWithTime });
+      await TestBed.configureTestingModule({
+        imports: [AddressComponent],
+        providers: [
+          provideHttpClient(),
+          provideHttpClientTesting(),
+          { provide: Controller, useValue: mockController },
+          { provide: ModelService, useValue: mockServiceWithTime },
+          { provide: ToastService, useValue: mockToastService },
+          { provide: ConfirmDialogService, useValue: mockConfirmService }
+        ]
+      }).compileComponents();
+      
       const newFixture = TestBed.createComponent(AddressComponent);
       const newComponent = newFixture.componentInstance;
       newComponent.searchTerm = 'test';

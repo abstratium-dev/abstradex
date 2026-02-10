@@ -56,14 +56,14 @@ describe('PartnerComponent', () => {
       lastPartnerSearchTerm$: signal('')
     });
 
-    mockPartnerService = jasmine.createSpyObj('PartnerService', ['getPartnerName']);
+    mockPartnerService = jasmine.createSpyObj('PartnerService', ['getPartnerName', 'getPartnerIcon']);
     mockToastService = jasmine.createSpyObj('ToastService', ['success', 'error']);
     mockConfirmService = jasmine.createSpyObj('ConfirmDialogService', ['confirm']);
     mockRouter = jasmine.createSpyObj('Router', ['navigate', 'getCurrentNavigation']);
 
     mockController.loadPartners.and.resolveTo();
     mockController.createPartner.and.resolveTo({ id: '1', partnerNumber: 'P00001', active: true });
-    mockController.updatePartner.and.resolveTo();
+    mockController.updatePartner.and.resolveTo({ ...mockNaturalPerson, partnerNumber: 'P00000001' });
     mockController.deletePartner.and.resolveTo();
     mockController.getPartnerById.and.resolveTo(null);
     mockController.clearPartners.and.stub();
@@ -71,6 +71,9 @@ describe('PartnerComponent', () => {
       const np = p as NaturalPerson;
       const le = p as LegalEntity;
       return np.firstName ? `${np.firstName} ${np.lastName}` : le.legalName || '';
+    });
+    mockPartnerService.getPartnerIcon.and.callFake((p: Partner) => {
+      return p.partnerType === PartnerDiscriminator.NATURAL_PERSON ? '👤' : '🏢';
     });
     mockRouter.getCurrentNavigation.and.returnValue(null);
 
@@ -307,7 +310,7 @@ describe('PartnerComponent', () => {
 
       expect(mockController.updatePartner).toHaveBeenCalled();
       expect(mockController.loadPartners).toHaveBeenCalledWith('John');
-      expect(mockToastService.success).toHaveBeenCalledWith('Partner updated successfully');
+      expect(mockToastService.success).toHaveBeenCalledWith('Partner updated successfully', jasmine.any(Number), jasmine.any(Object));
       expect(component.editingPartner).toBeNull();
     });
 
@@ -411,16 +414,33 @@ describe('PartnerComponent', () => {
       expect(filterInfo?.textContent).toContain('Showing 2 result(s) for "test"');
     });
 
-    it('should display load time when available', () => {
-      // Create a new mock with load time
-      const mockServiceWithTime = jasmine.createSpyObj('ModelService', ['setPartners'], {
+    it('should display load time when available', async () => {
+      // Reset and reconfigure TestBed with load time
+      TestBed.resetTestingModule();
+      
+      const mockServiceWithTime = jasmine.createSpyObj('ModelService', ['setPartners', 'setLastPartnerSearchTerm'], {
         partners$: signal([mockNaturalPerson, mockLegalEntity]),
         partnersLoading$: signal(false),
         partnersError$: signal(null),
-        partnersLoadTime$: signal(123)
+        partnersLoadTime$: signal(123),
+        lastPartnerSearchTerm$: signal('')
       });
       
-      TestBed.overrideProvider(ModelService, { useValue: mockServiceWithTime });
+      await TestBed.configureTestingModule({
+        imports: [PartnerComponent],
+        providers: [
+          provideHttpClient(),
+          provideHttpClientTesting(),
+          provideRouter([]),
+          { provide: Controller, useValue: mockController },
+          { provide: ModelService, useValue: mockServiceWithTime },
+          { provide: PartnerService, useValue: mockPartnerService },
+          { provide: ToastService, useValue: mockToastService },
+          { provide: ConfirmDialogService, useValue: mockConfirmService },
+          { provide: Router, useValue: mockRouter }
+        ]
+      }).compileComponents();
+      
       const newFixture = TestBed.createComponent(PartnerComponent);
       const newComponent = newFixture.componentInstance;
       newComponent.searchTerm = 'test';

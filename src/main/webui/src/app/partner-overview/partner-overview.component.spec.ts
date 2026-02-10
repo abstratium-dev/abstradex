@@ -30,7 +30,12 @@ describe('PartnerOverviewComponent', () => {
   };
 
   beforeEach(async () => {
-    mockController = jasmine.createSpyObj('Controller', ['loadPartners', 'setLastPartnerSearchTerm']);
+    mockController = jasmine.createSpyObj('Controller', [
+      'loadPartners',
+      'getPartnerById',
+      'loadPartnerAddresses',
+      'loadPartnerContacts'
+    ]);
     mockModelService = jasmine.createSpyObj('ModelService', ['partners$', 'lastPartnerSearchTerm$']);
     mockPartnerService = jasmine.createSpyObj('PartnerService', ['getPartnerIcon', 'getPartnerName']);
     mockRouter = jasmine.createSpyObj('Router', ['navigate']);
@@ -44,6 +49,9 @@ describe('PartnerOverviewComponent', () => {
 
     // Setup default return values
     mockController.loadPartners.and.resolveTo(undefined);
+    mockController.getPartnerById.and.resolveTo(mockPartner);
+    mockController.loadPartnerAddresses.and.resolveTo([]);
+    mockController.loadPartnerContacts.and.resolveTo([]);
     (mockModelService.partners$ as any) = jasmine.createSpy('partners$').and.returnValue([mockPartner]);
     (mockModelService.lastPartnerSearchTerm$ as any) = jasmine.createSpy('lastPartnerSearchTerm$').and.returnValue('test search');
     mockPartnerService.getPartnerIcon.and.returnValue('👤');
@@ -67,9 +75,7 @@ describe('PartnerOverviewComponent', () => {
     httpMock = TestBed.inject(HttpTestingController);
   });
 
-  afterEach(() => {
-    httpMock.verify();
-  });
+  // No longer using HTTP mocks
 
   it('should create', () => {
     expect(component).toBeTruthy();
@@ -79,37 +85,19 @@ describe('PartnerOverviewComponent', () => {
     component.ngOnInit();
     tick();
     
-    // Mock the HTTP request for partner
-    const partnerReq = httpMock.expectOne('/api/partner/123');
-    partnerReq.flush(mockPartner);
-    tick();
-    
-    // Mock the HTTP requests for addresses and contacts
-    const addressReq = httpMock.expectOne('/api/partner/123/address');
-    addressReq.flush([]);
-    tick();
-    
-    const contactReq = httpMock.expectOne('/api/partner/123/contact');
-    contactReq.flush([]);
-    tick();
-    
+    expect(mockController.getPartnerById).toHaveBeenCalledWith('123');
+    expect(mockController.loadPartnerAddresses).toHaveBeenCalledWith('123');
+    expect(mockController.loadPartnerContacts).toHaveBeenCalledWith('123');
     expect(component.partner).toEqual(mockPartner);
     expect(component.loading).toBeFalse();
     expect(component.error).toBeNull();
   }));
 
   it('should show error when partner not found', fakeAsync(() => {
+    mockController.getPartnerById.and.rejectWith(new Error('Not found'));
+    
     component.ngOnInit();
     tick();
-    
-    // Mock HTTP 404 error
-    const partnerReq = httpMock.expectOne('/api/partner/123');
-    partnerReq.flush(null, { status: 404, statusText: 'Not Found' });
-    tick();
-    
-    // No HTTP requests should be made for addresses/contacts when partner is not found
-    httpMock.expectNone('/api/partner/123/address');
-    httpMock.expectNone('/api/partner/123/contact');
     
     expect(component.partner).toBeNull();
     expect(component.error).toBe('Failed to load partner details');
@@ -120,20 +108,13 @@ describe('PartnerOverviewComponent', () => {
     component.ngOnInit();
     tick();
     
-    // Mock the HTTP request for partner
-    const partnerReq = httpMock.expectOne('/api/partner/123');
-    partnerReq.flush(mockPartner);
-    tick();
-    
-    // Mock the HTTP requests for addresses and contacts
-    const addressReq = httpMock.expectOne('/api/partner/123/address');
-    addressReq.flush([]);
-    const contactReq = httpMock.expectOne('/api/partner/123/contact');
-    contactReq.flush([]);
-    tick();
-    
     // Verify that loadPartners was NOT called (which would overwrite the search term)
     expect(mockController.loadPartners).not.toHaveBeenCalled();
+    
+    // Verify controller methods were called
+    expect(mockController.getPartnerById).toHaveBeenCalledWith('123');
+    expect(mockController.loadPartnerAddresses).toHaveBeenCalledWith('123');
+    expect(mockController.loadPartnerContacts).toHaveBeenCalledWith('123');
     
     // Verify partner was loaded successfully
     expect(component.partner).toEqual(mockPartner);

@@ -2,7 +2,6 @@ import { Component, inject, OnInit, Signal } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../core/toast/toast.service';
 import { ConfirmDialogService } from '../core/confirm-dialog/confirm-dialog.service';
 import { AutocompleteComponent, AutocompleteOption } from '../core/autocomplete/autocomplete.component';
@@ -25,7 +24,6 @@ export class PartnerAddressComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private location = inject(Location);
-  private http = inject(HttpClient);
   private toastService = inject(ToastService);
   private confirmService = inject(ConfirmDialogService);
   private partnerService = inject(PartnerService);
@@ -69,8 +67,8 @@ export class PartnerAddressComponent implements OnInit {
 
   async loadPartnerData(): Promise<void> {
     try {
-      // Load partner directly by ID without overwriting the search term
-      this.partner = await this.http.get<Partner>(`/api/partner/${this.partnerId}`).toPromise() || null;
+      // Load partner using controller
+      this.partner = await this.controller.getPartnerById(this.partnerId);
 
       if (!this.partner) {
         this.error = 'Partner not found';

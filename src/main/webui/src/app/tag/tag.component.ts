@@ -113,7 +113,9 @@ export class TagComponent implements OnInit {
       this.cancelForm();
     } catch (err: any) {
       this.formError = err.error?.message || 'Failed to save tag';
-      this.toastService.error(this.formError);
+      if (this.formError) {
+        this.toastService.error(this.formError);
+      }
     } finally {
       this.formSubmitting = false;
     }
@@ -130,10 +132,10 @@ export class TagComponent implements OnInit {
   }
 
   async onDelete(tag: Tag): Promise<void> {
-    const confirmed = await this.confirmService.confirm(
-      'Delete Tag',
-      `Are you sure you want to delete the tag "${tag.tagName}"? This will remove it from all partners.`
-    );
+    const confirmed = await this.confirmService.confirm({
+      title: 'Delete Tag',
+      message: `Are you sure you want to delete the tag "${tag.tagName}"? This will remove it from all partners.`
+    });
 
     if (!confirmed) {
       return;

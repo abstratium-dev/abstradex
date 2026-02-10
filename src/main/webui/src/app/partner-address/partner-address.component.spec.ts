@@ -83,7 +83,7 @@ describe('PartnerAddressComponent', () => {
 
   beforeEach(async () => {
     mockController = jasmine.createSpyObj('Controller', [
-      'loadPartners',
+      'getPartnerById',
       'loadPartnerAddresses',
       'loadAddresses',
       'addAddressToPartner',
@@ -109,7 +109,7 @@ describe('PartnerAddressComponent', () => {
       }
     };
 
-    mockController.loadPartners.and.resolveTo();
+    mockController.getPartnerById.and.resolveTo(mockPartner);
     mockController.loadPartnerAddresses.and.resolveTo(mockAddressDetails);
     mockController.loadAddresses.and.resolveTo();
     mockController.addAddressToPartner.and.resolveTo();
@@ -147,23 +147,25 @@ describe('PartnerAddressComponent', () => {
     await fixture.whenStable();
 
     expect(component.partnerId).toBe('123');
-    expect(mockController.loadPartners).toHaveBeenCalled();
+    expect(mockController.getPartnerById).toHaveBeenCalledWith('123');
     expect(mockController.loadPartnerAddresses).toHaveBeenCalledWith('123');
   });
 
   it('should set partner from loaded data', async () => {
-    component.partnerId = '123'; // Set partnerId first
+    component.partnerId = '123';
     await component.loadPartnerData();
 
+    expect(mockController.getPartnerById).toHaveBeenCalledWith('123');
     expect(component.partner).toEqual(mockPartner);
   });
 
   it('should show error when partner not found', async () => {
-    component.partnerId = '999'; // Non-existent partner ID
-    (mockModelService.partners$ as any) = signal([]);
+    component.partnerId = '999';
+    mockController.getPartnerById.and.resolveTo(null);
 
     await component.loadPartnerData();
 
+    expect(mockController.getPartnerById).toHaveBeenCalledWith('999');
     expect(component.error).toBe('Partner not found');
     expect(mockToastService.error).toHaveBeenCalledWith('Partner not found');
   });

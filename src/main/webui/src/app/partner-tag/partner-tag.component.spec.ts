@@ -44,7 +44,7 @@ describe('PartnerTagComponent', () => {
 
   beforeEach(async () => {
     mockController = jasmine.createSpyObj('Controller', [
-      'loadPartners',
+      'getPartnerById',
       'loadPartnerTags',
       'loadTags',
       'addTagToPartner',
@@ -69,7 +69,7 @@ describe('PartnerTagComponent', () => {
       }
     };
 
-    mockController.loadPartners.and.resolveTo();
+    mockController.getPartnerById.and.resolveTo(mockPartner);
     mockController.loadPartnerTags.and.resolveTo(mockPartnerTags);
     mockController.loadTags.and.resolveTo(mockTags);
     mockController.addTagToPartner.and.resolveTo();
@@ -112,7 +112,7 @@ describe('PartnerTagComponent', () => {
     await fixture.whenStable();
 
     expect(component.partnerId).toBe('123');
-    expect(mockController.loadPartners).toHaveBeenCalled();
+    expect(mockController.getPartnerById).toHaveBeenCalledWith('123');
     expect(mockController.loadPartnerTags).toHaveBeenCalledWith('123');
     expect(mockController.loadTags).toHaveBeenCalled();
   });
@@ -121,15 +121,17 @@ describe('PartnerTagComponent', () => {
     component.partnerId = '123';
     await component.loadPartnerData();
 
+    expect(mockController.getPartnerById).toHaveBeenCalledWith('123');
     expect(component.partner).toEqual(mockPartner);
   });
 
   it('should show error when partner not found', async () => {
     component.partnerId = '999';
-    (mockModelService.partners$ as any) = signal([]);
+    mockController.getPartnerById.and.resolveTo(null);
 
     await component.loadPartnerData();
 
+    expect(mockController.getPartnerById).toHaveBeenCalledWith('999');
     expect(component.error).toBe('Partner not found');
     expect(mockToastService.error).toHaveBeenCalledWith('Partner not found');
   });
