@@ -196,6 +196,15 @@
       <p *ngIf="!partner.tags || partner.tags.length === 0" class="empty-message">No tags assigned yet. Click the edit button to add tags.</p>
     </div>
 
+    <!-- Relationships -->
+    <div class="info-section">
+      <div class="section-header">
+        <h3>Relationships</h3>
+        <button class="btn-icon" (click)="manageRelationships()" title="Manage Relationships">✏️</button>
+      </div>
+      <p class="empty-message">Click the edit button to manage partner relationships.</p>
+    </div>
+
     <!-- Notes -->
     <div class="info-section" *ngIf="partner.notes">
       <div class="section-header">

@@ -1,0 +1,138 @@
+<div class="partner-relationship-container">
+  <div class="page-header">
+    <h2>Relationships for Partner {{ getPartnerNumberAndName() || 'Loading...' }}</h2>
+    <button class="btn-secondary" (click)="goBack()">← Back</button>
+  </div>
+
+  <div class="actions">
+    <button class="btn-primary" (click)="toggleAddForm()">
+      {{ showAddForm ? 'Cancel' : '+ Add Relationship' }}
+    </button>
+  </div>
+
+  <!-- Add Relationship Form -->
+  <div class="add-form" *ngIf="showAddForm">
+    <h3>Add Relationship to Partner</h3>
+    
+    <div class="form-group">
+      <label for="partnerAutocomplete">Search and Select Partner *</label>
+      <abs-autocomplete
+        id="partnerAutocomplete"
+        name="partnerAutocomplete"
+        [(ngModel)]="selectedPartnerId"
+        [fetchOptions]="fetchPartners"
+        [placeholder]="'Search partners (min 3 characters)...'"
+        [minSearchLength]="3"
+        [required]="true"
+        (optionSelected)="onPartnerSelected($event)"
+      ></abs-autocomplete>
+      <small class="form-hint">
+        Can't find the partner? 
+        <button type="button" class="btn-link" (click)="goToPartnerManagement()">Create a new partner</button>
+      </small>
+    </div>
+
+    <div class="form-group">
+      <label for="relationshipType">Relationship Type</label>
+      <input 
+        type="text" 
+        id="relationshipType" 
+        [(ngModel)]="newRelationship.relationshipType" 
+        placeholder="e.g., Subsidiary, Parent Company, Partner"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="effectiveFrom">Effective From</label>
+      <input 
+        type="date" 
+        id="effectiveFrom" 
+        [(ngModel)]="newRelationship.effectiveFrom"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="effectiveTo">Effective To</label>
+      <input 
+        type="date" 
+        id="effectiveTo" 
+        [(ngModel)]="newRelationship.effectiveTo"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="notes">Notes</label>
+      <textarea 
+        id="notes" 
+        [(ngModel)]="newRelationship.notes" 
+        placeholder="Additional notes about this relationship"
+        rows="3"
+      ></textarea>
+    </div>
+
+    <div class="form-actions">
+      <button 
+        class="btn-primary" 
+        (click)="onSubmitAdd()"
+        [disabled]="!selectedPartnerId"
+      >
+        Add Relationship
+      </button>
+      <button class="btn-secondary" (click)="toggleAddForm()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading"><p>Loading partner relationships...</p></div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="error-box">
+    <p>{{ error }}</p>
+    <button class="btn-primary" (click)="loadPartnerRelationships()">Retry</button>
+  </div>
+
+  <!-- Partner Relationships List -->
+  <div *ngIf="!loading && !error">
+    <h3>Partner Relationships ({{ partnerRelationships.length }})</h3>
+    
+    <div *ngIf="partnerRelationships.length === 0" class="info-message">
+      <p>No relationships found for this partner.</p>
+      <p>Click "Add Relationship" to create one.</p>
+    </div>
+
+    <div class="relationship-list">
+      <div *ngFor="let relationship of partnerRelationships" class="relationship-tile">
+        <div class="relationship-header">
+          <div class="relationship-partner">
+            <strong>{{ getRelatedPartner(relationship)?.partnerNumber }}</strong>
+            <span class="partner-name">{{ partnerService.getPartnerName(getRelatedPartner(relationship)!) }}</span>
+          </div>
+          <span class="relationship-direction">{{ getRelationshipDirection(relationship) }}</span>
+        </div>
+        
+        <div class="relationship-details">
+          <div *ngIf="relationship.relationshipType" class="detail-item">
+            <span class="label">Type:</span>
+            <span class="value">{{ relationship.relationshipType }}</span>
+          </div>
+          <div *ngIf="relationship.effectiveFrom" class="detail-item">
+            <span class="label">From:</span>
+            <span class="value">{{ relationship.effectiveFrom | date }}</span>
+          </div>
+          <div *ngIf="relationship.effectiveTo" class="detail-item">
+            <span class="label">To:</span>
+            <span class="value">{{ relationship.effectiveTo | date }}</span>
+          </div>
+          <div *ngIf="relationship.notes" class="detail-item notes">
+            <span class="label">Notes:</span>
+            <span class="value">{{ relationship.notes }}</span>
+          </div>
+        </div>
+
+        <div class="relationship-actions">
+          <button class="btn-danger" (click)="onDelete(relationship)">Remove</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

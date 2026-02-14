@@ -2,6 +2,7 @@ package dev.abstratium.partner.entity;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -59,6 +60,9 @@ public class Partner {
     @OneToMany(mappedBy = "partner", fetch = FetchType.LAZY)
     @JsonIgnore
     private Set<PartnerTag> partnerTags = new HashSet<>();
+
+    @Transient
+    private List<dev.abstratium.partner.entity.Tag> tags;
 
     @OneToMany(mappedBy = "fromPartner", fetch = FetchType.LAZY)
     @JsonIgnore
@@ -201,5 +205,13 @@ public class Partner {
 
     public void setSmeRelationships(Set<SMERelationship> smeRelationships) {
         this.smeRelationships = smeRelationships;
+    }
+
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
     }
 }

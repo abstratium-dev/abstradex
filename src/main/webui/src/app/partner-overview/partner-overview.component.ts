@@ -153,6 +153,12 @@ export class PartnerOverviewComponent implements OnInit {
     }
   }
 
+  manageRelationships(): void {
+    if (this.partner) {
+      this.router.navigate(['/partners', this.partner.id, 'relationships']);
+    }
+  }
+
   getPartnerIcon(): string {
     return this.partner ? this.partnerService.getPartnerIcon(this.partner) : '❓';
   }

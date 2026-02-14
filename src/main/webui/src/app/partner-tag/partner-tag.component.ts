@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ToastService } from '../core/toast/toast.service';
 import { ConfirmDialogService } from '../core/confirm-dialog/confirm-dialog.service';
 import { Controller } from '../controller';
@@ -20,6 +20,7 @@ export class PartnerTagComponent implements OnInit {
   private controller = inject(Controller);
   private modelService = inject(ModelService);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private location = inject(Location);
   private toastService = inject(ToastService);
   private confirmService = inject(ConfirmDialogService);
@@ -34,23 +35,11 @@ export class PartnerTagComponent implements OnInit {
 
   // Add tag form
   showAddForm = false;
-  showCreateForm = false;
   selectedTagId = '';
-  
-  // Create new tag form
-  newTag: Tag = this.getEmptyTag();
 
   getPartnerName(): string {
     if (!this.partner) return 'Loading...';
     return this.partnerService.getPartnerName(this.partner);
-  }
-
-  getEmptyTag(): Tag {
-    return {
-      tagName: '',
-      colorHex: '#3B82F6',
-      description: ''
-    };
   }
 
   ngOnInit(): void {
@@ -108,15 +97,6 @@ export class PartnerTagComponent implements OnInit {
     this.showAddForm = !this.showAddForm;
     if (this.showAddForm) {
       this.selectedTagId = '';
-      this.showCreateForm = false;
-    }
-  }
-
-  toggleCreateForm(): void {
-    this.showCreateForm = !this.showCreateForm;
-    if (this.showCreateForm) {
-      this.newTag = this.getEmptyTag();
-      this.showAddForm = false;
     }
   }
 
@@ -134,24 +114,6 @@ export class PartnerTagComponent implements OnInit {
       await this.loadPartnerTags();
     } catch (err) {
       this.toastService.error('Failed to add tag to partner');
-    }
-  }
-
-  async onCreateNewTag(): Promise<void> {
-    if (!this.newTag.tagName || !this.newTag.tagName.trim()) {
-      this.toastService.error('Please enter a tag name');
-      return;
-    }
-
-    try {
-      await this.controller.createTag(this.newTag);
-      this.toastService.success('Tag created successfully. You can now search and add it to the partner.');
-      
-      this.showCreateForm = false;
-      this.newTag = this.getEmptyTag();
-      await this.loadAllTags();
-    } catch (err) {
-      this.toastService.error('Failed to create tag');
     }
   }
 
@@ -174,6 +136,10 @@ export class PartnerTagComponent implements OnInit {
 
   goBack(): void {
     this.location.back();
+  }
+
+  goToTagManagement(): void {
+    this.router.navigate(['/tags']);
   }
 
   getPartnerNumberAndName(): string {

@@ -811,6 +811,27 @@ button {
   }
 }
 
+.btn-link {
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--color-link-primary);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: inherit;
+  font-weight: normal;
+
+  &:hover:not(:disabled) {
+    color: var(--color-link-hover);
+    background: none;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
 .btn-icon {
   padding: 0.5rem;
   background: transparent;

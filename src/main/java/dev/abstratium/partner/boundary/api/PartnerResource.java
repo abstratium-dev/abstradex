@@ -11,6 +11,7 @@ import dev.abstratium.partner.entity.LegalEntity;
 import dev.abstratium.partner.entity.NaturalPerson;
 import dev.abstratium.partner.entity.Partner;
 import dev.abstratium.partner.service.PartnerService;
+import dev.abstratium.partner.service.PartnerTagService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -31,6 +32,9 @@ public class PartnerResource {
 
     @Inject
     PartnerService partnerService;
+
+    @Inject
+    PartnerTagService partnerTagService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -56,6 +60,8 @@ public class PartnerResource {
         if (partner == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
+        // Load tags for the partner
+        partner.setTags(partnerTagService.findTagsByPartnerId(id));
         return Response.ok(partner).build();
     }
 

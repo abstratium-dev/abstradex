@@ -1,23 +1,25 @@
 <div class="container">
   <div class="page-header">
-    <h2>Tag Management</h2>
+    <h1>Tag Management</h1>
+    <div class="header-actions">
+      <button class="btn-add" (click)="toggleAddForm()" [disabled]="formSubmitting">
+        {{ showForm ? 'Cancel' : '+ Add Tag' }}
+      </button>
+    </div>
   </div>
 
-  <!-- Search and Actions -->
-  <div class="filter-actions">
-    <div class="search-box">
+  <!-- Search -->
+  <div class="filter-section">
+    <div class="filter-input-wrapper">
       <input
         type="text"
         [(ngModel)]="searchTerm"
         (ngModelChange)="onSearchChange()"
         placeholder="Search tags..."
-        class="search-input"
+        class="filter-input"
       />
-      <button *ngIf="searchTerm" class="btn-clear" (click)="clearSearch()">✕</button>
+      <button *ngIf="searchTerm" class="filter-clear-button" (click)="clearSearch()" title="Clear search">✕</button>
     </div>
-    <button class="btn-primary" (click)="toggleAddForm()">
-      {{ showForm ? 'Cancel' : (editingTag ? 'Cancel Edit' : '+ Add Tag') }}
-    </button>
   </div>
 
   <!-- Add/Edit Tag Form -->

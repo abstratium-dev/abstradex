@@ -8,9 +8,6 @@
     <button class="btn-primary" (click)="toggleAddForm()">
       {{ showAddForm ? 'Cancel' : '+ Add Existing Tag' }}
     </button>
-    <button class="btn-secondary" (click)="toggleCreateForm()">
-      {{ showCreateForm ? 'Cancel' : '+ Create New Tag' }}
-    </button>
   </div>
 
   <!-- Add Existing Tag Form -->
@@ -28,6 +25,10 @@
       <small class="form-hint" *ngIf="getAvailableTags().length === 0">
         All available tags have already been added to this partner.
       </small>
+      <small class="form-hint">
+        Can't find the tag? 
+        <button type="button" class="btn-link" (click)="goToTagManagement()">Create a new tag</button>
+      </small>
     </div>
 
     <div class="form-actions">
@@ -39,57 +40,6 @@
         Add Tag
       </button>
       <button class="btn-secondary" (click)="toggleAddForm()">Cancel</button>
-    </div>
-  </div>
-
-  <!-- Create New Tag Form -->
-  <div class="form-container" *ngIf="showCreateForm">
-    <h3>Create New Tag</h3>
-    
-    <div class="form-group">
-      <label for="tagName">Tag Name *</label>
-      <input 
-        type="text" 
-        id="tagName" 
-        [(ngModel)]="newTag.tagName" 
-        placeholder="Enter tag name"
-        required
-      />
-    </div>
-
-    <div class="form-group">
-      <label for="colorHex">Color</label>
-      <div class="color-input-group">
-        <input 
-          type="color" 
-          id="colorHex" 
-          [(ngModel)]="newTag.colorHex"
-          class="color-picker"
-        />
-        <input 
-          type="text" 
-          [(ngModel)]="newTag.colorHex" 
-          placeholder="#3B82F6"
-          class="color-text"
-        />
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label for="description">Description</label>
-      <textarea 
-        id="description" 
-        [(ngModel)]="newTag.description" 
-        placeholder="Enter tag description (optional)"
-        rows="3"
-      ></textarea>
-    </div>
-
-    <div class="form-actions">
-      <button class="btn-primary" (click)="onCreateNewTag()">
-        Create and Add Tag
-      </button>
-      <button class="btn-secondary" (click)="toggleCreateForm()">Cancel</button>
     </div>
   </div>
 
@@ -108,7 +58,7 @@
     
     <div *ngIf="partnerTags.length === 0" class="info-message">
       <p>No tags assigned to this partner yet.</p>
-      <p>Click "Add Existing Tag" to assign a tag or "Create New Tag" to create one.</p>
+      <p>Click "Add Existing Tag" to assign a tag.</p>
     </div>
 
     <div class="tag-grid">

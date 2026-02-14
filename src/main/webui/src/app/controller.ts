@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { Address, Country, ModelService, Partner } from './model.service';
 import { AddressDetail } from './models/address-detail.model';
 import { ContactDetail } from './models/contact-detail.model';
-import { Tag } from './models/partner.model';
+import { Tag, PartnerRelationship } from './models/partner.model';
 import { PartnerTag } from './models/partner-tag.model';
 
 @Injectable({
@@ -346,6 +346,58 @@ export class Controller {
       );
     } catch (error) {
       console.error('Failed to remove tag from partner:', error);
+      throw error;
+    }
+  }
+
+  // Partner Relationship Management
+  async loadPartnerRelationships(partnerId: string): Promise<PartnerRelationship[]> {
+    if (!partnerId || partnerId.trim() === '') {
+      throw new Error('Partner ID is required to load partner relationships');
+    }
+    try {
+      return await firstValueFrom(
+        this.http.get<PartnerRelationship[]>(`/api/partner/${partnerId}/relationship`)
+      );
+    } catch (error) {
+      console.error('Failed to load partner relationships:', error);
+      throw error;
+    }
+  }
+
+  async addRelationshipToPartner(partnerId: string, relatedPartnerId: string, relationship: PartnerRelationship): Promise<PartnerRelationship> {
+    if (!partnerId || partnerId.trim() === '') {
+      throw new Error('Partner ID is required to add relationship');
+    }
+    if (!relatedPartnerId || relatedPartnerId.trim() === '') {
+      throw new Error('Related partner ID is required to add relationship');
+    }
+    try {
+      return await firstValueFrom(
+        this.http.post<PartnerRelationship>(
+          `/api/partner/${partnerId}/relationship?relatedPartnerId=${relatedPartnerId}`,
+          relationship
+        )
+      );
+    } catch (error) {
+      console.error('Failed to add relationship to partner:', error);
+      throw error;
+    }
+  }
+
+  async removeRelationshipFromPartner(partnerId: string, relationshipId: string): Promise<void> {
+    if (!partnerId || partnerId.trim() === '') {
+      throw new Error('Partner ID is required to remove relationship');
+    }
+    if (!relationshipId || relationshipId.trim() === '') {
+      throw new Error('Relationship ID is required to remove relationship');
+    }
+    try {
+      await firstValueFrom(
+        this.http.delete<void>(`/api/partner/${partnerId}/relationship/${relationshipId}`)
+      );
+    } catch (error) {
+      console.error('Failed to remove relationship from partner:', error);
       throw error;
     }
   }

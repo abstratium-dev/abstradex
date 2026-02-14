@@ -40,3 +40,13 @@ export interface LegalEntity extends Partner {
   incorporationDate?: string;  // ISO date string from backend
   jurisdiction?: string;
 }
+
+export interface PartnerRelationship {
+  id?: string;
+  fromPartner?: Partner;
+  toPartner?: Partner;
+  relationshipType?: string;
+  effectiveFrom?: string;  // ISO date string
+  effectiveTo?: string;    // ISO date string
+  notes?: string;
+}
