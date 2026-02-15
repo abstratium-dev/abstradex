@@ -37,6 +37,9 @@ export class PartnerTagComponent implements OnInit {
   showAddForm = false;
   selectedTagId = '';
 
+  // Context menu state
+  activeContextMenuIndex: number | null = null;
+
   getPartnerName(): string {
     if (!this.partner) return 'Loading...';
     return this.partnerService.getPartnerName(this.partner);
@@ -117,7 +120,22 @@ export class PartnerTagComponent implements OnInit {
     }
   }
 
-  async onRemoveTag(tag: Tag): Promise<void> {
+  toggleContextMenu(event: Event, index: number): void {
+    event.stopPropagation();
+    this.activeContextMenuIndex = this.activeContextMenuIndex === index ? null : index;
+  }
+
+  closeContextMenu(index: number): void {
+    if (this.activeContextMenuIndex === index) {
+      this.activeContextMenuIndex = null;
+    }
+  }
+
+  async onRemoveTag(tag: Tag, event?: Event): Promise<void> {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.activeContextMenuIndex = null;
     const confirmed = await this.confirmService.confirm({
       title: 'Remove Tag',
       message: `Are you sure you want to remove the tag "${tag.tagName}" from this partner?`

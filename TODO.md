@@ -10,31 +10,22 @@ These TODOs are to be resolved by the developer, NOT THE LLM.
 ## Today
 
 - upgrade all and check security issues in github
-
 - update docs to describe the changes
-
 - sync upstream
+
+- check the numbering of the sql files
 
 - add more e2e tests based on the features
 
-- X when adding a partner or address, the toast is used to show a link to the partner/address. the same is not true when editing a partner/address, so please fix that, taking inspiration from the existing code where partners/addresses are added in the angular code
-
-- X when adding/editing contact details, the type should influence the html5 input field (e.g. phone number should be a phone number input field)
-
-
+- when adding an address, the toast show a link but the link doesn't work
 
 - use the feature files to test the api in a quarkus test???
   - if not, remove those feature files
   - is cucumber compatible with playwright?
 
-- need to be able to edit tags - need a route and link in the header for that
-
-
 - dont allow deleting an address if it is in use
-
 - dont allow deleting a tag if it is in use
-
-- in the controller we need to remove the two methods loadPartners and loadAddresses - as they won't perform well when we have a lot of partners.  in some places, like where we are editing a partner, it should load exactly that partner! ditto address.
+- dont allow deleting a relationship type if it is in use
 
 - in order to integrate with other microservices, we need to export data in a shareable way. apache arrow format? csv?
 

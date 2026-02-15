@@ -17,6 +17,7 @@ export class PartnerTileComponent {
   @Output() edit = new EventEmitter<Partner>();
   @Output() manageAddresses = new EventEmitter<Partner>();
   @Output() manageContacts = new EventEmitter<Partner>();
+  @Output() manageRelationships = new EventEmitter<Partner>();
   @Output() manageTags = new EventEmitter<Partner>();
   @Output() viewOverview = new EventEmitter<Partner>();
 
@@ -53,6 +54,12 @@ export class PartnerTileComponent {
     event.stopPropagation();
     this.closeContextMenu();
     this.manageContacts.emit(this.partner);
+  }
+
+  onManageRelationships(event: Event): void {
+    event.stopPropagation();
+    this.closeContextMenu();
+    this.manageRelationships.emit(this.partner);
   }
 
   onManageTags(event: Event): void {

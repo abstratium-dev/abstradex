@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { Address, Country, ModelService, Partner } from './model.service';
 import { AddressDetail } from './models/address-detail.model';
 import { ContactDetail } from './models/contact-detail.model';
-import { Tag, PartnerRelationship } from './models/partner.model';
+import { Tag, PartnerRelationship, RelationshipType } from './models/partner.model';
 import { PartnerTag } from './models/partner-tag.model';
 
 @Injectable({
@@ -29,27 +29,33 @@ export class Controller {
   }
 
   loadPartners(searchTerm: string) {
-    this.modelService.setPartnersLoading(true);
-    this.modelService.setPartnersError(null);
-    this.modelService.setLastPartnerSearchTerm(searchTerm);
-    
-    const startTime = performance.now();
-    const url = `/api/partner?search=${encodeURIComponent(searchTerm)}`;
-    
-    this.http.get<Partner[]>(url).subscribe({
-      next: (partners) => {
-        const loadTime = Math.round(performance.now() - startTime);
-        this.modelService.setPartners(partners);
-        this.modelService.setPartnersLoadTime(loadTime);
-        this.modelService.setPartnersLoading(false);
-      },
-      error: (err) => {
-        console.error('Error loading partners:', err);
+    if(!searchTerm) {
         this.modelService.setPartners([]);
-        this.modelService.setPartnersError('Failed to load partners');
+        this.modelService.setPartnersError(null);
         this.modelService.setPartnersLoading(false);
-      }
-    });
+    } else {
+      this.modelService.setPartnersLoading(true);
+      this.modelService.setPartnersError(null);
+      this.modelService.setLastPartnerSearchTerm(searchTerm);
+      
+      const startTime = performance.now();
+      const url = `/api/partner?search=${encodeURIComponent(searchTerm)}`;
+      
+      this.http.get<Partner[]>(url).subscribe({
+        next: (partners) => {
+          const loadTime = Math.round(performance.now() - startTime);
+          this.modelService.setPartners(partners);
+          this.modelService.setPartnersLoadTime(loadTime);
+          this.modelService.setPartnersLoading(false);
+        },
+        error: (err) => {
+          console.error('Error loading partners:', err);
+          this.modelService.setPartners([]);
+          this.modelService.setPartnersError('Failed to load partners');
+          this.modelService.setPartnersLoading(false);
+        }
+      });
+    }
   }
 
   async createPartner(partner: Partner): Promise<Partner> {
@@ -103,27 +109,31 @@ export class Controller {
     }
   }
 
-  loadAddresses(searchTerm: string) {
-    this.modelService.setAddressesLoading(true);
-    this.modelService.setAddressesError(null);
-    
-    const startTime = performance.now();
-    const url = `/api/address?search=${encodeURIComponent(searchTerm)}`;
-
-    this.http.get<Address[]>(url).subscribe({
-      next: (addresses) => {
+  async loadAddresses(searchTerm: string): Promise<void> {
+    if(!searchTerm) {
+      this.modelService.setAddresses([]);
+      this.modelService.setAddressesError(null);
+      this.modelService.setAddressesLoading(false);
+    } else {
+      this.modelService.setAddressesLoading(true);
+      this.modelService.setAddressesError(null);
+      
+      const startTime = performance.now();
+      const url = `/api/address?search=${encodeURIComponent(searchTerm)}`;
+  
+      try {
+        const addresses = await firstValueFrom(this.http.get<Address[]>(url));
         const loadTime = Math.round(performance.now() - startTime);
         this.modelService.setAddresses(addresses);
         this.modelService.setAddressesLoadTime(loadTime);
-        this.modelService.setAddressesLoading(false);
-      },
-      error: (err) => {
+      } catch (err) {
         console.error('Error loading addresses:', err);
         this.modelService.setAddresses([]);
         this.modelService.setAddressesError('Failed to load addresses');
+      } finally {
         this.modelService.setAddressesLoading(false);
       }
-    });
+    }
   }
 
   async createAddress(address: Address): Promise<Address> {
@@ -398,6 +408,65 @@ export class Controller {
       );
     } catch (error) {
       console.error('Failed to remove relationship from partner:', error);
+      throw error;
+    }
+  }
+
+  // Relationship Type Management
+  async loadRelationshipTypes(searchTerm?: string): Promise<RelationshipType[]> {
+    try {
+      const url = searchTerm 
+        ? `/api/relationship-type?search=${encodeURIComponent(searchTerm)}`
+        : '/api/relationship-type';
+      return await firstValueFrom(
+        this.http.get<RelationshipType[]>(url)
+      );
+    } catch (error) {
+      console.error('Failed to load relationship types:', error);
+      throw error;
+    }
+  }
+
+  async loadActiveRelationshipTypes(): Promise<RelationshipType[]> {
+    try {
+      return await firstValueFrom(
+        this.http.get<RelationshipType[]>('/api/relationship-type?activeOnly=true')
+      );
+    } catch (error) {
+      console.error('Failed to load active relationship types:', error);
+      throw error;
+    }
+  }
+
+  async createRelationshipType(relationshipType: RelationshipType): Promise<RelationshipType> {
+    try {
+      return await firstValueFrom(
+        this.http.post<RelationshipType>('/api/relationship-type', relationshipType)
+      );
+    } catch (error) {
+      console.error('Failed to create relationship type:', error);
+      throw error;
+    }
+  }
+
+  async updateRelationshipType(id: string, relationshipType: RelationshipType): Promise<RelationshipType> {
+    try {
+      return await firstValueFrom(
+        this.http.put<RelationshipType>(`/api/relationship-type/${id}`, relationshipType)
+      );
+    } catch (error) {
+      console.error('Failed to update relationship type:', error);
+      throw error;
+    }
+  }
+
+  async deleteRelationshipType(id: string): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.http.delete<void>(`/api/relationship-type/${id}`)
+      );
+    } catch (error) {
+      console.error('Failed to delete relationship type:', error);
       throw error;
     }
   }

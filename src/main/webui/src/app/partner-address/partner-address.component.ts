@@ -42,6 +42,9 @@ export class PartnerAddressComponent implements OnInit {
     addressType: 'BILLING'
   };
 
+  // Context menu state
+  activeContextMenuIndex: number | null = null;
+
   getPartnerName(): string {
     if (!this.partner) return 'Loading...';
     return this.partnerService.getPartnerName(this.partner);
@@ -144,7 +147,22 @@ export class PartnerAddressComponent implements OnInit {
     }
   }
 
-  async onDelete(addressDetail: AddressDetail): Promise<void> {
+  toggleContextMenu(event: Event, index: number): void {
+    event.stopPropagation();
+    this.activeContextMenuIndex = this.activeContextMenuIndex === index ? null : index;
+  }
+
+  closeContextMenu(index: number): void {
+    if (this.activeContextMenuIndex === index) {
+      this.activeContextMenuIndex = null;
+    }
+  }
+
+  async onDelete(addressDetail: AddressDetail, event?: Event): Promise<void> {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.activeContextMenuIndex = null;
     const confirmed = await this.confirmService.confirm({
       title: 'Remove Address',
       message: 'Are you sure you want to remove this address from the partner?'

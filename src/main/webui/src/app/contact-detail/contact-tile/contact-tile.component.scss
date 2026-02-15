@@ -47,38 +47,4 @@
   flex-shrink: 0;
 }
 
-.context-menu {
-  position: absolute;
-  right: 0;
-  top: 100%;
-  margin-top: 0.25rem;
-  background: var(--color-bg-primary);
-  border: 1px solid var(--color-border-primary);
-  border-radius: 4px;
-  box-shadow: 0 4px 12px var(--shadow-md);
-  min-width: 120px;
-  z-index: 1000;
-
-  button {
-    display: block;
-    width: 100%;
-    padding: 0.5rem 1rem;
-    border: none;
-    background: none;
-    text-align: left;
-    cursor: pointer;
-    color: var(--color-text-primary);
-
-    &:hover {
-      background: var(--color-bg-hover);
-    }
-
-    &.danger {
-      color: var(--color-error);
-
-      &:hover {
-        background: var(--color-overlay-danger);
-      }
-    }
-  }
-}
+// Context menu styles are now in global styles.scss

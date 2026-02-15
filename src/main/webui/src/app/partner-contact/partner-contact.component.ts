@@ -39,6 +39,9 @@ export class PartnerContactComponent implements OnInit {
 
   contactTypes = ['EMAIL', 'PHONE', 'MOBILE', 'FAX', 'WEBSITE', 'LINKEDIN', 'OTHER'];
 
+  // Context menu state
+  activeContextMenuIndex: number | null = null;
+
   getPartnerName(): string {
     if (!this.partner) return 'Loading...';
     return this.partnerService.getPartnerName(this.partner);
@@ -125,13 +128,32 @@ export class PartnerContactComponent implements OnInit {
     }
   }
 
-  onEdit(contact: ContactDetail): void {
+  toggleContextMenu(event: Event, index: number): void {
+    event.stopPropagation();
+    this.activeContextMenuIndex = this.activeContextMenuIndex === index ? null : index;
+  }
+
+  closeContextMenu(index: number): void {
+    if (this.activeContextMenuIndex === index) {
+      this.activeContextMenuIndex = null;
+    }
+  }
+
+  onEdit(contact: ContactDetail, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.activeContextMenuIndex = null;
     this.editingContact = contact;
     this.contactForm = { ...contact };
     this.showForm = true;
   }
 
-  async onDelete(contact: ContactDetail): Promise<void> {
+  async onDelete(contact: ContactDetail, event?: Event): Promise<void> {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.activeContextMenuIndex = null;
     const confirmed = await this.confirmService.confirm({
       title: 'Remove Contact',
       message: 'Are you sure you want to remove this contact from the partner?'

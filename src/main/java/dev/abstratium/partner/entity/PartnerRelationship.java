@@ -3,6 +3,7 @@ package dev.abstratium.partner.entity;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import dev.abstratium.core.entity.RelationshipType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -28,8 +29,9 @@ public class PartnerRelationship {
     @JoinColumn(name = "to_partner_id", nullable = false)
     private Partner toPartner;
 
-    @Column(name = "relationship_type", length = 100)
-    private String relationshipType;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "relationship_type_id")
+    private RelationshipType relationshipType;
 
     @Column(name = "effective_from")
     private LocalDate effectiveFrom;
@@ -72,11 +74,11 @@ public class PartnerRelationship {
         this.toPartner = toPartner;
     }
 
-    public String getRelationshipType() {
+    public RelationshipType getRelationshipType() {
         return relationshipType;
     }
 
-    public void setRelationshipType(String relationshipType) {
+    public void setRelationshipType(RelationshipType relationshipType) {
         this.relationshipType = relationshipType;
     }
 

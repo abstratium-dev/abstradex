@@ -1,0 +1,40 @@
+<div class="tile" (click)="closeContextMenu()">
+  <div class="tile-header">
+    <div class="tile-info">
+      <div class="relationship-direction">
+        <span class="direction-arrow" [class.outgoing]="getDirection() === 'outgoing'" [class.incoming]="getDirection() === 'incoming'">
+          {{ getDirectionArrow() }}
+        </span>
+        <span class="direction-label">{{ getDirectionLabel() }}</span>
+      </div>
+      <h3 class="partner-name">
+        <a class="partner-link" (click)="navigateToPartner($event)" [title]="'View ' + getRelatedPartnerName()">
+          {{ getRelatedPartnerName() }}
+        </a>
+      </h3>
+      <p class="relationship-type" [title]="getRelationshipTypeTooltip()">
+        <a class="type-link" (click)="navigateToRelationshipTypes($event)">{{ getRelationshipTypeName() }}</a>
+      </p>
+      <div class="relationship-dates" *ngIf="relationship.effectiveFrom || relationship.effectiveTo">
+        <span *ngIf="relationship.effectiveFrom">From: {{ formatDate(relationship.effectiveFrom) }}</span>
+        <span *ngIf="relationship.effectiveTo"> To: {{ formatDate(relationship.effectiveTo) }}</span>
+      </div>
+      <p class="relationship-notes" *ngIf="relationship.notes">{{ relationship.notes }}</p>
+    </div>
+    <div class="tile-actions">
+      <div class="context-menu-wrapper">
+        <button class="btn-context-menu" 
+                (click)="toggleContextMenu($event)" 
+                title="More actions">
+          ⋮
+        </button>
+        <div class="context-menu" *ngIf="showContextMenu">
+          <button class="context-menu-item context-menu-item-danger" (click)="onDelete($event)">
+            <span class="menu-icon">🗑️</span>
+            <span>Remove Relationship</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

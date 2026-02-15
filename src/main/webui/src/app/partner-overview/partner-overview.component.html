@@ -202,7 +202,22 @@
         <h3>Relationships</h3>
         <button class="btn-icon" (click)="manageRelationships()" title="Manage Relationships">✏️</button>
       </div>
-      <p class="empty-message">Click the edit button to manage partner relationships.</p>
+      <div *ngIf="relationships && relationships.length > 0" class="relationship-list">
+        <div *ngFor="let relationship of relationships" class="relationship-item">
+          <span class="relationship-direction">{{ getRelationshipDirection(relationship) }}</span>
+          <span class="relationship-type clickable" 
+                [title]="getRelationshipTypeTooltip(relationship)"
+                (click)="navigateToRelationshipType(relationship)">
+            {{ getRelationshipTypeName(relationship) }}
+          </span>
+          <span class="relationship-partner clickable" 
+                (click)="navigateToRelatedPartner(relationship)">
+            {{ getRelatedPartnerName(relationship) }}
+          </span>
+          <span class="relationship-notes" *ngIf="relationship.notes">{{ relationship.notes }}</span>
+        </div>
+      </div>
+      <p *ngIf="!relationships || relationships.length === 0" class="empty-message">No relationships found. Click the edit button to add relationships.</p>
     </div>
 
     <!-- Notes -->

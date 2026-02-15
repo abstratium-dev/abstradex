@@ -1,9 +1,9 @@
 <div class="container">
   <div class="page-header">
-    <h1>Tag Management</h1>
+    <h1>Relationship Type Management</h1>
     <div class="header-actions">
       <button class="btn-add" (click)="toggleAddForm()" [disabled]="formSubmitting">
-        {{ showForm ? 'Cancel' : '+ Add Tag' }}
+        {{ showForm ? 'Cancel' : '+ Add Relationship Type' }}
       </button>
     </div>
   </div>
@@ -15,24 +15,24 @@
         type="text"
         [(ngModel)]="searchTerm"
         (ngModelChange)="onSearchChange()"
-        placeholder="Search tags..."
+        placeholder="Search relationship types..."
         class="filter-input"
       />
       <button *ngIf="searchTerm" class="filter-clear-button" (click)="clearSearch()" title="Clear search">✕</button>
     </div>
   </div>
 
-  <!-- Add/Edit Tag Form -->
+  <!-- Add/Edit Form -->
   <div class="form-container" *ngIf="showForm">
-    <h3>{{ editingTag ? 'Edit Tag' : 'Add New Tag' }}</h3>
+    <h3>{{ editingType ? 'Edit Relationship Type' : 'Add New Relationship Type' }}</h3>
     
     <div class="form-group">
-      <label for="tagName">Tag Name *</label>
+      <label for="typeName">Type Name *</label>
       <input 
         type="text" 
-        id="tagName" 
-        [(ngModel)]="tagForm.tagName" 
-        placeholder="e.g., VIP, Premium, Corporate"
+        id="typeName" 
+        [(ngModel)]="typeForm.typeName" 
+        placeholder="e.g., PARENT_COMPANY, SUBSIDIARY"
         required
         autofocus
       />
@@ -44,17 +44,17 @@
         <input 
           type="color" 
           id="colorHex" 
-          [(ngModel)]="tagForm.colorHex"
+          [(ngModel)]="typeForm.colorHex"
           class="color-input"
         />
         <input 
           type="text" 
-          [(ngModel)]="tagForm.colorHex" 
+          [(ngModel)]="typeForm.colorHex" 
           placeholder="#4285f4"
           class="color-text-input"
           pattern="^#[0-9A-Fa-f]{6}$"
         />
-        <div class="color-preview" [style.background-color]="tagForm.colorHex"></div>
+        <div class="color-preview" [style.background-color]="typeForm.colorHex"></div>
       </div>
     </div>
 
@@ -62,45 +62,53 @@
       <label for="description">Description</label>
       <textarea 
         id="description" 
-        [(ngModel)]="tagForm.description" 
-        placeholder="Optional description of this tag"
+        [(ngModel)]="typeForm.description" 
+        placeholder="Optional description of this relationship type"
         rows="3"
       ></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>
+        <input type="checkbox" [(ngModel)]="typeForm.isActive" />
+        Active
+      </label>
     </div>
 
     <div *ngIf="formError" class="error-message">{{ formError }}</div>
 
     <div class="form-actions">
       <button class="btn-primary" (click)="onSubmit()" [disabled]="formSubmitting">
-        {{ editingTag ? 'Update Tag' : 'Add Tag' }}
+        {{ editingType ? 'Update Type' : 'Add Type' }}
       </button>
       <button class="btn-secondary" (click)="cancelForm()" [disabled]="formSubmitting">Cancel</button>
     </div>
   </div>
 
   <!-- Loading State -->
-  <div *ngIf="loading" class="loading"><p>Loading tags...</p></div>
+  <div *ngIf="loading" class="loading"><p>Loading relationship types...</p></div>
 
   <!-- Error State -->
   <div *ngIf="error" class="error-box">
     <p>{{ error }}</p>
-    <button class="btn-primary" (click)="loadTags()">Retry</button>
+    <button class="btn-primary" (click)="loadRelationshipTypes()">Retry</button>
   </div>
 
-  <!-- Tags List -->
+  <!-- Relationship Types List -->
   <div *ngIf="!loading && !error">
-    <h3>Tags ({{ tags.length }})</h3>
+    <h3>Relationship Types ({{ relationshipTypes.length }})</h3>
     
-    <div *ngIf="tags.length === 0" class="info-message">
-      <p>No tags found.</p>
-      <p>Click "Add Tag" to create a new tag.</p>
+    <div *ngIf="relationshipTypes.length === 0" class="info-message">
+      <p>No relationship types found.</p>
+      <p>Click "Add Relationship Type" to create a new type.</p>
     </div>
 
     <div class="tag-grid">
-      <div *ngFor="let tag of tags; let i = index" class="tag-card" (click)="closeContextMenu(i)">
+      <div *ngFor="let type of relationshipTypes; let i = index" class="tag-card" (click)="closeContextMenu(i)">
         <div class="tag-header">
-          <span class="tag-badge" [ngStyle]="getTagStyle(tag)">{{ tag.tagName }}</span>
-          <span class="tag-color">{{ tag.colorHex }}</span>
+          <span class="tag-badge" [ngStyle]="getTypeStyle(type)">{{ type.typeName }}</span>
+          <span class="tag-color">{{ type.colorHex }}</span>
+          <span *ngIf="!type.isActive" class="badge badge-inactive">Inactive</span>
           <div class="context-menu-wrapper">
             <button class="btn-context-menu" 
                     (click)="toggleContextMenu($event, i)" 
@@ -108,19 +116,19 @@
               ⋮
             </button>
             <div class="context-menu" *ngIf="activeContextMenuIndex === i">
-              <button class="context-menu-item" (click)="onEdit(tag, $event)">
+              <button class="context-menu-item" (click)="onEdit(type, $event)">
                 <span class="menu-icon">✏️</span>
-                <span>Edit Tag</span>
+                <span>Edit Type</span>
               </button>
-              <button class="context-menu-item context-menu-item-danger" (click)="onDelete(tag, $event)">
+              <button class="context-menu-item context-menu-item-danger" (click)="onDelete(type, $event)">
                 <span class="menu-icon">🗑️</span>
-                <span>Delete Tag</span>
+                <span>Delete Type</span>
               </button>
             </div>
           </div>
         </div>
-        <div class="tag-description" *ngIf="tag.description">
-          {{ tag.description }}
+        <div class="tag-description" *ngIf="type.description">
+          {{ type.description }}
         </div>
       </div>
     </div>

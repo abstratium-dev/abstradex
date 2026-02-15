@@ -193,3 +193,57 @@
   line-height: 1.6;
   white-space: pre-wrap;
 }
+
+.relationship-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.relationship-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: 6px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+
+  .clickable {
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-decoration-color: transparent;
+    transition: text-decoration-color 0.2s ease;
+
+    &:hover {
+      text-decoration-color: currentColor;
+    }
+  }
+}
+
+.relationship-direction {
+  font-size: 1.25rem;
+  font-weight: bold;
+  min-width: 1.5rem;
+  text-align: center;
+}
+
+.relationship-type {
+  font-weight: 600;
+  color: var(--color-primary);
+  min-width: 150px;
+}
+
+.relationship-partner {
+  flex: 1;
+  color: var(--color-text-primary);
+}
+
+.relationship-notes {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  font-style: italic;
+  flex: 2;
+}

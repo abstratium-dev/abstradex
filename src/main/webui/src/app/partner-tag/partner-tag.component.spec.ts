@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { signal } from '@angular/core';
@@ -23,6 +23,7 @@ describe('PartnerTagComponent', () => {
   let mockConfirmService: jasmine.SpyObj<ConfirmDialogService>;
   let mockPartnerService: jasmine.SpyObj<PartnerService>;
   let mockLocation: jasmine.SpyObj<Location>;
+  let mockRouter: jasmine.SpyObj<Router>;
   let mockActivatedRoute: any;
 
   const mockPartner: NaturalPerson = {
@@ -89,6 +90,7 @@ describe('PartnerTagComponent', () => {
         { provide: ConfirmDialogService, useValue: mockConfirmService },
         { provide: PartnerService, useValue: mockPartnerService },
         { provide: Location, useValue: mockLocation },
+        { provide: Router, useValue: mockRouter },
         { provide: ActivatedRoute, useValue: mockActivatedRoute }
       ]
     }).compileComponents();
@@ -103,7 +105,6 @@ describe('PartnerTagComponent', () => {
 
   it('should initialize with empty forms', () => {
     expect(component.showAddForm).toBe(false);
-    expect(component.showCreateForm).toBe(false);
     expect(component.selectedTagId).toBe('');
   });
 
@@ -165,27 +166,17 @@ describe('PartnerTagComponent', () => {
     expect(component.showAddForm).toBe(false);
     component.toggleAddForm();
     expect(component.showAddForm).toBe(true);
-    expect(component.showCreateForm).toBe(false);
     expect(component.selectedTagId).toBe('');
     component.toggleAddForm();
     expect(component.showAddForm).toBe(false);
   });
 
-  it('should toggle create form', () => {
-    expect(component.showCreateForm).toBe(false);
-    component.toggleCreateForm();
-    expect(component.showCreateForm).toBe(true);
-    expect(component.showAddForm).toBe(false);
-    component.toggleCreateForm();
-    expect(component.showCreateForm).toBe(false);
+  it('should navigate to tag management', () => {
+    component.goToTagManagement();
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/tags']);
   });
 
-  it('should return empty tag with default color', () => {
-    const emptyTag = component.getEmptyTag();
-    expect(emptyTag.tagName).toBe('');
-    expect(emptyTag.colorHex).toBe('#3B82F6');
-    expect(emptyTag.description).toBe('');
-  });
+  // Removed test for getEmptyTag - method no longer exists
 
   it('should filter available tags correctly', () => {
     component.allTags = mockTags;
@@ -234,71 +225,7 @@ describe('PartnerTagComponent', () => {
     });
   });
 
-  describe('creating new tag', () => {
-    beforeEach(() => {
-      component.partnerId = '123';
-    });
-
-    it('should create new tag successfully without auto-adding to partner', async () => {
-      component.newTag = {
-        tagName: 'New Tag',
-        colorHex: '#FF0000',
-        description: 'Test tag'
-      };
-
-      await component.onCreateNewTag();
-
-      expect(mockController.createTag).toHaveBeenCalledWith(jasmine.objectContaining({
-        tagName: 'New Tag',
-        colorHex: '#FF0000',
-        description: 'Test tag'
-      }));
-      // Should NOT automatically add to partner
-      expect(mockController.addTagToPartner).not.toHaveBeenCalled();
-      expect(mockToastService.success).toHaveBeenCalledWith('Tag created successfully. You can now search and add it to the partner.');
-      expect(component.showCreateForm).toBeFalse();
-      // Should NOT reload partner tags since tag wasn't added
-      expect(mockController.loadPartnerTags).not.toHaveBeenCalled();
-      // Should reload all tags so new tag appears in the list
-      expect(mockController.loadTags).toHaveBeenCalled();
-    });
-
-    it('should show error when tag name is empty', async () => {
-      component.newTag = {
-        tagName: '',
-        colorHex: '#FF0000'
-      };
-
-      await component.onCreateNewTag();
-
-      expect(mockToastService.error).toHaveBeenCalledWith('Please enter a tag name');
-      expect(mockController.createTag).not.toHaveBeenCalled();
-    });
-
-    it('should show error when tag name is whitespace', async () => {
-      component.newTag = {
-        tagName: '   ',
-        colorHex: '#FF0000'
-      };
-
-      await component.onCreateNewTag();
-
-      expect(mockToastService.error).toHaveBeenCalledWith('Please enter a tag name');
-      expect(mockController.createTag).not.toHaveBeenCalled();
-    });
-
-    it('should handle error creating tag', async () => {
-      component.newTag = {
-        tagName: 'New Tag',
-        colorHex: '#FF0000'
-      };
-      mockController.createTag.and.rejectWith(new Error('Network error'));
-
-      await component.onCreateNewTag();
-
-      expect(mockToastService.error).toHaveBeenCalledWith('Failed to create tag');
-    });
-  });
+  // Removed tests for creating new tag - functionality moved to tag management page
 
   describe('removing tag', () => {
     beforeEach(() => {

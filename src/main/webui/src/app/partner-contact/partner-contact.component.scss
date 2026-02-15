@@ -18,12 +18,12 @@
   }
 }
 
-.contact-grid {
+.contact-list {
   display: grid;
   gap: 1rem;
 }
 
-.contact-tile {
+.contact-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -73,7 +73,7 @@
         }
       }
 
-      .contact-badges {
+      .badge-list {
         display: flex;
         gap: 0.5rem;
       }

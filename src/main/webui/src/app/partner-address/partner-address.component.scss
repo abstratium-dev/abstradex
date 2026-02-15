@@ -55,17 +55,15 @@
 }
 
 .address-list {
+  display: grid;
+  gap: 1rem;
+
   h3 {
     margin-bottom: 1rem;
   }
 }
 
-.address-grid {
-  display: grid;
-  gap: 1rem;
-}
-
-.address-tile {
+.address-item {
   display: flex;
   justify-content: space-between;
   align-items: center;

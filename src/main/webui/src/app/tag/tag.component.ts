@@ -37,6 +37,9 @@ export class TagComponent implements OnInit {
   searchTerm = '';
   private searchTimeout: any;
 
+  // Context menu state
+  activeContextMenuIndex: number | null = null;
+
   ngOnInit(): void {
     this.loadTags();
   }
@@ -121,17 +124,32 @@ export class TagComponent implements OnInit {
     }
   }
 
-  onEdit(tag: Tag): void {
+  toggleContextMenu(event: Event, index: number): void {
+    event.stopPropagation();
+    this.activeContextMenuIndex = this.activeContextMenuIndex === index ? null : index;
+  }
+
+  closeContextMenu(index: number): void {
+    if (this.activeContextMenuIndex === index) {
+      this.activeContextMenuIndex = null;
+    }
+  }
+
+  onEdit(tag: Tag, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.activeContextMenuIndex = null;
     this.editingTag = tag;
-    this.tagForm = {
-      tagName: tag.tagName,
-      colorHex: tag.colorHex || '#4285f4',
-      description: tag.description || ''
-    };
+    this.tagForm = { ...tag };
     this.showForm = true;
   }
 
-  async onDelete(tag: Tag): Promise<void> {
+  async onDelete(tag: Tag, event?: Event): Promise<void> {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.activeContextMenuIndex = null;
     const confirmed = await this.confirmService.confirm({
       title: 'Delete Tag',
       message: `Are you sure you want to delete the tag "${tag.tagName}"? This will remove it from all partners.`

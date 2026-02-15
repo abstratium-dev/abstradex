@@ -61,18 +61,28 @@
       <p>Click "Add Existing Tag" to assign a tag.</p>
     </div>
 
-    <div class="tag-grid">
-      <div *ngFor="let tag of partnerTags" class="tag-tile">
+    <div class="assigned-tags">
+      <div *ngFor="let tag of partnerTags; let i = index" class="tag-item" (click)="closeContextMenu(i)">
         <div class="tag-info">
-          <div class="tag-badge" [ngStyle]="getTagStyle(tag)">
-            {{ tag.tagName }}
-          </div>
+          <span class="tag-badge" [ngStyle]="getTagStyle(tag)">{{ tag.tagName }}</span>
           <div class="tag-details" *ngIf="tag.description">
             <small>{{ tag.description }}</small>
           </div>
         </div>
         <div class="tag-actions">
-          <button class="btn-danger" (click)="onRemoveTag(tag)">Remove</button>
+          <div class="context-menu-wrapper">
+            <button class="btn-context-menu" 
+                    (click)="toggleContextMenu($event, i)" 
+                    title="More actions">
+              ⋮
+            </button>
+            <div class="context-menu" *ngIf="activeContextMenuIndex === i">
+              <button class="context-menu-item context-menu-item-danger" (click)="onRemoveTag(tag, $event)">
+                <span class="menu-icon">🗑️</span>
+                <span>Remove Tag</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

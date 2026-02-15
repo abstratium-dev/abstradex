@@ -71,8 +71,8 @@
       <p>Click "Add Address" to assign an existing address or "Create New Address" to create one first.</p>
     </div>
 
-    <div class="address-grid">
-      <div *ngFor="let addressDetail of partnerAddresses" class="address-tile">
+    <div class="address-list">
+      <div *ngFor="let addressDetail of partnerAddresses; let i = index" class="address-item" (click)="closeContextMenu(i)">
         <div class="address-info">
           <div class="address-text">
             <strong>{{ getAddressDisplay(addressDetail) }}</strong>
@@ -85,7 +85,19 @@
           </div>
         </div>
         <div class="address-actions">
-          <button class="btn-danger" (click)="onDelete(addressDetail)">Remove</button>
+          <div class="context-menu-wrapper">
+            <button class="btn-context-menu" 
+                    (click)="toggleContextMenu($event, i)" 
+                    title="More actions">
+              ⋮
+            </button>
+            <div class="context-menu" *ngIf="activeContextMenuIndex === i">
+              <button class="context-menu-item context-menu-item-danger" (click)="onDelete(addressDetail, $event)">
+                <span class="menu-icon">🗑️</span>
+                <span>Remove Address</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

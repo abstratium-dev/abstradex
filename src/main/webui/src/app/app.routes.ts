@@ -4,6 +4,7 @@ import { NotFoundComponent } from './core/not-found/not-found.component';
 import { PartnerComponent } from './partner/partner.component';
 import { AddressComponent } from './address/address.component';
 import { TagComponent } from './tag/tag.component';
+import { RelationshipTypeComponent } from './relationship-type/relationship-type.component';
 import { PartnerAddressComponent } from './partner-address/partner-address.component';
 import { PartnerContactComponent } from './partner-contact/partner-contact.component';
 import { PartnerTagComponent } from './partner-tag/partner-tag.component';
@@ -21,6 +22,7 @@ export const routes: Routes = [
   { path: 'partners/:partnerId/relationships', component: PartnerRelationshipComponent, canActivate: [authGuard] },
   { path: 'addresses',  component: AddressComponent, canActivate: [authGuard] },
   { path: 'tags',       component: TagComponent, canActivate: [authGuard] },
+  { path: 'relationship-types', component: RelationshipTypeComponent, canActivate: [authGuard] },
   { path: 'signed-out', component: SignedOutComponent },
   { path: '**',         component: NotFoundComponent }
 ];

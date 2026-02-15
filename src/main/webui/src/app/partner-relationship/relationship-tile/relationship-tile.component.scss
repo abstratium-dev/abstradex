@@ -1,7 +1,6 @@
 // Most styles are in global styles.scss
-// Only partner-relationship-specific styles here
+// Only relationship-tile-specific styles here
 
-// Relationship tile styles
 .relationship-direction {
   display: flex;
   align-items: center;
@@ -52,19 +51,8 @@
   margin: 0.25rem 0 0 0;
   font-size: 0.9375rem;
   font-weight: 500;
-  color: var(--color-text-secondary);
-
-  .type-link {
-    color: var(--color-primary);
-    text-decoration: none;
-    cursor: pointer;
-    transition: color 0.2s ease;
-
-    &:hover {
-      color: var(--color-primary-dark);
-      text-decoration: underline;
-    }
-  }
+  color: var(--color-primary);
+  cursor: help;
 }
 
 .relationship-dates {

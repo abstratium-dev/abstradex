@@ -292,6 +292,10 @@ export class PartnerComponent implements OnInit {
     this.router.navigate(['/partners', partner.id, 'contacts']);
   }
 
+  manageRelationships(partner: Partner): void {
+    this.router.navigate(['/partners', partner.id, 'relationships']);
+  }
+
   manageTags(partner: Partner): void {
     this.router.navigate(['/partners', partner.id, 'tags']);
   }

@@ -93,8 +93,8 @@
       <p>Click "Add Contact" to create a new contact.</p>
     </div>
 
-    <div class="contact-grid">
-      <div *ngFor="let contact of partnerContacts" class="contact-tile">
+    <div class="contact-list">
+      <div *ngFor="let contact of partnerContacts; let i = index" class="contact-item" (click)="closeContextMenu(i)">
         <div class="contact-info">
           <div class="contact-icon">{{ getContactTypeIcon(contact.contactType || '') }}</div>
           <div class="contact-text">
@@ -120,8 +120,23 @@
           </div>
         </div>
         <div class="contact-actions">
-          <button class="btn-secondary" (click)="onEdit(contact)">Edit</button>
-          <button class="btn-danger" (click)="onDelete(contact)">Remove</button>
+          <div class="context-menu-wrapper">
+            <button class="btn-context-menu" 
+                    (click)="toggleContextMenu($event, i)" 
+                    title="More actions">
+              ⋮
+            </button>
+            <div class="context-menu" *ngIf="activeContextMenuIndex === i">
+              <button class="context-menu-item" (click)="onEdit(contact, $event)">
+                <span class="menu-icon">✏️</span>
+                <span>Edit Contact</span>
+              </button>
+              <button class="context-menu-item context-menu-item-danger" (click)="onDelete(contact, $event)">
+                <span class="menu-icon">🗑️</span>
+                <span>Remove Contact</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -33,13 +33,21 @@
     </div>
 
     <div class="form-group">
-      <label for="relationshipType">Relationship Type</label>
-      <input 
-        type="text" 
+      <label for="relationshipType">Relationship Type * (this partners relationship to the selected one)</label>
+      <select 
         id="relationshipType" 
-        [(ngModel)]="newRelationship.relationshipType" 
-        placeholder="e.g., Subsidiary, Parent Company, Partner"
-      />
+        [(ngModel)]="selectedRelationshipTypeId"
+        required
+      >
+        <option value="">-- Select a relationship type --</option>
+        <option *ngFor="let type of relationshipTypes" [value]="type.id">
+          {{ type.typeName }}
+        </option>
+      </select>
+      <small class="form-hint">
+        Can't find the type? 
+        <button type="button" class="btn-link" (click)="goToRelationshipTypeManagement()">Manage relationship types</button>
+      </small>
     </div>
 
     <div class="form-group">
@@ -100,37 +108,45 @@
       <p>Click "Add Relationship" to create one.</p>
     </div>
 
-    <div class="relationship-list">
-      <div *ngFor="let relationship of partnerRelationships" class="relationship-tile">
-        <div class="relationship-header">
-          <div class="relationship-partner">
-            <strong>{{ getRelatedPartner(relationship)?.partnerNumber }}</strong>
-            <span class="partner-name">{{ partnerService.getPartnerName(getRelatedPartner(relationship)!) }}</span>
+    <div class="tile-list">
+      <div *ngFor="let relationship of partnerRelationships; let i = index" class="tile" (click)="closeRelationshipContextMenu(i)">
+        <div class="tile-header">
+          <div class="tile-info">
+            <div class="relationship-direction">
+              <span class="direction-arrow" [class.outgoing]="getDirection(relationship) === 'outgoing'" [class.incoming]="getDirection(relationship) === 'incoming'">
+                {{ getDirectionArrow(relationship) }}
+              </span>
+              <span class="direction-label">{{ getDirectionLabel(relationship) }}</span>
+            </div>
+            <h3 class="partner-name">
+              <a class="partner-link" (click)="navigateToPartner($event, relationship)" [title]="'View ' + getRelatedPartnerName(relationship)">
+                {{ getRelatedPartnerName(relationship) }}
+              </a>
+            </h3>
+            <p class="relationship-type" [title]="getRelationshipTypeTooltip(relationship)">
+              <a class="type-link" (click)="navigateToRelationshipTypes($event)">{{ getRelationshipTypeName(relationship) }}</a>
+            </p>
+            <div class="relationship-dates" *ngIf="relationship.effectiveFrom || relationship.effectiveTo">
+              <span *ngIf="relationship.effectiveFrom">From: {{ formatDate(relationship.effectiveFrom) }}</span>
+              <span *ngIf="relationship.effectiveTo"> To: {{ formatDate(relationship.effectiveTo) }}</span>
+            </div>
+            <p class="relationship-notes" *ngIf="relationship.notes">{{ relationship.notes }}</p>
           </div>
-          <span class="relationship-direction">{{ getRelationshipDirection(relationship) }}</span>
-        </div>
-        
-        <div class="relationship-details">
-          <div *ngIf="relationship.relationshipType" class="detail-item">
-            <span class="label">Type:</span>
-            <span class="value">{{ relationship.relationshipType }}</span>
+          <div class="tile-actions">
+            <div class="context-menu-wrapper">
+              <button class="btn-context-menu" 
+                      (click)="toggleRelationshipContextMenu($event, i)" 
+                      title="More actions">
+                ⋮
+              </button>
+              <div class="context-menu" *ngIf="activeRelationshipContextMenuIndex === i">
+                <button class="context-menu-item context-menu-item-danger" (click)="onDelete(relationship, $event)">
+                  <span class="menu-icon">🗑️</span>
+                  <span>Remove Relationship</span>
+                </button>
+              </div>
+            </div>
           </div>
-          <div *ngIf="relationship.effectiveFrom" class="detail-item">
-            <span class="label">From:</span>
-            <span class="value">{{ relationship.effectiveFrom | date }}</span>
-          </div>
-          <div *ngIf="relationship.effectiveTo" class="detail-item">
-            <span class="label">To:</span>
-            <span class="value">{{ relationship.effectiveTo | date }}</span>
-          </div>
-          <div *ngIf="relationship.notes" class="detail-item notes">
-            <span class="label">Notes:</span>
-            <span class="value">{{ relationship.notes }}</span>
-          </div>
-        </div>
-
-        <div class="relationship-actions">
-          <button class="btn-danger" (click)="onDelete(relationship)">Remove</button>
         </div>
       </div>
     </div>

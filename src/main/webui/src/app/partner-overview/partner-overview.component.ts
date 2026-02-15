@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { LegalEntity, NaturalPerson, Partner } from '../models';
+import { LegalEntity, NaturalPerson, Partner, PartnerRelationship, RelationshipType } from '../models';
 import { PartnerDiscriminator } from '../models/partner-discriminator';
 import { Controller } from '../controller';
 import { ModelService } from '../model.service';
@@ -25,19 +25,26 @@ export class PartnerOverviewComponent implements OnInit {
   partner: Partner | null = null;
   addresses: AddressDetail[] = [];
   contacts: ContactDetail[] = [];
+  relationships: PartnerRelationship[] = [];
+  relationshipTypes: RelationshipType[] = [];
   loading = false;
   error: string | null = null;
 
   ngOnInit(): void {
-    const partnerId = this.route.snapshot.paramMap.get('partnerId');
-    if (partnerId) {
-      this.loadPartner(partnerId);
-    } else {
-      this.error = 'No partner ID provided';
-    }
+    this.loadRelationshipTypes();
+    
+    // Subscribe to route parameter changes to reload data when navigating between partners
+    this.route.paramMap.subscribe(params => {
+      const partnerId = params.get('partnerId');
+      if (partnerId) {
+        this.loadPartnerData(partnerId);
+      } else {
+        this.error = 'No partner ID provided';
+      }
+    });
   }
 
-  async loadPartner(partnerId: string): Promise<void> {
+  async loadPartnerData(partnerId: string): Promise<void> {
     this.loading = true;
     this.error = null;
     try {
@@ -46,9 +53,10 @@ export class PartnerOverviewComponent implements OnInit {
       if (!this.partner) {
         this.error = 'Partner not found';
       } else {
-        // Load addresses and contacts
+        // Load addresses, contacts, and relationships
         await this.loadAddresses(partnerId);
         await this.loadContacts(partnerId);
+        await this.loadRelationships(partnerId);
       }
     } catch (err) {
       this.error = 'Failed to load partner details';
@@ -73,6 +81,22 @@ export class PartnerOverviewComponent implements OnInit {
       this.contacts = this.sortContacts(contacts || []);
     } catch (err) {
       console.error('Error loading contacts:', err);
+    }
+  }
+
+  async loadRelationships(partnerId: string): Promise<void> {
+    try {
+      this.relationships = await this.controller.loadPartnerRelationships(partnerId);
+    } catch (err) {
+      console.error('Error loading relationships:', err);
+    }
+  }
+
+  async loadRelationshipTypes(): Promise<void> {
+    try {
+      this.relationshipTypes = await this.controller.loadRelationshipTypes();
+    } catch (err) {
+      console.error('Error loading relationship types:', err);
     }
   }
 
@@ -156,6 +180,51 @@ export class PartnerOverviewComponent implements OnInit {
   manageRelationships(): void {
     if (this.partner) {
       this.router.navigate(['/partners', this.partner.id, 'relationships']);
+    }
+  }
+
+  getRelatedPartner(relationship: PartnerRelationship): Partner | undefined {
+    if (!this.partner) return undefined;
+    if (relationship.fromPartner?.id === this.partner.id) {
+      return relationship.toPartner;
+    }
+    return relationship.fromPartner;
+  }
+
+  getRelatedPartnerName(relationship: PartnerRelationship): string {
+    const relatedPartner = this.getRelatedPartner(relationship);
+    if (!relatedPartner) return 'Unknown Partner';
+    return this.partnerService.getPartnerName(relatedPartner);
+  }
+
+  getRelationshipDirection(relationship: PartnerRelationship): string {
+    if (!this.partner) return '';
+    return relationship.fromPartner?.id === this.partner.id ? '→' : '←';
+  }
+
+  getRelationshipTypeDescription(relationship: PartnerRelationship): string {
+    return relationship.relationshipType?.description || '';
+  }
+
+  getRelationshipTypeTooltip(relationship: PartnerRelationship): string {
+    const description = this.getRelationshipTypeDescription(relationship);
+    return description || relationship.relationshipType?.typeName || '';
+  }
+
+  getRelationshipTypeName(relationship: PartnerRelationship): string {
+    return relationship.relationshipType?.typeName || 'Unknown Type';
+  }
+
+  navigateToRelatedPartner(relationship: PartnerRelationship): void {
+    const relatedPartner = this.getRelatedPartner(relationship);
+    if (relatedPartner?.id) {
+      this.router.navigate(['/partners', relatedPartner.id]);
+    }
+  }
+
+  navigateToRelationshipType(relationship: PartnerRelationship): void {
+    if (relationship.relationshipType?.id) {
+      this.router.navigate(['/relationship-types']);
     }
   }
 

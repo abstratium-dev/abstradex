@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, effect } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -7,9 +7,8 @@ import { ConfirmDialogService } from '../core/confirm-dialog/confirm-dialog.serv
 import { AutocompleteComponent, AutocompleteOption } from '../core/autocomplete/autocomplete.component';
 import { Controller } from '../controller';
 import { ModelService } from '../model.service';
-import { Partner, PartnerRelationship } from '../models/partner.model';
+import { Partner, PartnerRelationship, RelationshipType } from '../models/partner.model';
 import { PartnerService } from '../partner.service';
-
 @Component({
   selector: 'app-partner-relationship',
   imports: [CommonModule, FormsModule, AutocompleteComponent],
@@ -29,27 +28,62 @@ export class PartnerRelationshipComponent implements OnInit {
   partnerId = '';
   partner: Partner | null = null;
   partnerRelationships: PartnerRelationship[] = [];
+  relationshipTypes: RelationshipType[] = [];
   loading = false;
   error: string | null = null;
 
   // Add relationship form
   showAddForm = false;
   selectedPartnerId = '';
+  selectedRelationshipTypeId = '';
   newRelationship: PartnerRelationship = {
-    relationshipType: '',
     notes: ''
   };
 
+  // Cached autocomplete options
+  private cachedOptions: AutocompleteOption[] = [];
+  private currentSearchTerm = '';
+  private resolveOptions: ((options: AutocompleteOption[]) => void) | null = null;
+
+  // Context menu state
+  activeRelationshipContextMenuIndex: number | null = null;
+
+  constructor() {
+    // Set up reactive effect to update autocomplete when partners change
+    effect(() => {
+      const partners = this.modelService.partners$();
+      const options = partners
+        .filter(p => p.id !== this.partnerId)
+        .map(p => ({
+          value: p.id || '',
+          label: this.formatPartnerLabel(p)
+        }));
+      
+      this.cachedOptions = options;
+      
+      // If there's a pending promise, resolve it
+      if (this.resolveOptions) {
+        this.resolveOptions(options);
+        this.resolveOptions = null;
+      }
+    });
+  }
+
   // Autocomplete fetch function
   fetchPartners = async (searchTerm: string): Promise<AutocompleteOption[]> => {
+    this.currentSearchTerm = searchTerm;
     this.controller.loadPartners(searchTerm);
-    const partners = this.modelService.partners$();
-    return partners
-      .filter(p => p.id !== this.partnerId) // Exclude current partner
-      .map(p => ({
-        value: p.id || '',
-        label: this.formatPartnerLabel(p)
-      }));
+    
+    // Return a promise that will be resolved by the effect when partners update
+    return new Promise((resolve) => {
+      // If partners are already loaded for this search, return immediately
+      if (this.modelService.lastPartnerSearchTerm$() === searchTerm && !this.modelService.partnersLoading$()) {
+        resolve(this.cachedOptions);
+      } else {
+        // Otherwise, wait for the effect to resolve it
+        this.resolveOptions = resolve;
+      }
+    });
   };
 
   ngOnInit(): void {
@@ -57,6 +91,16 @@ export class PartnerRelationshipComponent implements OnInit {
     if (this.partnerId) {
       this.loadPartnerData();
       this.loadPartnerRelationships();
+      this.loadRelationshipTypes();
+    }
+  }
+
+  async loadRelationshipTypes(): Promise<void> {
+    try {
+      this.relationshipTypes = await this.controller.loadActiveRelationshipTypes();
+    } catch (err) {
+      console.error('Failed to load relationship types:', err);
+      this.toastService.error('Failed to load relationship types');
     }
   }
 
@@ -104,8 +148,10 @@ export class PartnerRelationshipComponent implements OnInit {
 
   resetForm(): void {
     this.selectedPartnerId = '';
+    this.selectedRelationshipTypeId = '';
+    const today = new Date().toISOString().split('T')[0];
     this.newRelationship = {
-      relationshipType: '',
+      effectiveFrom: today,
       notes: ''
     };
   }
@@ -115,6 +161,19 @@ export class PartnerRelationshipComponent implements OnInit {
       this.toastService.error('Please select a partner');
       return;
     }
+
+    if (!this.selectedRelationshipTypeId) {
+      this.toastService.error('Please select a relationship type');
+      return;
+    }
+
+    // Find the selected relationship type
+    const selectedType = this.relationshipTypes.find(t => t.id === this.selectedRelationshipTypeId);
+    if (!selectedType) {
+      this.toastService.error('Invalid relationship type selected');
+      return;
+    }
+    this.newRelationship.relationshipType = selectedType;
 
     try {
       await this.controller.addRelationshipToPartner(
@@ -131,7 +190,22 @@ export class PartnerRelationshipComponent implements OnInit {
     }
   }
 
-  async onDelete(relationship: PartnerRelationship): Promise<void> {
+  toggleRelationshipContextMenu(event: Event, index: number): void {
+    event.stopPropagation();
+    this.activeRelationshipContextMenuIndex = this.activeRelationshipContextMenuIndex === index ? null : index;
+  }
+
+  closeRelationshipContextMenu(index: number): void {
+    if (this.activeRelationshipContextMenuIndex === index) {
+      this.activeRelationshipContextMenuIndex = null;
+    }
+  }
+
+  async onDelete(relationship: PartnerRelationship, event?: Event): Promise<void> {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.activeRelationshipContextMenuIndex = null;
     const confirmed = await this.confirmService.confirm({
       title: 'Remove Relationship',
       message: 'Are you sure you want to remove this relationship?'
@@ -152,8 +226,63 @@ export class PartnerRelationshipComponent implements OnInit {
     this.router.navigate(['/partners']);
   }
 
+  goToRelationshipTypeManagement(): void {
+    this.router.navigate(['/relationship-types']);
+  }
+
   goBack(): void {
     this.location.back();
+  }
+
+  // Helper methods for relationship display
+  getRelatedPartnerName(relationship: PartnerRelationship): string {
+    const relatedPartner = this.getRelatedPartner(relationship);
+    if (!relatedPartner) return 'Unknown Partner';
+    return this.partnerService.getPartnerName(relatedPartner);
+  }
+
+  getDirection(relationship: PartnerRelationship): 'outgoing' | 'incoming' {
+    return relationship.fromPartner?.id === this.partnerId ? 'outgoing' : 'incoming';
+  }
+
+  getDirectionLabel(relationship: PartnerRelationship): string {
+    return this.getDirection(relationship) === 'outgoing' ? 'to' : 'from';
+  }
+
+  getDirectionArrow(relationship: PartnerRelationship): string {
+    return this.getDirection(relationship) === 'outgoing' ? '→' : '←';
+  }
+
+  formatDate(dateString?: string): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
+  }
+
+  navigateToPartner(event: Event, relationship: PartnerRelationship): void {
+    event.stopPropagation();
+    const relatedPartner = this.getRelatedPartner(relationship);
+    if (relatedPartner?.id) {
+      this.router.navigate(['/partners', relatedPartner.id]);
+    }
+  }
+
+  navigateToRelationshipTypes(event: Event): void {
+    event.stopPropagation();
+    this.router.navigate(['/relationship-types']);
+  }
+
+  getRelationshipTypeDescription(relationship: PartnerRelationship): string {
+    return relationship.relationshipType?.description || '';
+  }
+
+  getRelationshipTypeTooltip(relationship: PartnerRelationship): string {
+    const description = this.getRelationshipTypeDescription(relationship);
+    return description || relationship.relationshipType?.typeName || '';
+  }
+
+  getRelationshipTypeName(relationship: PartnerRelationship): string {
+    return relationship.relationshipType?.typeName || 'Unknown Type';
   }
 
   getPartnerNumberAndName(): string {

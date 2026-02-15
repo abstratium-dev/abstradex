@@ -45,8 +45,16 @@ export interface PartnerRelationship {
   id?: string;
   fromPartner?: Partner;
   toPartner?: Partner;
-  relationshipType?: string;
+  relationshipType?: RelationshipType;
   effectiveFrom?: string;  // ISO date string
   effectiveTo?: string;    // ISO date string
   notes?: string;
+}
+
+export interface RelationshipType {
+  id?: string;
+  typeName: string;
+  description?: string;
+  colorHex?: string;
+  isActive?: boolean;
 }
