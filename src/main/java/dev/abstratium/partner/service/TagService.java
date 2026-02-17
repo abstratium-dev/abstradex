@@ -14,6 +14,9 @@ public class TagService {
     @Inject
     EntityManager em;
 
+    @Inject
+    PartnerTagService partnerTagService;
+
     @Transactional
     public List<Tag> findAll() {
         return em.createQuery("SELECT t FROM Tag t ORDER BY t.tagName", Tag.class)
@@ -74,11 +77,10 @@ public class TagService {
     public void delete(String id) {
         Tag tag = em.find(Tag.class, id);
         if (tag != null) {
-            // Delete all partner_tag associations first
-            em.createQuery("DELETE FROM PartnerTag pt WHERE pt.tag.id = :tagId")
-                .setParameter("tagId", id)
-                .executeUpdate();
-            
+            long usageCount = partnerTagService.countByTagId(id);
+            if (usageCount > 0) {
+                throw new IllegalStateException("Cannot delete tag: it is currently in use by " + usageCount + " partner(s)");
+            }
             em.remove(tag);
         }
     }

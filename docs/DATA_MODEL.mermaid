@@ -6,7 +6,6 @@ erDiagram
     Partner ||--o{ PartnerTag : "tagged with"
     Partner ||--o{ PartnerRelationship : "relates from"
     Partner ||--o{ PartnerRelationship : "relates to"
-    Partner ||--o{ SMERelationship : "has relationship with SME"
 
     AddressDetail ||--|| Address : "is"
     
@@ -86,19 +85,6 @@ erDiagram
         String address_type "BILLING, SHIPPING, REGISTERED, etc"
         LocalDateTime valid_from "Effective date from point of view of partner"
         LocalDateTime valid_to "Expiry date from point of view of partner"
-    }
-    
-    SMERelationship {
-        UUID id PK
-        UUID partner_id FK
-        String relationship_type "CUSTOMER, SUPPLIER, BOTH"
-        String status "ACTIVE, INACTIVE, PROSPECT, FORMER"
-        date relationship_start
-        date relationship_end
-        String payment_terms
-        String credit_limit
-        integer priority_level
-        String account_manager
     }
     
     PartnerRelationship {

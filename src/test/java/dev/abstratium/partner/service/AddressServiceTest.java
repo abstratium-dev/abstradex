@@ -7,6 +7,9 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import dev.abstratium.partner.entity.Address;
+import dev.abstratium.partner.entity.AddressDetail;
+import dev.abstratium.partner.entity.NaturalPerson;
+import dev.abstratium.partner.entity.Partner;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -16,6 +19,12 @@ public class AddressServiceTest {
 
     @Inject
     AddressService addressService;
+
+    @Inject
+    AddressDetailService addressDetailService;
+
+    @Inject
+    PartnerService partnerService;
 
     @Test
     @Transactional
@@ -84,5 +93,38 @@ public class AddressServiceTest {
     public void testFindAll() {
         List<Address> addresses = addressService.findAll();
         assertNotNull(addresses);
+    }
+
+    @Test
+    @Transactional
+    public void testCannotDeleteAddressInUse() {
+        // Create a partner
+        NaturalPerson partner = new NaturalPerson();
+        partner.setFirstName("Test");
+        partner.setLastName("Partner");
+        partner.setActive(true);
+        Partner createdPartner = partnerService.create(partner);
+
+        // Create an address
+        Address address = new Address();
+        address.setStreetLine1("456 In Use St");
+        address.setCity("Testville");
+        address.setPostalCode("12345");
+        address.setCountryCode("US");
+        Address createdAddress = addressService.create(address);
+
+        // Link address to partner
+        AddressDetail addressDetail = new AddressDetail();
+        addressDetail.setAddressType("BILLING");
+        addressDetail.setPrimary(true);
+        addressDetailService.create(createdPartner.getId(), createdAddress.getId(), addressDetail);
+
+        // Try to delete the address - should fail
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            addressService.delete(createdAddress.getId());
+        });
+        
+        assertTrue(exception.getMessage().contains("Cannot delete address"));
+        assertTrue(exception.getMessage().contains("in use"));
     }
 }

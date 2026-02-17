@@ -39,6 +39,14 @@ public class PartnerTagService {
         return em.find(PartnerTag.class, id);
     }
 
+    public long countByTagId(String tagId) {
+        return em.createQuery(
+            "SELECT COUNT(pt) FROM PartnerTag pt WHERE pt.tag.id = :tagId",
+            Long.class)
+            .setParameter("tagId", tagId)
+            .getSingleResult();
+    }
+
     @Transactional
     public PartnerTag addTagToPartner(String partnerId, String tagId) {
         Partner partner = em.find(Partner.class, partnerId);

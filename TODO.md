@@ -13,8 +13,6 @@ These TODOs are to be resolved by the developer, NOT THE LLM.
 - update docs to describe the changes
 - sync upstream
 
-- check the numbering of the sql files
-
 - add more e2e tests based on the features
 
 - when adding an address, the toast show a link but the link doesn't work
@@ -23,9 +21,9 @@ These TODOs are to be resolved by the developer, NOT THE LLM.
   - if not, remove those feature files
   - is cucumber compatible with playwright?
 
-- dont allow deleting an address if it is in use
-- dont allow deleting a tag if it is in use
-- dont allow deleting a relationship type if it is in use
+- X dont allow deleting an address if it is in use
+- X dont allow deleting a tag if it is in use
+- X dont allow deleting a relationship type if it is in use
 
 - in order to integrate with other microservices, we need to export data in a shareable way. apache arrow format? csv?
 

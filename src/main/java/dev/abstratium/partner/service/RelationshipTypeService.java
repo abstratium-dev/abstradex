@@ -1,9 +1,10 @@
-package dev.abstratium.core.service;
+package dev.abstratium.partner.service;
 
 import java.util.List;
 
 import dev.abstratium.core.entity.RelationshipType;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
@@ -13,6 +14,9 @@ public class RelationshipTypeService {
 
     @PersistenceContext
     EntityManager em;
+
+    @Inject
+    PartnerRelationshipService partnerRelationshipService;
 
     public List<RelationshipType> findAll() {
         return em.createQuery(
@@ -89,6 +93,10 @@ public class RelationshipTypeService {
     public void delete(String id) {
         RelationshipType relationshipType = findById(id);
         if (relationshipType != null) {
+            long usageCount = partnerRelationshipService.countByRelationshipTypeId(id);
+            if (usageCount > 0) {
+                throw new IllegalStateException("Cannot delete relationship type: it is currently in use by " + usageCount + " relationship(s)");
+            }
             em.remove(relationshipType);
         }
     }

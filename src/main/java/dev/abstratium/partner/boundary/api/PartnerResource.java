@@ -5,7 +5,7 @@ import java.util.List;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import dev.abstratium.core.Roles;
-import dev.abstratium.partner.boundary.dto.PartnerCreateRequest;
+import dev.abstratium.partner.dto.PartnerCreateRequest;
 import dev.abstratium.partner.dto.PartnerSearchResult;
 import dev.abstratium.partner.entity.LegalEntity;
 import dev.abstratium.partner.entity.NaturalPerson;

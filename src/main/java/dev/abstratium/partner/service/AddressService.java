@@ -4,6 +4,7 @@ import java.util.List;
 
 import dev.abstratium.partner.entity.Address;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
@@ -13,6 +14,9 @@ public class AddressService {
 
     @PersistenceContext
     EntityManager em;
+
+    @Inject
+    AddressDetailService addressDetailService;
 
     public List<Address> findAll() {
         return em.createQuery("SELECT a FROM Address a ORDER BY a.city, a.streetLine1", Address.class)
@@ -49,6 +53,10 @@ public class AddressService {
     public void delete(String id) {
         Address address = em.find(Address.class, id);
         if (address != null) {
+            long usageCount = addressDetailService.countByAddressId(id);
+            if (usageCount > 0) {
+                throw new IllegalStateException("Cannot delete address: it is currently in use by " + usageCount + " partner(s)");
+            }
             em.remove(address);
         }
     }

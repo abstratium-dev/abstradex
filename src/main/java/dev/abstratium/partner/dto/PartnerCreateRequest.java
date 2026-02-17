@@ -1,4 +1,4 @@
-package dev.abstratium.partner.boundary.dto;
+package dev.abstratium.partner.dto;
 
 import java.time.LocalDate;
 

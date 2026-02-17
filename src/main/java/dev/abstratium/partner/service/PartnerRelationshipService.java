@@ -31,6 +31,14 @@ public class PartnerRelationshipService {
         return em.find(PartnerRelationship.class, id);
     }
 
+    public long countByRelationshipTypeId(String relationshipTypeId) {
+        return em.createQuery(
+                "SELECT COUNT(pr) FROM PartnerRelationship pr WHERE pr.relationshipType.id = :relationshipTypeId",
+                Long.class)
+                .setParameter("relationshipTypeId", relationshipTypeId)
+                .getSingleResult();
+    }
+
     @Transactional
     public PartnerRelationship create(String fromPartnerId, String toPartnerId, PartnerRelationship relationship) {
         Partner fromPartner = em.find(Partner.class, fromPartnerId);

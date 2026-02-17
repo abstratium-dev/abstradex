@@ -28,7 +28,6 @@ class PartnerResourceTest {
         // Clean up existing data - order matters due to foreign keys
         em.createQuery("DELETE FROM PartnerTag").executeUpdate();
         em.createQuery("DELETE FROM PartnerRelationship").executeUpdate();
-        em.createQuery("DELETE FROM SMERelationship").executeUpdate();
         em.createQuery("DELETE FROM ContactDetail").executeUpdate();
         em.createQuery("DELETE FROM AddressDetail").executeUpdate();
         em.createQuery("DELETE FROM NaturalPerson").executeUpdate();

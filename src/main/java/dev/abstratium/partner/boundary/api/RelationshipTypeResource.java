@@ -1,10 +1,10 @@
-package dev.abstratium.core.boundary;
+package dev.abstratium.partner.boundary.api;
 
 import java.util.List;
 
 import dev.abstratium.core.Roles;
 import dev.abstratium.core.entity.RelationshipType;
-import dev.abstratium.core.service.RelationshipTypeService;
+import dev.abstratium.partner.service.RelationshipTypeService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;

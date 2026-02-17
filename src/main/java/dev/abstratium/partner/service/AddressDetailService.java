@@ -77,6 +77,14 @@ public class AddressDetailService {
         return em.find(AddressDetail.class, id);
     }
 
+    public long countByAddressId(String addressId) {
+        return em.createQuery(
+                "SELECT COUNT(ad) FROM AddressDetail ad WHERE ad.address.id = :addressId",
+                Long.class)
+                .setParameter("addressId", addressId)
+                .getSingleResult();
+    }
+
     @Transactional
     public AddressDetail create(String partnerId, String addressId, AddressDetail addressDetail) {
         Partner partner = em.find(Partner.class, partnerId);
