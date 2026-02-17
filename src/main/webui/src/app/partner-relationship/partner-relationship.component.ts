@@ -2,6 +2,8 @@ import { Component, inject, OnInit, effect } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { ToastService } from '../core/toast/toast.service';
 import { ConfirmDialogService } from '../core/confirm-dialog/confirm-dialog.service';
 import { AutocompleteComponent, AutocompleteOption } from '../core/autocomplete/autocomplete.component';
@@ -23,6 +25,7 @@ export class PartnerRelationshipComponent implements OnInit {
   private location = inject(Location);
   private toastService = inject(ToastService);
   private confirmService = inject(ConfirmDialogService);
+  private http = inject(HttpClient);
   public partnerService = inject(PartnerService);
 
   partnerId = '';
@@ -40,50 +43,29 @@ export class PartnerRelationshipComponent implements OnInit {
     notes: ''
   };
 
-  // Cached autocomplete options
-  private cachedOptions: AutocompleteOption[] = [];
-  private currentSearchTerm = '';
-  private resolveOptions: ((options: AutocompleteOption[]) => void) | null = null;
-
   // Context menu state
   activeRelationshipContextMenuIndex: number | null = null;
 
-  constructor() {
-    // Set up reactive effect to update autocomplete when partners change
-    effect(() => {
-      const partners = this.modelService.partners$();
-      const options = partners
+  // Autocomplete fetch function - fetches directly without persisting to model
+  fetchPartners = async (searchTerm: string): Promise<AutocompleteOption[]> => {
+    if (!searchTerm || searchTerm.trim().length < 3) {
+      return [];
+    }
+
+    try {
+      const url = `/api/partner?search=${encodeURIComponent(searchTerm)}`;
+      const partners = await firstValueFrom(this.http.get<Partner[]>(url));
+      
+      return partners
         .filter(p => p.id !== this.partnerId)
         .map(p => ({
           value: p.id || '',
           label: this.formatPartnerLabel(p)
         }));
-      
-      this.cachedOptions = options;
-      
-      // If there's a pending promise, resolve it
-      if (this.resolveOptions) {
-        this.resolveOptions(options);
-        this.resolveOptions = null;
-      }
-    });
-  }
-
-  // Autocomplete fetch function
-  fetchPartners = async (searchTerm: string): Promise<AutocompleteOption[]> => {
-    this.currentSearchTerm = searchTerm;
-    this.controller.loadPartners(searchTerm);
-    
-    // Return a promise that will be resolved by the effect when partners update
-    return new Promise((resolve) => {
-      // If partners are already loaded for this search, return immediately
-      if (this.modelService.lastPartnerSearchTerm$() === searchTerm && !this.modelService.partnersLoading$()) {
-        resolve(this.cachedOptions);
-      } else {
-        // Otherwise, wait for the effect to resolve it
-        this.resolveOptions = resolve;
-      }
-    });
+    } catch (error) {
+      console.error('Error fetching partners:', error);
+      return [];
+    }
   };
 
   ngOnInit(): void {

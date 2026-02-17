@@ -1,13 +1,12 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { LegalEntity, NaturalPerson, Partner, PartnerRelationship, RelationshipType } from '../models';
-import { PartnerDiscriminator } from '../models/partner-discriminator';
 import { Controller } from '../controller';
-import { ModelService } from '../model.service';
-import { PartnerService } from '../partner.service';
+import { LegalEntity, NaturalPerson, Partner, PartnerRelationship, RelationshipType } from '../models';
 import { AddressDetail } from '../models/address-detail.model';
 import { ContactDetail } from '../models/contact-detail.model';
+import { PartnerDiscriminator } from '../models/partner-discriminator';
+import { PartnerService } from '../partner.service';
 
 @Component({
   selector: 'app-partner-overview',
@@ -19,7 +18,6 @@ export class PartnerOverviewComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private controller = inject(Controller);
-  private modelService = inject(ModelService);
   private partnerService = inject(PartnerService);
 
   partner: Partner | null = null;
@@ -284,4 +282,9 @@ export class PartnerOverviewComponent implements OnInit {
     const type = contact.contactType?.toUpperCase();
     return type ? ['EMAIL', 'PHONE', 'MOBILE', 'FAX', 'WEBSITE', 'LINKEDIN'].includes(type) : false;
   }
+
+  getDirection(relationship: PartnerRelationship): 'outgoing' | 'incoming' {
+    return relationship.fromPartner?.id === this.partner?.id ? 'outgoing' : 'incoming';
+  }
+
 }

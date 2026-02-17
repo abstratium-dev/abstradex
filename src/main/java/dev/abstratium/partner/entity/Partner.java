@@ -72,10 +72,6 @@ public class Partner {
     @JsonIgnore
     private Set<PartnerRelationship> relationshipsTo = new HashSet<>();
 
-    @OneToMany(mappedBy = "partner", fetch = FetchType.LAZY)
-    @JsonIgnore
-    private Set<SMERelationship> smeRelationships = new HashSet<>();
-
     @PrePersist
     public void prePersist() {
         if (id == null) {
@@ -197,14 +193,6 @@ public class Partner {
 
     public void setRelationshipsTo(Set<PartnerRelationship> relationshipsTo) {
         this.relationshipsTo = relationshipsTo;
-    }
-
-    public Set<SMERelationship> getSmeRelationships() {
-        return smeRelationships;
-    }
-
-    public void setSmeRelationships(Set<SMERelationship> smeRelationships) {
-        this.smeRelationships = smeRelationships;
     }
 
     public List<Tag> getTags() {

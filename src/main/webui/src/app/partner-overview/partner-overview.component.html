@@ -204,16 +204,29 @@
       </div>
       <div *ngIf="relationships && relationships.length > 0" class="relationship-list">
         <div *ngFor="let relationship of relationships" class="relationship-item">
-          <span class="relationship-direction">{{ getRelationshipDirection(relationship) }}</span>
-          <span class="relationship-type clickable" 
-                [title]="getRelationshipTypeTooltip(relationship)"
-                (click)="navigateToRelationshipType(relationship)">
-            {{ getRelationshipTypeName(relationship) }}
-          </span>
-          <span class="relationship-partner clickable" 
-                (click)="navigateToRelatedPartner(relationship)">
-            {{ getRelatedPartnerName(relationship) }}
-          </span>
+          @if(getDirection(relationship) === 'outgoing') {
+            <span class="relationship-current-partner">{{ getPartnerName() }}</span>
+            <span class="relationship-type clickable" 
+                  [title]="getRelationshipTypeTooltip(relationship)"
+                  (click)="navigateToRelationshipType(relationship)">
+              {{ getRelationshipTypeName(relationship) }}
+            </span>
+            <span class="relationship-partner clickable" 
+                  (click)="navigateToRelatedPartner(relationship)">
+              {{ getRelatedPartnerName(relationship) }}
+            </span>
+          } @else {
+            <span class="relationship-partner clickable" 
+                  (click)="navigateToRelatedPartner(relationship)">
+              {{ getRelatedPartnerName(relationship) }}
+            </span>
+            <span class="relationship-type clickable" 
+                  [title]="getRelationshipTypeTooltip(relationship)"
+                  (click)="navigateToRelationshipType(relationship)">
+              {{ getRelationshipTypeName(relationship) }}
+            </span>
+            <span class="relationship-current-partner">{{ getPartnerName() }}</span>
+          }
           <span class="relationship-notes" *ngIf="relationship.notes">{{ relationship.notes }}</span>
         </div>
       </div>
