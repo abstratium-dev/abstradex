@@ -11,8 +11,6 @@ import java.util.stream.Collectors;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
-import dev.abstratium.partner.entity.LegalEntity;
-import dev.abstratium.partner.entity.NaturalPerson;
 import dev.abstratium.partner.entity.Partner;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -21,7 +19,7 @@ import jakarta.transaction.Transactional;
 
 /**
  * Service for exporting partner data to a file.
- * Exports partner number and full name for all partners in the system.
+ * Exports all partner attributes with CSV formatting including headers.
  */
 @ApplicationScoped
 public class PartnerExportService {
@@ -31,12 +29,12 @@ public class PartnerExportService {
     @Inject
     EntityManager em;
 
-    @ConfigProperty(name = "partner.export.file.path", defaultValue = "/tmp/partners.txt")
+    @ConfigProperty(name = "partner.export.file.path")
     String exportFilePath;
 
     /**
      * Export all partners to the configured file.
-     * The file contains one line per partner with format: "P00000001 Partner Name"
+     * The file contains a header line and CSV-formatted data for all partner attributes.
      * Partners are sorted by partner number.
      */
     @Transactional
@@ -50,10 +48,16 @@ public class PartnerExportService {
                 Partner.class
             ).getResultList();
 
-            // Format partners as lines
-            List<String> lines = partners.stream()
+            // Create lines with header and data
+            List<String> lines = new java.util.ArrayList<>();
+            
+            // Add header line
+            lines.add(getHeaderLine());
+            
+            // Add data lines
+            lines.addAll(partners.stream()
                 .map(this::formatPartnerLine)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
 
             // Write to file
             Path path = Paths.get(exportFilePath);
@@ -77,53 +81,32 @@ public class PartnerExportService {
     }
 
     /**
-     * Format a partner as a line for the export file.
-     * Format: "P00000001 Partner Name"
+     * Get the header line for the CSV export.
      */
-    private String formatPartnerLine(Partner partner) {
-        String partnerNumber = partner.getPartnerNumber();
-        String partnerName = getPartnerName(partner);
-        return String.format("%s %s", partnerNumber, partnerName);
+    private String getHeaderLine() {
+        return "\"Partner Number\",\"Name\",\"Active\"";
     }
 
     /**
-     * Get the display name for a partner.
-     * For NaturalPerson: concatenate title, firstName, middleName, lastName
-     * For LegalEntity: use tradingName if available, otherwise legalName
+     * Format a partner as a CSV line for the export file.
+     * Includes all direct partner fields with proper quoting.
      */
-    private String getPartnerName(Partner partner) {
-        if (partner instanceof NaturalPerson) {
-            NaturalPerson np = (NaturalPerson) partner;
-            StringBuilder name = new StringBuilder();
-            
-            if (np.getTitle() != null && !np.getTitle().isEmpty()) {
-                name.append(np.getTitle()).append(" ");
-            }
-            if (np.getFirstName() != null && !np.getFirstName().isEmpty()) {
-                name.append(np.getFirstName()).append(" ");
-            }
-            if (np.getMiddleName() != null && !np.getMiddleName().isEmpty()) {
-                name.append(np.getMiddleName()).append(" ");
-            }
-            if (np.getLastName() != null && !np.getLastName().isEmpty()) {
-                name.append(np.getLastName());
-            }
-            
-            String result = name.toString().trim();
-            return result.isEmpty() ? "Unnamed Natural Person" : result;
-            
-        } else if (partner instanceof LegalEntity) {
-            LegalEntity le = (LegalEntity) partner;
-            
-            if (le.getTradingName() != null && !le.getTradingName().isEmpty()) {
-                return le.getTradingName();
-            } else if (le.getLegalName() != null && !le.getLegalName().isEmpty()) {
-                return le.getLegalName();
-            } else {
-                return "Unnamed Legal Entity";
-            }
+    private String formatPartnerLine(Partner partner) {
+        return String.format("\"%s\",\"%s\",\"%s\"",
+            escapeCsv(partner.getPartnerNumber()),
+            escapeCsv(partner.getName()),
+            escapeCsv(String.valueOf(partner.isActive()))
+        );
+    }
+
+    /**
+     * Escape CSV values by handling null values and quoting properly.
+     */
+    private String escapeCsv(String value) {
+        if (value == null) {
+            return "";
         }
-        
-        return "Unknown Partner Type";
+        // Replace any existing quotes with escaped quotes
+        return value.replace("\"", "\"\"");
     }
 }

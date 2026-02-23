@@ -92,4 +92,9 @@ public class LegalEntity extends Partner {
     public void setJurisdiction(String jurisdiction) {
         this.jurisdiction = jurisdiction;
     }
+
+    @Override
+    public String getName() {
+        return legalName;
+    }
 }

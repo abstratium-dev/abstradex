@@ -28,7 +28,7 @@ import jakarta.persistence.Transient;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "partner_type", discriminatorType = DiscriminatorType.STRING)
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class Partner {
+public abstract class Partner {
 
     @Id
     @Column(length = 36)
@@ -202,4 +202,6 @@ public class Partner {
     public void setTags(List<Tag> tags) {
         this.tags = tags;
     }
+
+    public abstract String getName();
 }

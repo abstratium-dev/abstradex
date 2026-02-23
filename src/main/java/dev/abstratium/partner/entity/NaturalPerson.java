@@ -92,4 +92,9 @@ public class NaturalPerson extends Partner {
     public void setPreferredLanguage(String preferredLanguage) {
         this.preferredLanguage = preferredLanguage;
     }
+
+    @Override
+    public String getName() {
+        return firstName + " " + lastName;
+    }
 }

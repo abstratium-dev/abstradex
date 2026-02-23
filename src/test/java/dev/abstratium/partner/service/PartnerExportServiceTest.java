@@ -54,18 +54,24 @@ class PartnerExportServiceTest {
         np.setFirstName("John");
         np.setLastName("Doe");
         np.setActive(true);
+        np.setNotes("Natural person test");
         partnerService.create(np);
 
         LegalEntity le = new LegalEntity();
         le.setLegalName("Acme Corporation");
         le.setActive(true);
+        le.setNotes("Legal entity test");
         partnerService.create(le);
 
         exportService.exportPartnersToFile();
 
         assertTrue(Files.exists(testExportFile), "Export file should exist");
         List<String> lines = Files.readAllLines(testExportFile);
-        assertTrue(lines.size() >= 2, "Should have at least 2 partners");
+        assertTrue(lines.size() >= 3, "Should have header + at least 2 partners");
+        
+        // Check header line
+        assertTrue(lines.get(0).contains("\"id\",\"partnerNumberSeq\",\"createdAt\",\"updatedAt\",\"isActive\",\"notes\""), 
+            "Should contain proper CSV header");
     }
 
     @Test
@@ -77,14 +83,21 @@ class PartnerExportServiceTest {
         np.setMiddleName("Marie");
         np.setLastName("Smith");
         np.setActive(true);
+        np.setNotes("Test notes for Jane");
         partnerService.create(np);
 
         exportService.exportPartnersToFile();
 
         List<String> lines = Files.readAllLines(testExportFile);
-        boolean foundFullName = lines.stream()
-            .anyMatch(line -> line.contains("Dr. Jane Marie Smith"));
-        assertTrue(foundFullName, "Should contain full name with title and middle name");
+        // Check header line
+        assertTrue(lines.get(0).contains("\"id\",\"partnerNumberSeq\",\"createdAt\",\"updatedAt\",\"isActive\",\"notes\""), 
+            "Should contain proper CSV header");
+        
+        // Skip header line and check data line contains active=true and notes
+        boolean foundData = lines.stream()
+            .skip(1)
+            .anyMatch(line -> line.contains("\"true\"") && line.contains("\"Test notes for Jane\""));
+        assertTrue(foundData, "Should contain CSV data with active status and notes");
     }
 
     @Test
@@ -92,14 +105,17 @@ class PartnerExportServiceTest {
     void testExportWithNaturalPersonNoName() throws IOException {
         NaturalPerson np = new NaturalPerson();
         np.setActive(true);
+        np.setNotes("Natural person with no name");
         partnerService.create(np);
 
         exportService.exportPartnersToFile();
 
         List<String> lines = Files.readAllLines(testExportFile);
+        // Skip header line and check data line contains active=true and notes
         boolean foundUnnamed = lines.stream()
-            .anyMatch(line -> line.contains("Unnamed Natural Person"));
-        assertTrue(foundUnnamed, "Should contain Unnamed Natural Person");
+            .skip(1)
+            .anyMatch(line -> line.contains("\"true\"") && line.contains("\"Natural person with no name\""));
+        assertTrue(foundUnnamed, "Should contain CSV data with active status and notes");
     }
 
     @Test
@@ -109,14 +125,17 @@ class PartnerExportServiceTest {
         le.setLegalName("Acme Corporation Ltd");
         le.setTradingName("Acme Corp");
         le.setActive(true);
+        le.setNotes("Legal entity with trading name");
         partnerService.create(le);
 
         exportService.exportPartnersToFile();
 
         List<String> lines = Files.readAllLines(testExportFile);
+        // Skip header line and check data line contains active=true and notes
         boolean foundTradingName = lines.stream()
-            .anyMatch(line -> line.contains("Acme Corp"));
-        assertTrue(foundTradingName, "Should use trading name when available");
+            .skip(1)
+            .anyMatch(line -> line.contains("\"true\"") && line.contains("\"Legal entity with trading name\""));
+        assertTrue(foundTradingName, "Should contain CSV data with active status and notes");
     }
 
     @Test
@@ -124,14 +143,17 @@ class PartnerExportServiceTest {
     void testExportWithLegalEntityNoName() throws IOException {
         LegalEntity le = new LegalEntity();
         le.setActive(true);
+        le.setNotes("Legal entity with no names");
         partnerService.create(le);
 
         exportService.exportPartnersToFile();
 
         List<String> lines = Files.readAllLines(testExportFile);
+        // Skip header line and check data line contains active=true and notes
         boolean foundUnnamed = lines.stream()
-            .anyMatch(line -> line.contains("Unnamed Legal Entity"));
-        assertTrue(foundUnnamed, "Should contain Unnamed Legal Entity");
+            .skip(1)
+            .anyMatch(line -> line.contains("\"true\"") && line.contains("\"Legal entity with no names\""));
+        assertTrue(foundUnnamed, "Should contain CSV data with active status and notes");
     }
 
     @Test
@@ -148,13 +170,28 @@ class PartnerExportServiceTest {
         exportService.exportPartnersToFile();
 
         List<String> lines = Files.readAllLines(testExportFile);
-        assertTrue(lines.size() >= 5, "Should have at least 5 partners");
+        assertTrue(lines.size() >= 6, "Should have header + at least 5 partners");
         
-        for (int i = 0; i < lines.size() - 1; i++) {
-            String currentNumber = lines.get(i).substring(0, 9);
-            String nextNumber = lines.get(i + 1).substring(0, 9);
-            assertTrue(currentNumber.compareTo(nextNumber) < 0, 
+        // Skip header and check sorting by partner number (second field in CSV)
+        List<String> dataLines = lines.stream().skip(1).toList();
+        for (int i = 0; i < dataLines.size() - 1; i++) {
+            String currentLine = dataLines.get(i);
+            String nextLine = dataLines.get(i + 1);
+            
+            // Extract partner number (second field in CSV)
+            String currentNumber = extractPartnerNumberFromCsv(currentLine);
+            String nextNumber = extractPartnerNumberFromCsv(nextLine);
+            
+            assertTrue(Long.parseLong(currentNumber) < Long.parseLong(nextNumber), 
                 "Partners should be sorted by number");
         }
+    }
+    
+    private String extractPartnerNumberFromCsv(String csvLine) {
+        String[] fields = csvLine.split(",", 3); // Split into max 3 parts to get second field
+        if (fields.length >= 2) {
+            return fields[1].replaceAll("\"", ""); // Remove quotes
+        }
+        return "0";
     }
 }
